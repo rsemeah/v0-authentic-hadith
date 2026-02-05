@@ -36,7 +36,7 @@ function AssistantContent() {
 
   const onFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (input.trim() && !isLoading) {
+    if ((input || "").trim() && !isLoading) {
       handleSubmit(e)
     }
   }
@@ -137,7 +137,7 @@ function AssistantContent() {
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!(input || "").trim() || isLoading}
             className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
             aria-label="Send message"
           >

@@ -71,17 +71,20 @@ export default function HomePage() {
           setIsFirstVisit(true)
         }
 
-        // Fetch daily hadith
-        const { data: hadithData } = await supabase.from("hadiths").select("*").eq("is_featured", true).single()
+        // Fetch daily hadith (pick one based on day of year)
+        const { data: allHadiths } = await supabase.from("hadiths").select("*").limit(50)
 
-        if (hadithData) {
-          // Check if saved
+        if (allHadiths && allHadiths.length > 0) {
+          const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
+          const hadithData = allHadiths[dayOfYear % allHadiths.length]
+
+          // Check if saved (use maybeSingle to avoid 406 on 0 rows)
           const { data: savedData } = await supabase
             .from("saved_hadiths")
             .select("id")
             .eq("user_id", user.id)
             .eq("hadith_id", hadithData.id)
-            .single()
+            .maybeSingle()
 
           setDailyHadith({
             ...hadithData,

@@ -1,41 +1,40 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, ChevronLeft, BookOpen } from "lucide-react"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import useSWR from "swr"
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json())
+
+const suggestedTerms = ["intentions", "faith", "Muslim", "Quran", "believes", "modesty", "Paradise", "prayer"]
 
 function SearchContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialQuery = searchParams.get("q") || ""
   const [query, setQuery] = useState(initialQuery)
-  const [results, setResults] = useState<any[]>([])
-  const [loading, setLoading] = useState(false)
-  const supabase = getSupabaseBrowserClient()
+  const [debouncedQuery, setDebouncedQuery] = useState(initialQuery)
 
-  useEffect(() => {
-    const searchHadiths = async () => {
-      if (query.length < 2) {
-        setResults([])
-        return
-      }
+  // Debounce the query
+  const debounceTimer = useState<ReturnType<typeof setTimeout> | null>(null)
+  const handleQueryChange = (value: string) => {
+    setQuery(value)
+    if (debounceTimer[0]) clearTimeout(debounceTimer[0])
+    debounceTimer[1](
+      setTimeout(() => {
+        setDebouncedQuery(value)
+      }, 300),
+    )
+  }
 
-      setLoading(true)
-      const { data } = await supabase
-        .from("hadiths")
-        .select("*")
-        .or(`english_translation.ilike.%${query}%,arabic_text.ilike.%${query}%`)
-        .limit(20)
+  const { data, isLoading } = useSWR(
+    debouncedQuery.length >= 2 ? `/api/search?q=${encodeURIComponent(debouncedQuery)}` : null,
+    fetcher,
+  )
 
-      setResults(data || [])
-      setLoading(false)
-    }
-
-    const debounce = setTimeout(searchHadiths, 300)
-    return () => clearTimeout(debounce)
-  }, [query, supabase])
+  const results = data?.results || []
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
@@ -45,6 +44,7 @@ function SearchContent() {
           <button
             onClick={() => router.back()}
             className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors shrink-0"
+            aria-label="Go back"
           >
             <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
           </button>
@@ -53,7 +53,7 @@ function SearchContent() {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="Search hadiths..."
               className="flex-1 bg-transparent outline-none text-[#1a1f36]"
               autoFocus
@@ -64,16 +64,16 @@ function SearchContent() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {loading ? (
+        {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="w-8 h-8 border-4 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
           </div>
         ) : results.length > 0 ? (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-[#6b7280] mb-4">
               Found {results.length} result{results.length !== 1 ? "s" : ""}
             </p>
-            {results.map((hadith) => (
+            {results.map((hadith: any) => (
               <button
                 key={hadith.id}
                 onClick={() => router.push(`/hadith/${hadith.id}`)}
@@ -83,21 +83,43 @@ function SearchContent() {
                   <span className="px-2 py-1 rounded text-xs font-bold text-white bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]">
                     {hadith.collection}
                   </span>
-                  <span className="text-xs text-muted-foreground">{hadith.reference}</span>
+                  <span className="text-xs text-[#6b7280]">
+                    Book {hadith.book_number} / Hadith {hadith.hadith_number}
+                  </span>
+                  {hadith.grade && (
+                    <span className="ml-auto px-2 py-0.5 rounded text-xs font-medium bg-[#C5A059]/10 text-[#C5A059]">
+                      {hadith.grade}
+                    </span>
+                  )}
                 </div>
+                {hadith.narrator && (
+                  <p className="text-xs text-[#6b7280] mb-1">Narrated by: {hadith.narrator}</p>
+                )}
                 <p className="text-sm text-[#1a1f36] line-clamp-2">{hadith.english_translation}</p>
               </button>
             ))}
           </div>
-        ) : query.length > 1 ? (
+        ) : debouncedQuery.length > 1 ? (
           <div className="text-center py-12">
-            <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground/40" />
-            <p className="text-muted-foreground">No hadiths found for "{query}"</p>
+            <BookOpen className="w-12 h-12 mx-auto mb-4 text-[#d1d5db]" />
+            <p className="text-[#6b7280] mb-4">No hadiths found for &ldquo;{debouncedQuery}&rdquo;</p>
+            <p className="text-sm text-[#9ca3af]">Try searching for: {suggestedTerms.join(", ")}</p>
           </div>
         ) : (
           <div className="text-center py-12">
-            <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground/40" />
-            <p className="text-muted-foreground">Enter a search term to find hadiths</p>
+            <Search className="w-12 h-12 mx-auto mb-4 text-[#d1d5db]" />
+            <p className="text-[#6b7280] mb-6">Enter a search term to find hadiths</p>
+            <div className="flex flex-wrap justify-center gap-2 max-w-md mx-auto">
+              {suggestedTerms.map((term) => (
+                <button
+                  key={term}
+                  onClick={() => handleQueryChange(term)}
+                  className="px-3 py-1.5 rounded-full text-sm border border-[#C5A059] text-[#C5A059] hover:bg-[#C5A059] hover:text-white transition-colors"
+                >
+                  {term}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </main>

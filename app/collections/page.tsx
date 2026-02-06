@@ -1,6 +1,6 @@
-import { Suspense } from "react"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { CollectionsClientContent } from "@/components/collections/collections-client-content"
+import { EmptyState } from "@/components/collections/empty-state"
 
 export interface Collection {
   id: string
@@ -9,6 +9,7 @@ export interface Collection {
   slug: string
   description_en: string | null
   total_hadiths: number
+  total_books: number
   scholar: string
   is_featured: boolean
   grade_distribution: {
@@ -44,19 +45,24 @@ async function getCollectionsData() {
 export default async function CollectionsIndexPage() {
   const { featured, all, scholars } = await getCollectionsData()
 
+  if (all.length === 0) {
+    return (
+      <div className="min-h-screen marble-bg flex items-center justify-center">
+        <EmptyState
+          title="No Collections Available"
+          description="Hadith collections have not been loaded yet. Please check back later."
+          actionLabel="Go Home"
+          actionHref="/home"
+        />
+      </div>
+    )
+  }
+
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen marble-bg flex items-center justify-center">
-          <div className="w-8 h-8 border-4 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
-        </div>
-      }
-    >
-      <CollectionsClientContent
-        initialFeatured={featured}
-        initialAll={all}
-        initialScholars={scholars}
-      />
-    </Suspense>
+    <CollectionsClientContent
+      initialFeatured={featured}
+      initialAll={all}
+      initialScholars={scholars}
+    />
   )
 }

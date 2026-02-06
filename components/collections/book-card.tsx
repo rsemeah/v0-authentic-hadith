@@ -21,7 +21,7 @@ export function BookCard({ book, collectionSlug }: BookCardProps) {
 
   return (
     <button
-      onClick={() => router.push(`/collections/${collectionSlug}/books/${book.id}`)}
+      onClick={() => router.push(`/collections/${collectionSlug}/books/${book.number}`)}
       className="flex flex-col p-5 rounded-xl premium-card text-left transition-all hover:shadow-lg hover:-translate-y-1 group min-h-[160px]"
     >
       <div className="flex items-start gap-3 mb-3">

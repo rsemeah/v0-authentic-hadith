@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { ChevronLeft, Bookmark, Share2, BookOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { cn } from "@/lib/utils"
 
 interface Hadith {
@@ -219,7 +218,6 @@ export default function HadithDetailPage() {
         </div>
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

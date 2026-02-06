@@ -1,28 +1,23 @@
-import { redirect } from "next/navigation"
-import { getSupabaseServerClient } from "@/lib/supabase/server"
+"use client"
 
-interface Props {
-  params: Promise<{ slug: string; bookId: string; chapterId: string }>
-}
+import { useEffect } from "react"
+import { useRouter, useParams } from "next/navigation"
 
-/**
- * This page redirects to the book reader with the chapter query param.
- * The book reader at /collections/[slug]/books/[bookNumber]?chapter=X handles all chapter display.
- */
-export default async function ChapterRedirectPage({ params }: Props) {
-  const { slug, bookId: bookNumber, chapterId } = await params
+export default function ChapterRedirectPage() {
+  const router = useRouter()
+  const params = useParams()
+  const slug = params.slug as string
+  const bookNumber = params.bookId as string
+  const chapterId = params.chapterId as string
 
-  // chapterId could be a UUID or a chapter number. Try to resolve it.
-  const supabase = await getSupabaseServerClient()
+  useEffect(() => {
+    // Redirect to book reader with chapter param
+    router.replace(`/collections/${slug}/books/${bookNumber}?chapter=${chapterId}`)
+  }, [router, slug, bookNumber, chapterId])
 
-  // Try to find the chapter to get its number
-  const { data: chapter } = await supabase
-    .from("chapters")
-    .select("number")
-    .eq("id", chapterId)
-    .single()
-
-  const chapterNumber = chapter?.number ?? chapterId
-
-  redirect(`/collections/${slug}/books/${bookNumber}?chapter=${chapterNumber}`)
+  return (
+    <div className="min-h-screen marble-bg flex items-center justify-center">
+      <div className="w-8 h-8 border-4 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
+    </div>
+  )
 }

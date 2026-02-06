@@ -22,7 +22,7 @@ async function getCollectionData(slug: string) {
     .from("books")
     .select("*")
     .eq("collection_id", collection.id)
-    .order("sort_order", { ascending: true })
+    .order("number", { ascending: true })
 
   return { collection, books: books ?? [] }
 }

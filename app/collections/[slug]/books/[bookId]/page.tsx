@@ -35,7 +35,7 @@ async function getBookReaderData(slug: string, bookNumber: string) {
     .from("chapters")
     .select("*")
     .eq("book_id", book.id)
-    .order("sort_order", { ascending: true })
+    .order("number", { ascending: true })
 
   return {
     collection,

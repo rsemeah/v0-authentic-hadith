@@ -49,6 +49,7 @@ export const viewport: Viewport = {
   themeColor: "#1B5E43",
   width: "device-width",
   initialScale: 1,
+  maximumScale: 1,
 }
 
 export default function RootLayout({
@@ -57,8 +58,8 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
-      <body className={`${cinzel.variable} ${geist.variable} ${geistMono.variable} font-sans antialiased`}>
+    <html lang="en" className="bg-[#F8F6F2]">
+      <body className={`${cinzel.variable} ${geist.variable} ${geistMono.variable} font-sans antialiased bg-[#F8F6F2]`}>
         <AppShell>{children}</AppShell>
         <Analytics />
       </body>

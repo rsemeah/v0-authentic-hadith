@@ -7,7 +7,7 @@ import Image from "next/image"
 import { Search, ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
 import { CollectionCard } from "@/components/collections/collection-card"
 import { CollectionFilters } from "@/components/collections/collection-filters"
-import type { Collection } from "@/app/collections/page"
+import type { Collection } from "@/lib/types/collections"
 
 interface CollectionsClientContentProps {
   initialFeatured: Collection[]

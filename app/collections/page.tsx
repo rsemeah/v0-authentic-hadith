@@ -1,23 +1,7 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { CollectionsClientContent } from "@/components/collections/collections-client-content"
 import { EmptyState } from "@/components/collections/empty-state"
-
-export interface Collection {
-  id: string
-  name_en: string
-  name_ar: string
-  slug: string
-  description_en: string | null
-  total_hadiths: number
-  total_books: number
-  scholar: string
-  is_featured: boolean
-  grade_distribution: {
-    sahih: number
-    hasan: number
-    daif: number
-  }
-}
+import type { Collection } from "@/lib/types/collections"
 
 async function getCollectionsData() {
   const supabase = await getSupabaseServerClient()

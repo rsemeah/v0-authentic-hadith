@@ -1,5 +1,3 @@
-'use client';
-
 import { useEffect, useCallback } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Stack } from "expo-router";

@@ -1,5 +1,3 @@
-'use client';
-
 import { useRef, useState, useCallback } from "react";
 import {
   View,
@@ -156,12 +154,12 @@ export default function AppScreen() {
         thirdPartyCookiesEnabled={true}
         textZoom={100}
         overScrollMode="never"
-        // Prevent white flash on load
-        backgroundColor="#0A1A14"
+        // Match app background on load
+        backgroundColor="#F8F6F2"
       />
       {isLoading && (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#D4AF37" />
+          <ActivityIndicator size="large" color="#C5A059" />
           <Text style={styles.loadingText}>Loading Authentic Hadith...</Text>
         </View>
       )}
@@ -172,53 +170,53 @@ export default function AppScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A1A14",
+    backgroundColor: "#F8F6F2",
   },
   webview: {
     flex: 1,
-    backgroundColor: "#0A1A14",
+    backgroundColor: "#F8F6F2",
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#0A1A14",
+    backgroundColor: "#F8F6F2",
     justifyContent: "center",
     alignItems: "center",
     gap: 16,
   },
   loadingText: {
-    color: "#D4AF37",
+    color: "#C5A059",
     fontSize: 16,
     fontWeight: "500",
     marginTop: 8,
   },
   errorContainer: {
     flex: 1,
-    backgroundColor: "#0A1A14",
+    backgroundColor: "#F8F6F2",
     justifyContent: "center",
     alignItems: "center",
     padding: 32,
   },
   errorTitle: {
-    color: "#FFFFFF",
+    color: "#2C2416",
     fontSize: 22,
     fontWeight: "700",
     marginBottom: 12,
   },
   errorMessage: {
-    color: "#94A3B8",
+    color: "#6B5D4D",
     fontSize: 16,
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 24,
   },
   retryButton: {
-    color: "#D4AF37",
+    color: "#1B5E43",
     fontSize: 18,
     fontWeight: "600",
     paddingHorizontal: 32,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "#D4AF37",
+    borderColor: "#1B5E43",
     borderRadius: 8,
     overflow: "hidden",
   },

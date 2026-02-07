@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils"
 
 const navItems = [
   { id: "home", icon: Home, label: "Home", href: "/home" },
-  { id: "collections", icon: BookOpen, label: "Coll", href: "/collections" },
-  { id: "search", icon: Search, label: "Srch", href: "/search" },
-  { id: "assistant", icon: Bot, label: "Asst", href: "/assistant" },
-  { id: "profile", icon: User, label: "Prof", href: "/profile" },
+  { id: "collections", icon: BookOpen, label: "Books", href: "/collections" },
+  { id: "search", icon: Search, label: "Look", href: "/search" },
+  { id: "assistant", icon: Bot, label: "Chat", href: "/assistant" },
+  { id: "profile", icon: User, label: "Me", href: "/profile" },
 ]
 
 const excludedPaths = ["/", "/onboarding", "/reset-password"]

@@ -1,20 +1,9 @@
 import { createBrowserClient } from "@supabase/ssr"
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config"
 
-const globalForSupabase = globalThis as unknown as {
-  __supabaseBrowserClient: ReturnType<typeof createBrowserClient> | undefined
+export function createClient() {
+  return createBrowserClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 }
 
-export function getSupabaseBrowserClient() {
-  if (globalForSupabase.__supabaseBrowserClient) {
-    return globalForSupabase.__supabaseBrowserClient
-  }
-
-  const client = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
-
-  globalForSupabase.__supabaseBrowserClient = client
-
-  return client
-}
+// Alias for backwards compatibility
+export const getSupabaseBrowserClient = createClient

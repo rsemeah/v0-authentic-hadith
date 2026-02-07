@@ -1,337 +1,222 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-
-interface BookStatus {
-  number: number
-  name: string
-  total_hadiths: number
-  seeded: boolean
-}
 
 interface CollectionStatus {
   slug: string
   name: string
-  total_books: number
-  total_hadiths: number
-  books: BookStatus[]
-  seeded_books: number
-  unseeded_books: number
+  expected_hadiths: number
+  hadith_count: number
+  missing: number
+  book_count: number
+  expected_books: number
 }
 
 interface SeedResult {
-  collection: string
-  book: number
-  bookName: string
-  status: string
-  fetched?: number
-  updated?: number
-  chapters_updated?: number
-  error?: string
+  total_inserted: number
+  total_skipped: number
+  sections: number
+  errors: string[]
 }
 
-export default function AdminSeedPage() {
+const SEED_ORDER = [
+  "muwatta-malik",
+  "jami-tirmidhi",
+  "sunan-ibn-majah",
+  "sunan-nasai",
+  "sunan-abu-dawud",
+  "sahih-muslim",
+  "sahih-bukhari",
+  "musnad-ahmad",
+]
+
+export default function SeedAdminPage() {
   const [collections, setCollections] = useState<CollectionStatus[]>([])
+  const [totalHadiths, setTotalHadiths] = useState(0)
+  const [totalExpected, setTotalExpected] = useState(0)
   const [loading, setLoading] = useState(false)
   const [seeding, setSeeding] = useState(false)
-  const [currentBook, setCurrentBook] = useState("")
-  const [results, setResults] = useState<SeedResult[]>([])
-  const [progress, setProgress] = useState({ done: 0, total: 0 })
-  const abortRef = useRef(false)
+  const [currentCollection, setCurrentCollection] = useState<string | null>(null)
+  const [results, setResults] = useState<Record<string, SeedResult>>({})
+  const [log, setLog] = useState<string[]>([])
 
-  const fetchStatus = useCallback(async () => {
+  async function fetchStatus() {
     setLoading(true)
     try {
-      const res = await fetch("/api/seed-status")
-      const data = await res.json()
-      setCollections(data.collections || [])
+      const resp = await fetch("/api/seed-status")
+      if (resp.ok) {
+        const data = await resp.json()
+        setCollections(data.collections || [])
+        setTotalHadiths(data.total_hadiths || 0)
+        setTotalExpected(data.total_expected || 0)
+      }
     } catch (err) {
       console.error("Failed to fetch status:", err)
     }
     setLoading(false)
+  }
+
+  useEffect(() => {
+    fetchStatus()
   }, [])
 
-  const seedAllUnseeded = useCallback(async () => {
-    abortRef.current = false
-    setSeeding(true)
-    setResults([])
-
-    // Gather all unseeded books
-    const toSeed: Array<{ slug: string; bookNumber: number; bookName: string }> = []
-    for (const coll of collections) {
-      for (const book of coll.books) {
-        if (!book.seeded) {
-          toSeed.push({ slug: coll.slug, bookNumber: book.number, bookName: book.name })
-        }
-      }
-    }
-
-    setProgress({ done: 0, total: toSeed.length })
-
-    for (let i = 0; i < toSeed.length; i++) {
-      if (abortRef.current) break
-
-      const { slug, bookNumber, bookName } = toSeed[i]
-      setCurrentBook(`${slug} - Book ${bookNumber}: ${bookName}`)
-
-      try {
-        const res = await fetch("/api/seed-book", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ collection: slug, bookNumber }),
-        })
-        const data = await res.json()
-
-        setResults(prev => [...prev, {
-          collection: slug,
-          book: bookNumber,
-          bookName,
-          status: data.status || "error",
-          fetched: data.fetched,
-          updated: data.updated,
-          chapters_updated: data.chapters_updated,
-          error: data.error,
-        }])
-      } catch (err) {
-        setResults(prev => [...prev, {
-          collection: slug,
-          book: bookNumber,
-          bookName,
-          status: "error",
-          error: String(err),
-        }])
-      }
-
-      setProgress({ done: i + 1, total: toSeed.length })
-
-      // Rate limit delay
-      if (i < toSeed.length - 1) {
-        await new Promise(r => setTimeout(r, 2000))
-      }
-    }
-
-    setCurrentBook("")
-    setSeeding(false)
-    // Refresh status
-    fetchStatus()
-  }, [collections, fetchStatus])
-
-  const seedSingleBook = useCallback(async (slug: string, bookNumber: number, bookName: string) => {
-    setSeeding(true)
-    setCurrentBook(`${slug} - Book ${bookNumber}: ${bookName}`)
+  async function seedCollection(slug: string) {
+    setCurrentCollection(slug)
+    setLog(prev => [...prev, `Starting ${slug}...`])
 
     try {
-      const res = await fetch("/api/seed-book", {
+      const resp = await fetch("/api/seed-full", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ collection: slug, bookNumber }),
+        body: JSON.stringify({ collection: slug }),
       })
-      const data = await res.json()
 
-      setResults(prev => [...prev, {
-        collection: slug,
-        book: bookNumber,
-        bookName,
-        status: data.status || "error",
-        fetched: data.fetched,
-        updated: data.updated,
-        chapters_updated: data.chapters_updated,
-        error: data.error,
-      }])
+      if (!resp.ok) {
+        const err = await resp.text()
+        setLog(prev => [...prev, `ERROR ${slug}: ${err}`])
+        setCurrentCollection(null)
+        return
+      }
+
+      const data = await resp.json()
+      const result = data.results?.[slug]
+      if (result) {
+        setResults(prev => ({ ...prev, [slug]: result }))
+        setLog(prev => [
+          ...prev,
+          `Done ${slug}: +${result.total_inserted} inserted, ${result.sections} sections processed${result.errors.length > 0 ? `, ${result.errors.length} errors` : ""}`,
+        ])
+      }
     } catch (err) {
-      setResults(prev => [...prev, {
-        collection: slug,
-        book: bookNumber,
-        bookName,
-        status: "error",
-        error: String(err),
-      }])
+      setLog(prev => [...prev, `ERROR ${slug}: ${String(err)}`])
     }
 
-    setCurrentBook("")
+    setCurrentCollection(null)
+    await fetchStatus()
+  }
+
+  async function seedAll() {
+    setSeeding(true)
+    setLog([])
+    setResults({})
+
+    for (const slug of SEED_ORDER) {
+      const coll = collections.find(c => c.slug === slug)
+      if (coll && coll.missing > 0) {
+        await seedCollection(slug)
+      } else {
+        setLog(prev => [...prev, `Skipping ${slug} (complete)`])
+      }
+    }
+
     setSeeding(false)
-    fetchStatus()
-  }, [fetchStatus])
+    setLog(prev => [...prev, "--- All done ---"])
+  }
 
-  const stopSeeding = useCallback(() => {
-    abortRef.current = true
-  }, [])
-
-  const totalSeeded = collections.reduce((s, c) => s + c.seeded_books, 0)
-  const totalUnseeded = collections.reduce((s, c) => s + c.unseeded_books, 0)
-  const totalBooks = totalSeeded + totalUnseeded
+  const pctTotal = totalExpected > 0 ? Math.round((totalHadiths / totalExpected) * 100) : 0
 
   return (
-    <div className="min-h-screen bg-background p-4 pb-24">
-      <div className="mx-auto max-w-3xl">
-        <header className="mb-6">
-          <h1 className="font-serif text-2xl font-bold text-foreground">Database Seeder</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Backfill real hadith data from sunnah.com
-          </p>
-        </header>
+    <div className="min-h-screen bg-[#F8F6F2] p-6">
+      <div className="mx-auto max-w-4xl">
+        <h1 className="font-serif text-3xl font-bold text-[#2C2416] mb-1">Hadith Seed Dashboard</h1>
+        <p className="text-[#6B5D4D] mb-6">
+          {totalHadiths.toLocaleString()} / {totalExpected.toLocaleString()} hadiths ({pctTotal}%)
+        </p>
 
-        {/* Controls */}
-        <Card className="mb-6">
-          <CardContent className="flex flex-col gap-3 pt-6">
-            <div className="flex items-center gap-3">
-              <Button
-                onClick={fetchStatus}
-                disabled={loading || seeding}
-                variant="outline"
-                className="bg-transparent"
+        <div className="mb-4 h-3 rounded-full bg-[#E8E4DA] overflow-hidden">
+          <div
+            className="h-full rounded-full bg-[#1B5E43] transition-all duration-700"
+            style={{ width: `${pctTotal}%` }}
+          />
+        </div>
+
+        <div className="mb-6 flex gap-3">
+          <Button
+            onClick={seedAll}
+            disabled={seeding || loading}
+            className="bg-[#1B5E43] text-white hover:bg-[#2D7A5B]"
+          >
+            {seeding ? "Seeding..." : "Seed All Missing"}
+          </Button>
+          <Button
+            onClick={fetchStatus}
+            disabled={loading}
+            variant="outline"
+            className="border-[#C5A059] text-[#C5A059] bg-transparent hover:bg-[#C5A059]/10"
+          >
+            {loading ? "Refreshing..." : "Refresh"}
+          </Button>
+        </div>
+
+        {/* Collection cards */}
+        <div className="space-y-3 mb-8">
+          {collections.map(coll => {
+            const pct = coll.expected_hadiths > 0
+              ? Math.min(100, Math.round((coll.hadith_count / coll.expected_hadiths) * 100))
+              : 0
+            const isFull = coll.missing <= 0
+            const isActive = currentCollection === coll.slug
+            const result = results[coll.slug]
+
+            return (
+              <div
+                key={coll.slug}
+                className={`rounded-xl border p-4 ${
+                  isFull ? "border-[#1B5E43]/30 bg-[#1B5E43]/5" : "border-[#C5A059]/30 bg-white"
+                } ${isActive ? "ring-2 ring-[#C5A059]" : ""}`}
               >
-                {loading ? "Checking..." : "Check Status"}
-              </Button>
-
-              {totalUnseeded > 0 && (
-                <Button
-                  onClick={seedAllUnseeded}
-                  disabled={seeding}
-                  className="bg-primary text-primary-foreground"
-                >
-                  Seed All Unseeded ({totalUnseeded} books)
-                </Button>
-              )}
-
-              {seeding && (
-                <Button onClick={stopSeeding} variant="destructive">
-                  Stop
-                </Button>
-              )}
-            </div>
-
-            {totalBooks > 0 && (
-              <div className="flex items-center gap-3 text-sm">
-                <Badge variant="secondary" className="bg-primary/10 text-primary">
-                  {totalSeeded} seeded
-                </Badge>
-                <Badge variant="outline">
-                  {totalUnseeded} remaining
-                </Badge>
-                <span className="text-muted-foreground">
-                  {totalBooks} total books
-                </span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Progress */}
-        {seeding && (
-          <Card className="mb-6 border-secondary/50">
-            <CardContent className="pt-6">
-              <div className="mb-2 flex items-center justify-between text-sm">
-                <span className="font-medium text-foreground">Seeding in progress...</span>
-                <span className="text-muted-foreground">
-                  {progress.done}/{progress.total}
-                </span>
-              </div>
-              <div className="mb-3 h-2 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full bg-primary transition-all duration-500"
-                  style={{ width: progress.total ? `${(progress.done / progress.total) * 100}%` : "0%" }}
-                />
-              </div>
-              <p className="truncate text-xs text-muted-foreground">
-                {currentBook}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Results Log */}
-        {results.length > 0 && (
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="text-base">Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="max-h-64 space-y-1 overflow-y-auto">
-                {results.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between rounded px-2 py-1 text-xs odd:bg-muted/50">
-                    <span className="truncate font-medium text-foreground">
-                      {r.collection} / Book {r.book}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      {r.status === "seeded" && (
-                        <span className="text-primary">
-                          +{r.updated || 0} hadiths, +{r.chapters_updated || 0} chapters
-                        </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <h3 className="font-serif font-semibold text-[#2C2416]">{coll.name}</h3>
+                    <p className="text-sm text-[#6B5D4D]">
+                      {coll.hadith_count.toLocaleString()} / {coll.expected_hadiths.toLocaleString()} hadiths
+                      {" | "}{coll.book_count} / {coll.expected_books} books
+                      {coll.missing > 0 && (
+                        <span className="text-[#C5A059]"> ({coll.missing.toLocaleString()} missing)</span>
                       )}
-                      {r.status === "already_seeded" && (
-                        <span className="text-muted-foreground">already done</span>
-                      )}
-                      {r.status === "error" && (
-                        <span className="text-destructive">error</span>
-                      )}
-                    </div>
+                    </p>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Collections */}
-        {collections.map(coll => (
-          <Card key={coll.slug} className="mb-4">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{coll.name}</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="bg-primary/10 text-xs text-primary">
-                    {coll.seeded_books}/{coll.books.length}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {isActive && <span className="text-xs text-[#C5A059] animate-pulse">Seeding...</span>}
+                    {result && !isActive && (
+                      <span className="text-xs text-[#1B5E43]">+{result.total_inserted}</span>
+                    )}
+                    <Button
+                      size="sm"
+                      onClick={() => seedCollection(coll.slug)}
+                      disabled={seeding || isActive}
+                      className={isFull
+                        ? "bg-[#1B5E43]/20 text-[#1B5E43] hover:bg-[#1B5E43]/30"
+                        : "bg-[#C5A059] text-white hover:bg-[#C5A059]/90"
+                      }
+                    >
+                      {isActive ? "..." : isFull ? "Done" : "Seed"}
+                    </Button>
+                  </div>
+                </div>
+                <div className="h-2 rounded-full bg-[#E8E4DA] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${isFull ? "bg-[#1B5E43]" : "bg-[#C5A059]"}`}
+                    style={{ width: `${pct}%` }}
+                  />
                 </div>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-1">
-                {coll.books.map(book => (
-                  <div
-                    key={book.number}
-                    className="flex items-center justify-between rounded px-2 py-1.5 text-xs odd:bg-muted/30"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`inline-block h-2 w-2 rounded-full ${
-                          book.seeded ? "bg-primary" : "bg-muted-foreground/30"
-                        }`}
-                      />
-                      <span className="truncate text-foreground">
-                        Book {book.number}: {book.name}
-                      </span>
-                      <span className="text-muted-foreground">
-                        ({book.total_hadiths})
-                      </span>
-                    </div>
-                    {!book.seeded && !seeding && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 px-2 text-xs text-primary"
-                        onClick={() => seedSingleBook(coll.slug, book.number, book.name)}
-                      >
-                        Seed
-                      </Button>
-                    )}
-                    {book.seeded && (
-                      <span className="text-xs text-primary">done</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+            )
+          })}
+        </div>
 
-        {collections.length === 0 && !loading && (
-          <div className="py-12 text-center text-sm text-muted-foreground">
-            Click "Check Status" to see all collections and their seeding status
+        {/* Log */}
+        {log.length > 0 && (
+          <div className="rounded-xl border border-[#E8E4DA] bg-white p-4">
+            <h3 className="font-serif font-semibold text-[#2C2416] mb-2">Activity Log</h3>
+            <div className="max-h-64 overflow-y-auto font-mono text-xs text-[#6B5D4D] space-y-1">
+              {log.map((line, i) => (
+                <div key={i} className={line.startsWith("ERROR") ? "text-red-600" : ""}>
+                  {line}
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

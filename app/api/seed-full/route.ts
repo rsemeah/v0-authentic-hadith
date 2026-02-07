@@ -70,17 +70,33 @@ function extractNarrator(text: string): string {
 }
 
 /**
+ * GET /api/seed-full?collection=sahih-bukhari&startSection=1&endSection=200
+ * Downloads sections from CDN and inserts missing hadiths.
+ */
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const slug = searchParams.get("collection") || ""
+  const startSection = Number(searchParams.get("startSection")) || 1
+  const endSection = Number(searchParams.get("endSection")) || 200
+  return seedCollection(slug, startSection, endSection)
+}
+
+/**
  * POST /api/seed-full
  * Body: { collection: "sahih-bukhari", startSection?: number, endSection?: number }
  * Downloads sections from CDN and inserts missing hadiths.
  */
 export async function POST(request: Request) {
+  const body = await request.json()
+  const slug = body.collection as string
+  const startSection = (body.startSection as number) || 1
+  const endSection = (body.endSection as number) || 200
+  return seedCollection(slug, startSection, endSection)
+}
+
+async function seedCollection(slug: string, startSection: number, endSection: number) {
   const start = Date.now()
   try {
-    const body = await request.json()
-    const slug = body.collection as string
-    const startSection = (body.startSection as number) || 1
-    const endSection = (body.endSection as number) || 200
 
     if (!slug || !EDITION_MAP[slug]) {
       return NextResponse.json({ error: `Unknown collection: ${slug}` }, { status: 400 })

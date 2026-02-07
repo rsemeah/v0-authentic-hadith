@@ -1,8 +1,10 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
+import React from "react"
+
+import { useEffect, useState, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, User, Bookmark, Settings, LogOut } from "lucide-react"
+import { ChevronLeft, User, Bookmark, Settings, LogOut, Camera, X, Loader2 } from "lucide-react"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
@@ -16,18 +18,23 @@ function ProfileContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const tab = searchParams.get("tab") || "profile"
-  const supabase = getSupabaseBrowserClient()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [savedHadiths, setSavedHadiths] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
+      const supabase = getSupabaseBrowserClient()
       const {
         data: { user },
       } = await supabase.auth.getUser()
 
       if (user) {
+        setUserId(user.id)
         const { data: profileData } = await supabase.from("profiles").select("*").eq("user_id", user.id).single()
 
         if (profileData) {
@@ -51,9 +58,87 @@ function ProfileContent() {
     }
 
     fetchData()
-  }, [supabase, tab])
+  }, [tab])
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !userId) return
+
+    // Validate file
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image must be less than 5MB")
+      return
+    }
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      alert("Please upload a JPG, PNG, or WebP image")
+      return
+    }
+
+    setUploading(true)
+    try {
+      const supabase = getSupabaseBrowserClient()
+      const fileExt = file.name.split(".").pop()
+      const filePath = `${userId}/avatar.${fileExt}`
+
+      // Delete old avatar if exists
+      await supabase.storage.from("avatars").remove([`${userId}/avatar.jpg`, `${userId}/avatar.png`, `${userId}/avatar.webp`])
+
+      // Upload new avatar
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(filePath, file, { upsert: true })
+
+      if (uploadError) throw uploadError
+
+      // Get public URL
+      const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(filePath)
+
+      // Add cache-busting query param
+      const publicUrl = `${urlData.publicUrl}?t=${Date.now()}`
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("user_id", userId)
+
+      if (updateError) throw updateError
+
+      setProfile((prev) => (prev ? { ...prev, avatar_url: publicUrl } : prev))
+    } catch (err) {
+      console.error("Avatar upload failed:", err)
+      alert("Failed to upload image. Please try again.")
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""
+      }
+    }
+  }
+
+  const handleRemoveAvatar = async () => {
+    if (!userId) return
+
+    setUploading(true)
+    try {
+      const supabase = getSupabaseBrowserClient()
+
+      // Remove all possible avatar files
+      await supabase.storage.from("avatars").remove([`${userId}/avatar.jpg`, `${userId}/avatar.png`, `${userId}/avatar.webp`])
+
+      // Clear avatar_url in profile
+      await supabase.from("profiles").update({ avatar_url: null }).eq("user_id", userId)
+
+      setProfile((prev) => (prev ? { ...prev, avatar_url: null } : prev))
+    } catch (err) {
+      console.error("Avatar removal failed:", err)
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const handleSignOut = async () => {
+    const supabase = getSupabaseBrowserClient()
     await supabase.auth.signOut()
     document.cookie = "qbos_onboarded=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
     router.push("/")
@@ -87,24 +172,86 @@ function ProfileContent() {
         {/* Profile Card */}
         <div className="gold-border rounded-xl p-6 premium-card mb-6">
           <div className="flex items-center gap-4">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url || "/placeholder.svg"}
-                alt={profile.name}
-                className="w-16 h-16 rounded-full object-cover border-2 border-[#C5A059]"
+            {/* Avatar with upload */}
+            <div className="relative group">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-[#C5A059] cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#C5A059]/50 focus:ring-offset-2 disabled:cursor-wait"
+                aria-label="Upload profile picture"
+              >
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url || "/placeholder.svg"}
+                    alt={profile.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#F8F6F2] flex items-center justify-center">
+                    <User className="w-10 h-10 text-[#C5A059]" />
+                  </div>
+                )}
+
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  {uploading ? (
+                    <Loader2 className="w-6 h-6 text-white animate-spin" />
+                  ) : (
+                    <Camera className="w-6 h-6 text-white" />
+                  )}
+                </div>
+
+                {/* Always show camera badge */}
+                {!uploading && (
+                  <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#C5A059] border-2 border-white flex items-center justify-center shadow-sm">
+                    <Camera className="w-3.5 h-3.5 text-white" />
+                  </div>
+                )}
+                {uploading && (
+                  <div className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-[#C5A059] border-2 border-white flex items-center justify-center shadow-sm">
+                    <Loader2 className="w-3.5 h-3.5 text-white animate-spin" />
+                  </div>
+                )}
+              </button>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={handleAvatarUpload}
+                className="hidden"
+                aria-label="Choose profile picture"
               />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-[#F8F6F2] border-2 border-[#C5A059] flex items-center justify-center">
-                <User className="w-8 h-8 text-[#C5A059]" />
-              </div>
-            )}
-            <div>
+            </div>
+
+            <div className="flex-1">
               <h2 className="text-xl font-semibold text-[#1a1f36]">{profile?.name || "User"}</h2>
               {profile?.school_of_thought && (
                 <p className="text-sm text-muted-foreground">{profile.school_of_thought}</p>
               )}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="mt-1 text-xs text-[#C5A059] hover:text-[#a8863e] transition-colors disabled:opacity-50"
+              >
+                {uploading ? "Uploading..." : profile?.avatar_url ? "Change photo" : "Add photo"}
+              </button>
             </div>
           </div>
+
+          {/* Remove photo option */}
+          {profile?.avatar_url && !uploading && (
+            <button
+              type="button"
+              onClick={handleRemoveAvatar}
+              className="mt-3 ml-24 text-xs text-muted-foreground hover:text-red-500 transition-colors flex items-center gap-1"
+            >
+              <X className="w-3 h-3" />
+              Remove photo
+            </button>
+          )}
         </div>
 
         {/* Tabs */}

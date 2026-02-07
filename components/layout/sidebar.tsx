@@ -36,34 +36,43 @@ const bottomNavItems = [
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = getSupabaseBrowserClient()
   const [collapsed, setCollapsed] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
+  const supabase = getSupabaseBrowserClient() // Declare supabase variable
 
   useEffect(() => {
     const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("name, avatar_url")
-          .eq("user_id", user.id)
-          .single()
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("name, avatar_url")
+            .eq("user_id", user.id)
+            .single()
 
-        if (profile) {
-          setUserName(profile.name)
-          setUserAvatar(profile.avatar_url)
+          if (profile) {
+            setUserName(profile.name)
+            setUserAvatar(profile.avatar_url)
+          }
         }
+      } catch (err) {
+        console.log("[v0] Sidebar: failed to fetch user", err)
       }
     }
     fetchUser()
-  }, [supabase])
+  }, [])
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      const supabase = getSupabaseBrowserClient()
+      await supabase.auth.signOut()
+    } catch (err) {
+      console.log("[v0] Sign out error:", err)
+    }
     router.push("/")
   }
 

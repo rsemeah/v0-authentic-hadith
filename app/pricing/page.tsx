@@ -3,7 +3,7 @@
 import React from "react"
 
 import { useState, Suspense } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, Check, Star, Crown, Zap, Infinity, X } from "lucide-react"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { PRODUCTS } from "@/lib/products"
@@ -48,7 +48,10 @@ const planIcons: Record<string, React.ReactNode> = {
 
 function PricingContent() {
   const router = useRouter()
-  const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
+  const searchParams = useSearchParams()
+  const planFromUrl = searchParams.get("plan")
+  const validPlan = PRODUCTS.find((p) => p.id === planFromUrl)
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(validPlan ? validPlan.id : null)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
 
   if (selectedProduct) {

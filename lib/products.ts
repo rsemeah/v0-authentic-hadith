@@ -14,7 +14,7 @@ export interface Product {
 export const PRODUCTS: Product[] = [
   {
     id: "monthly-intro",
-    stripeProductId: "prod_TwJihTwf0x4hmv",
+    stripeProductId: process.env.STRIPE_PRODUCT_MONTHLY_INTRO || "prod_TwQlGuMaHFrj8Y",
     name: "Monthly (Intro)",
     description: "Introductory monthly access for first-time members. Full access to all learning paths and AI explanations.",
     priceInCents: 499,
@@ -31,7 +31,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "monthly-premium",
-    stripeProductId: "prod_TwJiYHi7QRpGqJ",
+    stripeProductId: process.env.STRIPE_PRODUCT_MONTHLY || "prod_TwQlhKMbgmTCKR",
     name: "Monthly Premium",
     description: "Unlimited access to authentic hadith collections, AI-powered explanations, learning paths, and progress tracking.",
     priceInCents: 999,
@@ -47,7 +47,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "annual-premium",
-    stripeProductId: "prod_TwJiyXNERmzQwW",
+    stripeProductId: process.env.STRIPE_PRODUCT_ANNUAL || "prod_TwQlg8sbgNPQAY",
     name: "Annual Premium",
     description: "Full access to Authentic Hadith for one year. Best value for committed learners.",
     priceInCents: 4999,
@@ -65,7 +65,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "lifetime-access",
-    stripeProductId: "prod_TwJiLLwEm4kwBJ",
+    stripeProductId: process.env.STRIPE_PRODUCT_LIFETIME || "prod_TwQlP4juGDT1KA",
     name: "Lifetime Access",
     description: "Lifetime access to Authentic Hadith, including all current and future core features.",
     priceInCents: 9999,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle } from "lucide-react"
+import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle, Star, Heart } from "lucide-react"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 
 const settingsItems = [
@@ -47,6 +47,39 @@ export default function SettingsPage() {
               </div>
             </button>
           ))}
+        </div>
+
+        {/* Premium & Support */}
+        <div className="mt-8">
+          <h2 className="text-sm font-semibold text-[#6b7280] uppercase tracking-wider mb-3 px-1">
+            Premium & Support
+          </h2>
+          <div className="space-y-3">
+            <button
+              onClick={() => router.push("/pricing")}
+              className="w-full gold-border rounded-xl p-4 premium-card flex items-center gap-4 hover:-translate-y-0.5 transition-transform text-left"
+            >
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#C5A059] to-[#E8C77D] flex items-center justify-center shrink-0">
+                <Star className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-[#1a1f36]">Upgrade to Premium</h3>
+                <p className="text-sm text-muted-foreground">Ad-free, advanced search, offline access</p>
+              </div>
+            </button>
+            <button
+              onClick={() => router.push("/pricing?tab=donate")}
+              className="w-full border border-[#e5e7eb] rounded-xl p-4 bg-white flex items-center gap-4 hover:-translate-y-0.5 transition-transform text-left"
+            >
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] flex items-center justify-center shrink-0">
+                <Heart className="w-5 h-5 text-white" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-medium text-[#1a1f36]">Sadaqah / Donate</h3>
+                <p className="text-sm text-muted-foreground">Support the hadith preservation project</p>
+              </div>
+            </button>
+          </div>
         </div>
 
         <div className="mt-8 text-center text-sm text-muted-foreground">

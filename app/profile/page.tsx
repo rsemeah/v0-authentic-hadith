@@ -4,7 +4,8 @@ import React from "react"
 
 import { useEffect, useState, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, User, Bookmark, Settings, LogOut, Camera, X, Loader2 } from "lucide-react"
+import { ChevronLeft, User, Bookmark, Settings, LogOut, Camera, X, Loader2, Pencil, Check, ChevronDown } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
@@ -25,6 +26,13 @@ function ProfileContent() {
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [userId, setUserId] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editName, setEditName] = useState("")
+  const [editSchool, setEditSchool] = useState("")
+  const [saving, setSaving] = useState(false)
+  const [schoolDropdownOpen, setSchoolDropdownOpen] = useState(false)
+
+  const SCHOOLS_OF_THOUGHT = ["Hanafi", "Maliki", "Shafi'i", "Hanbali", "Other / Prefer not to say"]
 
   useEffect(() => {
     const fetchData = async () => {
@@ -137,6 +145,46 @@ function ProfileContent() {
     }
   }
 
+  const startEditing = () => {
+    setEditName(profile?.name || "")
+    setEditSchool(profile?.school_of_thought || "")
+    setEditing(true)
+  }
+
+  const handleSaveProfile = async () => {
+    if (!userId || !editName.trim()) return
+    setSaving(true)
+    try {
+      const supabase = getSupabaseBrowserClient()
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          name: editName.trim(),
+          school_of_thought: editSchool || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", userId)
+
+      if (error) throw error
+
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              name: editName.trim(),
+              school_of_thought: editSchool || null,
+            }
+          : prev,
+      )
+      setEditing(false)
+    } catch (err) {
+      console.error("Profile save failed:", err)
+      alert("Failed to save profile. Please try again.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleSignOut = async () => {
     const supabase = getSupabaseBrowserClient()
     await supabase.auth.signOut()
@@ -226,23 +274,108 @@ function ProfileContent() {
             </div>
 
             <div className="flex-1">
-              <h2 className="text-xl font-semibold text-[#1a1f36]">{profile?.name || "User"}</h2>
-              {profile?.school_of_thought && (
-                <p className="text-sm text-muted-foreground">{profile.school_of_thought}</p>
+              {editing ? (
+                <div className="space-y-3">
+                  <div>
+                    <label htmlFor="edit-name" className="text-xs font-medium text-muted-foreground mb-1 block">
+                      Name
+                    </label>
+                    <Input
+                      id="edit-name"
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="h-10 premium-input rounded-lg"
+                      maxLength={50}
+                      placeholder="Your name"
+                    />
+                  </div>
+                  <div className="relative">
+                    <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                      School of Thought
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setSchoolDropdownOpen(!schoolDropdownOpen)}
+                      className="w-full h-10 px-3 flex items-center justify-between premium-input rounded-lg text-left text-sm"
+                    >
+                      <span className={editSchool ? "text-[#2C2416]" : "text-muted-foreground"}>
+                        {editSchool || "Select school"}
+                      </span>
+                      <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    </button>
+                    {schoolDropdownOpen && (
+                      <div className="absolute z-20 w-full mt-1 bg-card border border-border rounded-lg shadow-lg overflow-y-auto max-h-48">
+                        {SCHOOLS_OF_THOUGHT.map((school) => (
+                          <button
+                            key={school}
+                            type="button"
+                            onClick={() => {
+                              setEditSchool(school)
+                              setSchoolDropdownOpen(false)
+                            }}
+                            className="w-full px-3 py-2.5 text-left text-sm hover:bg-[#F8F6F2] transition-colors flex items-center justify-between"
+                          >
+                            <span className="text-[#2C2416]">{school}</span>
+                            {editSchool === school && <Check className="w-4 h-4 text-[#C5A059]" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleSaveProfile}
+                      disabled={saving || !editName.trim()}
+                      className="px-4 py-1.5 rounded-lg gold-button text-sm font-medium disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                      {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditing(false)
+                        setSchoolDropdownOpen(false)
+                      }}
+                      className="px-4 py-1.5 rounded-lg border border-[#e5e7eb] text-sm font-medium text-muted-foreground hover:text-[#2C2416] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-semibold text-[#1a1f36]">{profile?.name || "User"}</h2>
+                    <button
+                      type="button"
+                      onClick={startEditing}
+                      className="p-1 rounded-md hover:bg-[#F8F6F2] transition-colors"
+                      aria-label="Edit profile"
+                    >
+                      <Pencil className="w-4 h-4 text-[#C5A059]" />
+                    </button>
+                  </div>
+                  {profile?.school_of_thought && (
+                    <p className="text-sm text-muted-foreground">{profile.school_of_thought}</p>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="mt-1 text-xs text-[#C5A059] hover:text-[#a8863e] transition-colors disabled:opacity-50"
+                  >
+                    {uploading ? "Uploading..." : profile?.avatar_url ? "Change photo" : "Add photo"}
+                  </button>
+                </>
               )}
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-                className="mt-1 text-xs text-[#C5A059] hover:text-[#a8863e] transition-colors disabled:opacity-50"
-              >
-                {uploading ? "Uploading..." : profile?.avatar_url ? "Change photo" : "Add photo"}
-              </button>
             </div>
           </div>
 
           {/* Remove photo option */}
-          {profile?.avatar_url && !uploading && (
+          {profile?.avatar_url && !uploading && !editing && (
             <button
               type="button"
               onClick={handleRemoveAvatar}

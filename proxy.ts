@@ -32,7 +32,26 @@ export async function proxy(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     const pathname = request.nextUrl.pathname
-    const hasOnboarded = request.cookies.get("qbos_onboarded")?.value === "1"
+    let hasOnboarded = request.cookies.get("qbos_onboarded")?.value === "1"
+
+    // If user is authenticated but cookie is missing, check the database
+    if (user && !hasOnboarded) {
+      const { data: prefs } = await supabase
+        .from("user_preferences")
+        .select("onboarded")
+        .eq("user_id", user.id)
+        .single()
+
+      if (prefs?.onboarded) {
+        hasOnboarded = true
+        // Set the cookie so we don't need to check DB every time
+        supabaseResponse.cookies.set("qbos_onboarded", "1", {
+          path: "/",
+          maxAge: 31536000,
+          sameSite: "lax",
+        })
+      }
+    }
 
     // Protect dashboard and home routes
     if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/home"))) {
@@ -62,7 +81,8 @@ export async function proxy(request: NextRequest) {
       pathname !== "/onboarding" &&
       pathname !== "/" &&
       !pathname.startsWith("/api") &&
-      !pathname.startsWith("/admin")
+      !pathname.startsWith("/admin") &&
+      !pathname.startsWith("/auth")
     ) {
       const url = request.nextUrl.clone()
       url.pathname = "/onboarding"

@@ -6,6 +6,7 @@ import { ChevronLeft, Bookmark, Share2, BookOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { cn } from "@/lib/utils"
+import { parseEnglishTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 
 interface Hadith {
   id: string
@@ -170,7 +171,7 @@ export default function HadithDetailPage() {
           {/* Badges */}
           <div className="flex items-center justify-between mb-6">
             <span className="px-3 py-1.5 rounded-md text-xs font-bold text-white bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]">
-              {hadith.collection}
+              {getCollectionDisplayName(hadith.collection)}
             </span>
             <span
               className={cn(
@@ -198,7 +199,19 @@ export default function HadithDetailPage() {
           {/* English Translation */}
           <div className="mb-8" dir="ltr" lang="en">
             <h3 className="text-sm font-semibold text-[#C5A059] mb-3 uppercase tracking-wider">Translation</h3>
-            <p className="text-lg leading-relaxed text-[#4a5568]">{hadith.english_translation}</p>
+            {(() => {
+              const { narrator: parsedNarrator, text: parsedText } = parseEnglishTranslation(hadith.english_translation)
+              return (
+                <>
+                  {parsedNarrator && (
+                    <p className="text-sm font-medium text-[#6b7280] italic mb-2">
+                      Narrated by {parsedNarrator}
+                    </p>
+                  )}
+                  <p className="text-lg leading-relaxed text-[#4a5568]">{parsedText}</p>
+                </>
+              )
+            })()}
           </div>
 
           {/* Metadata */}
@@ -209,7 +222,9 @@ export default function HadithDetailPage() {
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Narrator</span>
-              <span className="text-[#1a1f36] font-medium">{hadith.narrator}</span>
+              <span className="text-[#1a1f36] font-medium">
+                {hadith.narrator || parseEnglishTranslation(hadith.english_translation).narrator || "Unknown"}
+              </span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Grade</span>

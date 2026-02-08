@@ -23,6 +23,7 @@ import {
   TrendingUp,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 
 interface UserProfile {
   name: string
@@ -90,20 +91,22 @@ export default function HomePage() {
             .single()
           if (profileData) setProfile(profileData)
 
-          // Fetch daily hadith
-          const { data: allHadiths } = await supabase.from("hadiths").select("*").limit(50)
-          if (allHadiths && allHadiths.length > 0) {
-            const dayOfYear = Math.floor(
-              (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000,
-            )
-            const hadithData = allHadiths[dayOfYear % allHadiths.length]
-            const { data: savedData } = await supabase
-              .from("saved_hadiths")
-              .select("id")
-              .eq("user_id", user.id)
-              .eq("hadith_id", hadithData.id)
-              .maybeSingle()
-            setDailyHadith({ ...hadithData, is_saved: !!savedData })
+          // Fetch daily hadith from API
+          try {
+            const dailyRes = await fetch("/api/daily-hadith")
+            const dailyData = await dailyRes.json()
+            if (dailyData.hadith) {
+              const hadithData = dailyData.hadith
+              const { data: savedData } = await supabase
+                .from("saved_hadiths")
+                .select("id")
+                .eq("user_id", user.id)
+                .eq("hadith_id", hadithData.id)
+                .maybeSingle()
+              setDailyHadith({ ...hadithData, is_saved: !!savedData })
+            }
+          } catch (e) {
+            console.log("[v0] Daily hadith fetch error:", e)
           }
 
           // Fetch recently viewed
@@ -119,8 +122,8 @@ export default function HomePage() {
                 .filter((item: any) => item.hadiths)
                 .map((item: any) => ({
                   id: item.hadiths.id,
-                  title: item.hadiths.english_translation.substring(0, 60) + "...",
-                  collection: item.hadiths.collection,
+                  title: getCleanTranslation(item.hadiths.english_translation).substring(0, 60) + "...",
+                  collection: getCollectionDisplayName(item.hadiths.collection),
                   viewed_at: item.viewed_at,
                 })),
             )

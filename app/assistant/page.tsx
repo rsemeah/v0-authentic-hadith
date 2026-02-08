@@ -57,7 +57,7 @@ function AssistantContent() {
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] flex items-center justify-center">
               <Bot className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-lg font-semibold text-[#1a1f36]">AI Assistant</h1>
+            <h1 className="text-lg font-semibold text-[#1a1f36]">TruthSerum</h1>
           </div>
         </div>
       </header>

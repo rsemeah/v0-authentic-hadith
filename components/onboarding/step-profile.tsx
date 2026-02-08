@@ -174,7 +174,7 @@ export function StepProfile({ data, onUpdate }: StepProfileProps) {
           </button>
 
           {dropdownOpen && (
-            <div className="absolute z-10 w-full mt-2 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+            <div className="absolute z-10 w-full mt-2 bg-card border border-border rounded-lg shadow-lg overflow-y-auto max-h-60">
               {SCHOOLS_OF_THOUGHT.map((school) => (
                 <button
                   key={school}

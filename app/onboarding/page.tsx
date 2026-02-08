@@ -117,27 +117,62 @@ export default function OnboardingPage() {
         }
       }
 
-      // Insert profile
-      const { error: profileError } = await supabase.from("profiles").upsert({
-        user_id: user.id,
-        name: data.name,
-        avatar_url: avatarPublicUrl,
-        school_of_thought: data.schoolOfThought || null,
-      })
+      // Insert or update profile
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", user.id)
+        .single()
 
-      if (profileError) {
-        console.log("[v0] Profile upsert error:", profileError)
+      if (existingProfile) {
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .update({
+            name: data.name,
+            avatar_url: avatarPublicUrl,
+            school_of_thought: data.schoolOfThought || null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", user.id)
+
+        if (profileError) {
+          console.log("[v0] Profile update error:", profileError)
+        }
+      } else {
+        const { error: profileError } = await supabase.from("profiles").insert({
+          user_id: user.id,
+          name: data.name,
+          avatar_url: avatarPublicUrl,
+          school_of_thought: data.schoolOfThought || null,
+        })
+
+        if (profileError) {
+          console.log("[v0] Profile insert error:", profileError)
+        }
       }
 
-      // Insert preferences
-      const { error: prefsError } = await supabase.from("user_preferences").upsert({
+      // Insert or update preferences
+      const { data: existingPrefs } = await supabase
+        .from("user_preferences")
+        .select("id")
+        .eq("user_id", user.id)
+        .single()
+
+      const prefsPayload = {
         user_id: user.id,
         language: data.language,
         collections_of_interest: data.collections,
         learning_level: data.learningLevel.toLowerCase(),
         safety_agreed_at: new Date().toISOString(),
         onboarded: true,
-      })
+      }
+
+      const { error: prefsError } = existingPrefs
+        ? await supabase
+            .from("user_preferences")
+            .update(prefsPayload)
+            .eq("user_id", user.id)
+        : await supabase.from("user_preferences").insert(prefsPayload)
 
       if (prefsError) {
         console.log("[v0] Preferences upsert error:", prefsError)

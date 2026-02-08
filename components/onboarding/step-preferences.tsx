@@ -1,8 +1,9 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState } from "react"
+
 import { Check } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -33,21 +34,11 @@ interface StepPreferencesProps {
 }
 
 export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
-  const [sliderValue, setSliderValue] = useState(() => {
-    const index = LEARNING_LEVELS.indexOf(data.learningLevel)
-    return index >= 0 ? index * 50 : 50
-  })
+  const activeIndex = Math.max(0, LEARNING_LEVELS.indexOf(data.learningLevel))
+  const [sliderValue, setSliderValue] = useState<number>(activeIndex * 50);
 
-  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value)
-    // Snap to nearest position (0, 50, 100)
-    let snappedValue = 50
-    if (value < 25) snappedValue = 0
-    else if (value > 75) snappedValue = 100
-    else snappedValue = 50
-
-    setSliderValue(snappedValue)
-    onUpdate({ learningLevel: LEARNING_LEVELS[snappedValue / 50] })
+  const handleLevelSelect = (level: string) => {
+    onUpdate({ learningLevel: level })
   }
 
   const toggleCollection = (collectionId: string) => {
@@ -55,6 +46,15 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
       ? data.collections.filter((c) => c !== collectionId)
       : [...data.collections, collectionId]
     onUpdate({ collections: updated })
+  }
+
+  const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(event.target.value);
+    setSliderValue(value);
+    const levelIndex = Math.floor(value / 50);
+    if (levelIndex >= 0 && levelIndex < LEARNING_LEVELS.length) {
+      handleLevelSelect(LEARNING_LEVELS[levelIndex]);
+    }
   }
 
   return (
@@ -129,32 +129,37 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
         </div>
       </div>
 
-      {/* Learning Level Slider */}
+      {/* Learning Level Toggle */}
       <div className="space-y-4">
         <label className="text-sm font-medium text-[#2C2416]">Learning Level</label>
-        <div className="px-2">
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={sliderValue}
-            onChange={handleSliderChange}
-            className="gold-slider w-full"
-            aria-label="Select your learning level"
+        <div className="relative flex items-center bg-[#F3F0EA] rounded-xl p-1" role="radiogroup" aria-label="Select your learning level">
+          {/* Sliding indicator */}
+          <div
+            className="absolute top-1 bottom-1 rounded-lg transition-all duration-300 ease-out"
+            style={{
+              width: `calc(${100 / LEARNING_LEVELS.length}% - 4px)`,
+              left: `calc(${(activeIndex * 100) / LEARNING_LEVELS.length}% + 2px)`,
+              background: "linear-gradient(135deg, #C5A059 0%, #D4B06A 100%)",
+              boxShadow: "0 2px 8px rgba(197, 160, 89, 0.35)",
+            }}
           />
-          <div className="flex justify-between mt-2">
-            {LEARNING_LEVELS.map((level, index) => (
-              <span
-                key={level}
-                className={cn(
-                  "text-sm transition-colors",
-                  sliderValue === index * 50 ? "text-[#C5A059] font-medium" : "text-muted-foreground",
-                )}
-              >
-                {level}
-              </span>
-            ))}
-          </div>
+          {LEARNING_LEVELS.map((level) => (
+            <button
+              key={level}
+              type="button"
+              role="radio"
+              aria-checked={data.learningLevel === level}
+              onClick={() => handleLevelSelect(level)}
+              className={cn(
+                "relative z-10 flex-1 py-2.5 text-sm font-medium rounded-lg text-center transition-colors duration-200",
+                data.learningLevel === level
+                  ? "text-white"
+                  : "text-[#6B6455] hover:text-[#2C2416]",
+              )}
+            >
+              {level}
+            </button>
+          ))}
         </div>
       </div>
     </div>

@@ -35,8 +35,8 @@ export function AuthForm() {
       setError(error.message)
       setLoading(false)
     } else {
-      // Let the proxy middleware handle routing based on onboarding status
-      router.push("/")
+      // Redirect to home - middleware will handle onboarding check
+      router.push("/home")
       router.refresh()
     }
   }

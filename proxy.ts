@@ -56,19 +56,19 @@ export async function proxy(request: NextRequest) {
     // Protect dashboard and home routes
     if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/home"))) {
       const url = request.nextUrl.clone()
-      url.pathname = "/"
+      url.pathname = "/login"
       return NextResponse.redirect(url)
     }
 
     // Protect onboarding route
     if (!user && pathname.startsWith("/onboarding")) {
       const url = request.nextUrl.clone()
-      url.pathname = "/"
+      url.pathname = "/login"
       return NextResponse.redirect(url)
     }
 
-    // Redirect authenticated users from auth page
-    if (user && pathname === "/") {
+    // Redirect authenticated users from login page to home
+    if (user && pathname === "/login") {
       const url = request.nextUrl.clone()
       url.pathname = hasOnboarded ? "/home" : "/onboarding"
       return NextResponse.redirect(url)

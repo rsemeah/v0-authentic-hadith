@@ -7,7 +7,7 @@ import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { cn } from "@/lib/utils"
 
 // Pages that should NOT show the sidebar/navigation
-const excludedPaths = ["/", "/onboarding", "/reset-password"]
+const excludedPaths = ["/", "/login", "/onboarding", "/reset-password"]
 
 interface AppShellProps {
   children: ReactNode

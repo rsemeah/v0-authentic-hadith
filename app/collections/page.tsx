@@ -41,13 +41,13 @@ function CollectionsContent() {
 
   useEffect(() => {
     const fetchCollections = async () => {
-      // Fetch featured collections
+      // Fetch featured collections (top 4 by hadith count)
       const { data: featured } = await supabase
         .from("collections")
         .select("*")
         .eq("is_featured", true)
         .order("total_hadiths", { ascending: false })
-        .limit(3)
+        .limit(4)
 
       // Fetch all collections
       const { data: all } = await supabase.from("collections").select("*").order("name_en", { ascending: true })
@@ -202,8 +202,8 @@ function CollectionsContent() {
               </div>
             </div>
 
-            {/* Desktop: 3-column grid */}
-            <div className="hidden md:grid md:grid-cols-3 gap-4">
+            {/* Desktop: 4-column grid */}
+            <div className="hidden md:grid md:grid-cols-4 gap-4">
               {featuredCollections.map((collection) => (
                 <CollectionCard key={collection.id} collection={collection} variant="featured" />
               ))}

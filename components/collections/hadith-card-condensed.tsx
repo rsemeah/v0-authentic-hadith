@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation"
 import { Bookmark, Share2, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 
 interface HadithCardCondensedProps {
   hadith: {
@@ -40,7 +41,7 @@ export function HadithCardCondensed({
   const supabase = getSupabaseBrowserClient()
 
   const arabicText = hadith.text_ar || hadith.arabic_text || ""
-  const englishText = hadith.text_en || hadith.english_translation || ""
+  const englishText = getCleanTranslation(hadith.text_en || hadith.english_translation || "")
   const narrator = hadith.narrator || hadith.narrator_primary || "Unknown narrator"
 
   const gradeColors = {

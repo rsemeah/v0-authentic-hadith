@@ -4,6 +4,7 @@ import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, ChevronLeft, BookOpen } from "lucide-react"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
+import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 import useSWR from "swr"
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json())
@@ -81,7 +82,7 @@ function SearchContent() {
               >
                 <div className="flex items-center gap-2 mb-2">
                   <span className="px-2 py-1 rounded text-xs font-bold text-white bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]">
-                    {hadith.collection}
+                    {getCollectionDisplayName(hadith.collection)}
                   </span>
                   <span className="text-xs text-[#6b7280]">
                     Book {hadith.book_number} / Hadith {hadith.hadith_number}
@@ -95,7 +96,7 @@ function SearchContent() {
                 {hadith.narrator && (
                   <p className="text-xs text-[#6b7280] mb-1">Narrated by: {hadith.narrator}</p>
                 )}
-                <p className="text-sm text-[#1a1f36] line-clamp-2">{hadith.english_translation}</p>
+                <p className="text-sm text-[#1a1f36] line-clamp-2">{getCleanTranslation(hadith.english_translation)}</p>
               </button>
             ))}
           </div>

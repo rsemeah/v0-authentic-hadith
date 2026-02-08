@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Volume2, Bookmark, Share2, ChevronRight, BookOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { parseEnglishTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 
 interface Hadith {
   id: string
@@ -25,6 +26,10 @@ interface DailyHadithCardProps {
 export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyHadithCardProps) {
   const [isSaved, setIsSaved] = useState(hadith.is_saved || false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const { narrator: parsedNarrator, text: parsedText } = parseEnglishTranslation(hadith.english_translation)
+  const displayNarrator = hadith.narrator || parsedNarrator || "Unknown"
+  const displayText = parsedText || hadith.english_translation
+  const displayCollection = getCollectionDisplayName(hadith.collection)
 
   const gradeColors = {
     sahih: "from-[#10b981] to-[#34d399]",
@@ -53,7 +58,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
       {/* Badges */}
       <div className="flex items-center justify-between mb-6">
         <span className="px-3 py-1.5 rounded-md text-xs font-bold text-white bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]">
-          {hadith.collection}
+          {displayCollection}
         </span>
         <span
           className={cn(
@@ -77,7 +82,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
 
       {/* English Translation */}
       <div className="mb-6" dir="ltr" lang="en">
-        <p className="text-base sm:text-lg leading-relaxed text-[#4a5568]">{hadith.english_translation}</p>
+        <p className="text-base sm:text-lg leading-relaxed text-[#4a5568]">{displayText}</p>
       </div>
 
       {/* Metadata */}
@@ -85,7 +90,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
         <BookOpen className="w-4 h-4" />
         <span>{hadith.reference}</span>
         <span className="mx-2">•</span>
-        <span>Narrated by {hadith.narrator}</span>
+        <span>Narrated by {displayNarrator}</span>
       </div>
 
       {/* Action Buttons */}

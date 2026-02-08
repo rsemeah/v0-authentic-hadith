@@ -9,50 +9,33 @@ export async function startCheckoutSession(productId: string) {
     throw new Error(`Product with id "${productId}" not found`)
   }
 
-  if (product.mode === "subscription") {
-    const session = await stripe.checkout.sessions.create({
-      ui_mode: "embedded",
-      redirect_on_completion: "never",
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: product.name,
-              description: product.description,
-            },
-            unit_amount: product.priceInCents,
-            recurring: {
-              interval: product.interval || "month",
-            },
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "subscription",
-    })
+  // Look up the default price from the real Stripe product
+  const prices = await stripe.prices.list({
+    product: product.stripeProductId,
+    active: true,
+    limit: 1,
+  })
 
-    return session.client_secret
+  if (!prices.data.length) {
+    throw new Error(`No active price found for product "${product.stripeProductId}"`)
   }
 
-  // One-time payment (donations)
+  const priceId = prices.data[0].id
+
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000"
+
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
-    redirect_on_completion: "never",
     line_items: [
       {
-        price_data: {
-          currency: "usd",
-          product_data: {
-            name: product.name,
-            description: product.description,
-          },
-          unit_amount: product.priceInCents,
-        },
+        price: priceId,
         quantity: 1,
       },
     ],
-    mode: "payment",
+    mode: product.mode,
+    return_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
   })
 
   return session.client_secret

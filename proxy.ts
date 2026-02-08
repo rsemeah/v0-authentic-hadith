@@ -2,6 +2,12 @@ import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
 
+// Routes that do NOT require authentication
+const publicPaths = ["/", "/login", "/pricing", "/checkout/success", "/reset-password"]
+
+// Routes that require authentication
+const protectedPrefixes = ["/home", "/dashboard", "/onboarding", "/profile", "/settings", "/saved", "/collections", "/hadith", "/assistant", "/search", "/learn"]
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -47,43 +53,37 @@ export async function proxy(request: NextRequest) {
         // Set the cookie so we don't need to check DB every time
         supabaseResponse.cookies.set("qbos_onboarded", "1", {
           path: "/",
-          maxAge: 31536000,
+          maxAge: 31536000, // 1 year
           sameSite: "lax",
         })
       }
     }
 
-    // Protect dashboard and home routes
-    if (!user && (pathname.startsWith("/dashboard") || pathname.startsWith("/home"))) {
+    // Check if the current path is public
+    const isPublic = publicPaths.some((p) => pathname === p) ||
+      pathname.startsWith("/api") ||
+      pathname.startsWith("/auth") ||
+      pathname.startsWith("/admin")
+
+    // Check if the current path is protected
+    const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
+
+    // Redirect unauthenticated users away from protected routes
+    if (!user && isProtected) {
       const url = request.nextUrl.clone()
       url.pathname = "/login"
       return NextResponse.redirect(url)
     }
 
-    // Protect onboarding route
-    if (!user && pathname.startsWith("/onboarding")) {
-      const url = request.nextUrl.clone()
-      url.pathname = "/login"
-      return NextResponse.redirect(url)
-    }
-
-    // Redirect authenticated users from login page to home
+    // Redirect authenticated users away from login page to home
     if (user && pathname === "/login") {
       const url = request.nextUrl.clone()
       url.pathname = hasOnboarded ? "/home" : "/onboarding"
       return NextResponse.redirect(url)
     }
 
-    // Redirect to onboarding if not onboarded
-    if (
-      user &&
-      !hasOnboarded &&
-      pathname !== "/onboarding" &&
-      pathname !== "/" &&
-      !pathname.startsWith("/api") &&
-      !pathname.startsWith("/admin") &&
-      !pathname.startsWith("/auth")
-    ) {
+    // Redirect to onboarding if authenticated but not onboarded (except public/api/admin paths)
+    if (user && !hasOnboarded && isProtected && pathname !== "/onboarding") {
       const url = request.nextUrl.clone()
       url.pathname = "/onboarding"
       return NextResponse.redirect(url)

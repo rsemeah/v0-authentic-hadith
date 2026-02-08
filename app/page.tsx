@@ -1,6 +1,7 @@
 import Image from "next/image"
 import Link from "next/link"
-import { BookOpen, Search, Shield, MessageCircle, Star, Heart } from "lucide-react"
+import { BookOpen, Search, Shield, MessageCircle, Star, Heart, Zap, Crown, Infinity, Check } from "lucide-react"
+import { PRODUCTS } from "@/lib/products"
 
 export default function LandingPage() {
   return (
@@ -126,41 +127,108 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Preview */}
-      <section className="px-6 py-16 max-w-4xl mx-auto text-center">
-        <h2 className="text-2xl font-bold text-[#2C2416] mb-4">
-          Premium Digital Subscription
-        </h2>
-        <p className="text-[#6b5d4d] mb-10 max-w-xl mx-auto">
-          Access all features with a premium subscription. All content is delivered
-          digitally through our web and mobile platform.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-lg mx-auto">
-          <div className="premium-card gold-border rounded-xl p-6 text-center">
-            <h3 className="font-semibold text-[#2C2416]">Monthly</h3>
-            <p className="text-3xl font-bold text-[#2C2416] mt-2">
-              $4.99
-              <span className="text-sm font-normal text-[#6b5d4d]">/mo</span>
-            </p>
-          </div>
-          <div className="premium-card gold-border rounded-xl p-6 text-center relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-[#C5A059] text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
-              Best Value
-            </div>
-            <h3 className="font-semibold text-[#2C2416]">Yearly</h3>
-            <p className="text-3xl font-bold text-[#2C2416] mt-2">
-              $39.99
-              <span className="text-sm font-normal text-[#6b5d4d]">/yr</span>
-            </p>
-            <p className="text-xs text-[#1B5E43] font-medium mt-1">Save 33%</p>
-          </div>
+      {/* Pricing Section - Real Products */}
+      <section id="pricing" className="px-6 py-16 max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <h2 className="text-2xl font-bold text-[#2C2416] mb-4">
+            Choose Your Plan
+          </h2>
+          <p className="text-[#6b5d4d] max-w-xl mx-auto">
+            Start free or unlock the full experience. All premium plans include
+            unlimited access to every collection, AI assistant, and learning path.
+          </p>
         </div>
-        <Link
-          href="/pricing"
-          className="inline-block mt-8 px-8 py-3 gold-button rounded-lg text-base"
-        >
-          View All Plans
-        </Link>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+          {PRODUCTS.map((plan) => {
+            const icons: Record<string, typeof Zap> = {
+              "monthly-intro": Zap,
+              "monthly-premium": Star,
+              "annual-premium": Crown,
+              "lifetime-access": Infinity,
+            }
+            const Icon = icons[plan.id] || Star
+
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-xl p-6 ${
+                  plan.highlighted
+                    ? "gold-border premium-card ring-2 ring-[#C5A059]/30"
+                    : "premium-card"
+                }`}
+              >
+                {plan.badge && (
+                  <div
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold ${
+                      plan.highlighted
+                        ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D]"
+                        : plan.id === "lifetime-access"
+                          ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]"
+                          : "bg-[#6b7280]"
+                    }`}
+                  >
+                    {plan.badge}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg gold-icon-bg flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-[#C5A059]" />
+                  </div>
+                  <h3 className="font-semibold text-[#2C2416]">{plan.name}</h3>
+                </div>
+
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-[#2C2416]">
+                    ${(plan.priceInCents / 100).toFixed(2)}
+                  </span>
+                  <span className="text-sm text-[#6b5d4d] ml-1">
+                    {plan.interval === "month"
+                      ? "/month"
+                      : plan.interval === "year"
+                        ? "/year"
+                        : " one-time"}
+                  </span>
+                  {plan.interval === "year" && (
+                    <span className="block text-xs text-[#C5A059] font-medium mt-1">
+                      ${(plan.priceInCents / 100 / 12).toFixed(2)}/mo billed yearly
+                    </span>
+                  )}
+                </div>
+
+                {plan.features && (
+                  <ul className="space-y-2 mb-5">
+                    {plan.features.slice(0, 3).map((feature) => (
+                      <li key={feature} className="flex items-center gap-2 text-sm text-[#6b5d4d]">
+                        <Check className="w-4 h-4 text-[#1B5E43] shrink-0" />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                <Link
+                  href="/pricing"
+                  className={`block w-full py-3 rounded-xl font-semibold text-sm text-center transition-all ${
+                    plan.highlighted
+                      ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"
+                      : plan.id === "lifetime-access"
+                        ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B] text-white hover:opacity-90"
+                        : "bg-[#F8F6F2] border border-[#d4cfc7] text-[#2C2416] hover:border-[#C5A059] hover:text-[#C5A059]"
+                  }`}
+                >
+                  {plan.mode === "payment" ? "Buy Lifetime Access" : "Subscribe Now"}
+                </Link>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Free tier note */}
+        <p className="text-center text-sm text-[#6b5d4d] mt-8">
+          Not ready to commit? <Link href="/login" className="gold-text font-medium hover:underline">Start with our free tier</Link> -- browse all collections and basic search included.
+        </p>
       </section>
 
       {/* Footer */}

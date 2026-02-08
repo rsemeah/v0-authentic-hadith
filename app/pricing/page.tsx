@@ -2,8 +2,6 @@
 
 import React from "react"
 
-"use client"
-
 import { useState, Suspense } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, Check, Star, Crown, Zap, Infinity, X } from "lucide-react"
@@ -51,6 +49,7 @@ const planIcons: Record<string, React.ReactNode> = {
 function PricingContent() {
   const router = useRouter()
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
 
   if (selectedProduct) {
     return (
@@ -58,7 +57,10 @@ function PricingContent() {
         <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
             <button
-              onClick={() => setSelectedProduct(null)}
+              onClick={() => {
+                setSelectedProduct(null)
+                setCheckoutError(null)
+              }}
               className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
             >
               <X className="w-5 h-5 text-[#6b7280]" />
@@ -67,7 +69,22 @@ function PricingContent() {
           </div>
         </header>
         <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
-          <Checkout productId={selectedProduct} />
+          {checkoutError ? (
+            <div className="text-center py-12">
+              <p className="text-destructive mb-4">{checkoutError}</p>
+              <button
+                onClick={() => {
+                  setCheckoutError(null)
+                  setSelectedProduct(null)
+                }}
+                className="px-6 py-2 gold-button rounded-lg text-sm"
+              >
+                Back to Plans
+              </button>
+            </div>
+          ) : (
+            <Checkout productId={selectedProduct} />
+          )}
         </main>
       </div>
     )
@@ -75,7 +92,6 @@ function PricingContent() {
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
-      {/* Header */}
       <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
@@ -89,7 +105,6 @@ function PricingContent() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        {/* Hero */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#C5A059] to-[#E8C77D] flex items-center justify-center">
             <Star className="w-8 h-8 text-white" />
@@ -100,7 +115,6 @@ function PricingContent() {
           </p>
         </div>
 
-        {/* All Plans */}
         <div className="space-y-4">
           {PRODUCTS.map((plan) => (
             <div
@@ -112,13 +126,15 @@ function PricingContent() {
               }`}
             >
               {plan.badge && (
-                <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold ${
-                  plan.highlighted
-                    ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D]"
-                    : plan.id === "lifetime-access"
-                      ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]"
-                      : "bg-[#6b7280]"
-                }`}>
+                <div
+                  className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold ${
+                    plan.highlighted
+                      ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D]"
+                      : plan.id === "lifetime-access"
+                        ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]"
+                        : "bg-[#6b7280]"
+                  }`}
+                >
                   {plan.badge}
                 </div>
               )}
@@ -162,20 +178,22 @@ function PricingContent() {
             </div>
           ))}
 
-          {/* Free tier comparison */}
           <div className="rounded-xl border border-dashed border-[#e5e7eb] p-5 bg-white/50">
             <h3 className="text-sm font-semibold text-[#6b7280] uppercase tracking-wider mb-3">
               Free Tier (Current)
             </h3>
             <ul className="space-y-2">
-              {["Browse all 8 hadith collections", "Basic search", "Save & bookmark hadiths", "AI assistant (limited)"].map(
-                (feature) => (
-                  <li key={feature} className="flex items-center gap-2 text-sm text-[#6b7280]">
-                    <Check className="w-4 h-4 text-[#6b7280] shrink-0" />
-                    {feature}
-                  </li>
-                ),
-              )}
+              {[
+                "Browse all 8 hadith collections",
+                "Basic search",
+                "Save & bookmark hadiths",
+                "AI assistant (limited)",
+              ].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-[#6b7280]">
+                  <Check className="w-4 h-4 text-[#6b7280] shrink-0" />
+                  {feature}
+                </li>
+              ))}
             </ul>
           </div>
         </div>

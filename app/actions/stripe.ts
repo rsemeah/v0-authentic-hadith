@@ -22,9 +22,12 @@ export async function startCheckoutSession(productId: string) {
 
   const priceId = prices.data[0].id
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : "http://localhost:3000"
+
   const session = await stripe.checkout.sessions.create({
     ui_mode: "embedded",
-    redirect_on_completion: "never",
     line_items: [
       {
         price: priceId,
@@ -32,6 +35,7 @@ export async function startCheckoutSession(productId: string) {
       },
     ],
     mode: product.mode,
+    return_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
   })
 
   return session.client_secret

@@ -35,7 +35,8 @@ export function AuthForm() {
       setError(error.message)
       setLoading(false)
     } else {
-      router.push("/dashboard")
+      // Let the proxy middleware handle routing based on onboarding status
+      router.push("/")
       router.refresh()
     }
   }
@@ -50,7 +51,7 @@ export function AuthForm() {
       email,
       password,
       options: {
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
+        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/auth/callback`,
         data: {
           full_name: fullName,
         },

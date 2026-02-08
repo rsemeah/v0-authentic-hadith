@@ -88,8 +88,8 @@ export async function proxy(request: NextRequest) {
       url.pathname = "/onboarding"
       return NextResponse.redirect(url)
     }
-  } catch (err) {
-    console.error("[v0] Proxy error:", err)
+  } catch {
+    // Proxy error - allow request to continue
   }
 
   return supabaseResponse

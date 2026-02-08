@@ -5,7 +5,8 @@ import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe
 import { loadStripe } from "@stripe/stripe-js"
 import { startCheckoutSession } from "@/app/actions/stripe"
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || ""
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null
 
 export default function Checkout({ productId }: { productId: string }) {
   const [error, setError] = useState<string | null>(null)
@@ -24,6 +25,20 @@ export default function Checkout({ productId }: { productId: string }) {
       throw err
     }
   }, [productId])
+
+  if (!stripePromise) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+          <span className="text-red-500 text-xl">!</span>
+        </div>
+        <p className="text-[#1a1f36] font-medium mb-2">Payment Setup Required</p>
+        <p className="text-sm text-[#6b7280] mb-4 max-w-md mx-auto">
+          Stripe publishable key is not configured. Please check your environment variables.
+        </p>
+      </div>
+    )
+  }
 
   if (error) {
     return (

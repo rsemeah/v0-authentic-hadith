@@ -1,23 +1,56 @@
 "use client"
 
+import React from "react"
+
+"use client"
+
 import { useState, Suspense } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, Check, Heart, Star, Sparkles, X } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { ChevronLeft, Check, Star, Crown, Zap, Infinity, X } from "lucide-react"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
-import { getSubscriptionProducts, getDonationProducts } from "@/lib/products"
+import { PRODUCTS } from "@/lib/products"
+import type { Product } from "@/lib/products"
 import dynamic from "next/dynamic"
 
 const Checkout = dynamic(() => import("@/components/checkout"), { ssr: false })
 
-const subscriptions = getSubscriptionProducts()
-const donations = getDonationProducts()
+function PriceDisplay({ product }: { product: Product }) {
+  if (product.interval === "year") {
+    const monthly = (product.priceInCents / 100 / 12).toFixed(2)
+    return (
+      <div className="text-right shrink-0 ml-4">
+        <div className="text-2xl font-bold text-[#1a1f36]">${(product.priceInCents / 100).toFixed(2)}</div>
+        <div className="text-xs text-[#C5A059] font-medium">${monthly}/mo</div>
+        <div className="text-xs text-[#6b7280]">billed yearly</div>
+      </div>
+    )
+  }
+  if (product.interval === "month") {
+    return (
+      <div className="text-right shrink-0 ml-4">
+        <div className="text-2xl font-bold text-[#1a1f36]">${(product.priceInCents / 100).toFixed(2)}</div>
+        <div className="text-xs text-[#6b7280]">per month</div>
+      </div>
+    )
+  }
+  return (
+    <div className="text-right shrink-0 ml-4">
+      <div className="text-2xl font-bold text-[#1a1f36]">${(product.priceInCents / 100).toFixed(2)}</div>
+      <div className="text-xs text-[#6b7280]">one-time</div>
+    </div>
+  )
+}
+
+const planIcons: Record<string, React.ReactNode> = {
+  "monthly-intro": <Zap className="w-5 h-5 text-[#C5A059]" />,
+  "monthly-premium": <Star className="w-5 h-5 text-[#C5A059]" />,
+  "annual-premium": <Crown className="w-5 h-5 text-[#C5A059]" />,
+  "lifetime-access": <Infinity className="w-5 h-5 text-[#C5A059]" />,
+}
 
 function PricingContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const initialTab = searchParams.get("tab") === "donate" ? "donate" : "premium"
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<"premium" | "donate">(initialTab)
 
   if (selectedProduct) {
     return (
@@ -51,7 +84,7 @@ function PricingContent() {
           >
             <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
           </button>
-          <h1 className="text-lg font-semibold text-[#1a1f36]">Premium & Support</h1>
+          <h1 className="text-lg font-semibold text-[#1a1f36]">Choose Your Plan</h1>
         </div>
       </header>
 
@@ -61,161 +94,91 @@ function PricingContent() {
           <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-[#C5A059] to-[#E8C77D] flex items-center justify-center">
             <Star className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-2xl font-bold text-[#1a1f36] text-balance">Support Authentic Hadith</h2>
+          <h2 className="text-2xl font-bold text-[#1a1f36] text-balance">Unlock Authentic Hadith Premium</h2>
           <p className="text-[#6b7280] mt-2 max-w-md mx-auto text-pretty">
-            Go premium for an enhanced experience, or contribute sadaqah to help us preserve and share authentic knowledge.
+            Get full access to AI explanations, advanced search, learning paths, and more.
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex rounded-xl bg-[#F8F6F2] border border-[#e5e7eb] p-1 mb-8">
-          <button
-            onClick={() => setActiveTab("premium")}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              activeTab === "premium"
-                ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white shadow-sm"
-                : "text-[#6b7280] hover:text-[#1a1f36]"
-            }`}
-          >
-            <span className="flex items-center justify-center gap-1.5">
-              <Sparkles className="w-4 h-4" />
-              Premium
-            </span>
-          </button>
-          <button
-            onClick={() => setActiveTab("donate")}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              activeTab === "donate"
-                ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B] text-white shadow-sm"
-                : "text-[#6b7280] hover:text-[#1a1f36]"
-            }`}
-          >
-            <span className="flex items-center justify-center gap-1.5">
-              <Heart className="w-4 h-4" />
-              Sadaqah
-            </span>
-          </button>
-        </div>
-
-        {/* Premium Plans */}
-        {activeTab === "premium" && (
-          <div className="space-y-4">
-            {subscriptions.map((plan) => {
-              const priceDisplay =
-                plan.interval === "year"
-                  ? `$${(plan.priceInCents / 100).toFixed(2)}/yr`
-                  : `$${(plan.priceInCents / 100).toFixed(2)}/mo`
-              const monthlyEquiv =
-                plan.interval === "year" ? `$${(plan.priceInCents / 100 / 12).toFixed(2)}/mo` : null
-
-              return (
-                <div
-                  key={plan.id}
-                  className={`relative rounded-xl p-5 transition-all ${
-                    plan.highlighted
-                      ? "gold-border premium-card ring-2 ring-[#C5A059]/30"
-                      : "border border-[#e5e7eb] bg-white"
-                  }`}
-                >
-                  {plan.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white text-xs font-bold">
-                      Best Value
-                    </div>
-                  )}
-
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold text-[#1a1f36]">{plan.name}</h3>
-                      <p className="text-sm text-[#6b7280] mt-0.5">{plan.description}</p>
-                    </div>
-                    <div className="text-right shrink-0 ml-4">
-                      <div className="text-2xl font-bold text-[#1a1f36]">{priceDisplay}</div>
-                      {monthlyEquiv && <div className="text-xs text-[#C5A059] font-medium">{monthlyEquiv}</div>}
-                    </div>
-                  </div>
-
-                  {plan.features && (
-                    <ul className="space-y-2 mb-5">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-center gap-2 text-sm text-[#4a5568]">
-                          <Check className="w-4 h-4 text-[#1B5E43] shrink-0" />
-                          {feature}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  <button
-                    onClick={() => setSelectedProduct(plan.id)}
-                    className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
-                      plan.highlighted
-                        ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"
-                        : "bg-[#F8F6F2] border border-[#e5e7eb] text-[#1a1f36] hover:border-[#C5A059] hover:text-[#C5A059]"
-                    }`}
-                  >
-                    Subscribe Now
-                  </button>
+        {/* All Plans */}
+        <div className="space-y-4">
+          {PRODUCTS.map((plan) => (
+            <div
+              key={plan.id}
+              className={`relative rounded-xl p-5 transition-all ${
+                plan.highlighted
+                  ? "gold-border premium-card ring-2 ring-[#C5A059]/30"
+                  : "border border-[#e5e7eb] bg-white"
+              }`}
+            >
+              {plan.badge && (
+                <div className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold ${
+                  plan.highlighted
+                    ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D]"
+                    : plan.id === "lifetime-access"
+                      ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]"
+                      : "bg-[#6b7280]"
+                }`}>
+                  {plan.badge}
                 </div>
-              )
-            })}
+              )}
 
-            {/* Free tier comparison */}
-            <div className="rounded-xl border border-dashed border-[#e5e7eb] p-5 bg-white/50">
-              <h3 className="text-sm font-semibold text-[#6b7280] uppercase tracking-wider mb-3">
-                Free Tier (Current)
-              </h3>
-              <ul className="space-y-2">
-                {["Browse all 8 hadith collections", "Basic search", "Save & bookmark hadiths", "AI assistant (limited)"].map(
-                  (feature) => (
-                    <li key={feature} className="flex items-center gap-2 text-sm text-[#6b7280]">
-                      <Check className="w-4 h-4 text-[#6b7280] shrink-0" />
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center shrink-0 mt-0.5">
+                    {planIcons[plan.id]}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#1a1f36]">{plan.name}</h3>
+                    <p className="text-sm text-[#6b7280] mt-0.5 max-w-xs">{plan.description}</p>
+                  </div>
+                </div>
+                <PriceDisplay product={plan} />
+              </div>
+
+              {plan.features && (
+                <ul className="space-y-2 mb-5">
+                  {plan.features.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2 text-sm text-[#4a5568]">
+                      <Check className="w-4 h-4 text-[#1B5E43] shrink-0" />
                       {feature}
                     </li>
-                  ),
-                )}
-              </ul>
+                  ))}
+                </ul>
+              )}
+
+              <button
+                onClick={() => setSelectedProduct(plan.id)}
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
+                  plan.highlighted
+                    ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"
+                    : plan.id === "lifetime-access"
+                      ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B] text-white hover:opacity-90 shadow-md"
+                      : "bg-[#F8F6F2] border border-[#e5e7eb] text-[#1a1f36] hover:border-[#C5A059] hover:text-[#C5A059]"
+                }`}
+              >
+                {plan.mode === "payment" ? "Buy Lifetime Access" : "Subscribe Now"}
+              </button>
             </div>
+          ))}
+
+          {/* Free tier comparison */}
+          <div className="rounded-xl border border-dashed border-[#e5e7eb] p-5 bg-white/50">
+            <h3 className="text-sm font-semibold text-[#6b7280] uppercase tracking-wider mb-3">
+              Free Tier (Current)
+            </h3>
+            <ul className="space-y-2">
+              {["Browse all 8 hadith collections", "Basic search", "Save & bookmark hadiths", "AI assistant (limited)"].map(
+                (feature) => (
+                  <li key={feature} className="flex items-center gap-2 text-sm text-[#6b7280]">
+                    <Check className="w-4 h-4 text-[#6b7280] shrink-0" />
+                    {feature}
+                  </li>
+                ),
+              )}
+            </ul>
           </div>
-        )}
-
-        {/* Donation Options */}
-        {activeTab === "donate" && (
-          <div className="space-y-6">
-            <div className="rounded-xl bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] p-5 text-white">
-              <h3 className="font-semibold text-lg mb-2">Sadaqah Jariyah</h3>
-              <p className="text-white/80 text-sm leading-relaxed">
-                {'"'}The Prophet (peace be upon him) said: {'"'}When a person dies, their deeds come to an end except
-                for three: ongoing charity (sadaqah jariyah), beneficial knowledge, or a righteous child who prays for
-                them.{'"'} - Sahih Muslim
-              </p>
-            </div>
-
-            <p className="text-sm text-[#6b7280] text-center">
-              Your contribution helps maintain the database, improve translations, and keep the app free for everyone.
-            </p>
-
-            <div className="grid grid-cols-3 gap-3">
-              {donations.map((donation) => {
-                const amount = `$${(donation.priceInCents / 100).toFixed(0)}`
-                return (
-                  <button
-                    key={donation.id}
-                    onClick={() => setSelectedProduct(donation.id)}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border border-[#e5e7eb] bg-white hover:border-[#1B5E43] hover:shadow-md transition-all"
-                  >
-                    <Heart className="w-6 h-6 text-[#1B5E43]" />
-                    <span className="text-xl font-bold text-[#1a1f36]">{amount}</span>
-                    <span className="text-xs text-[#6b7280] text-center">One-time</span>
-                  </button>
-                )
-              })}
-            </div>
-
-            <p className="text-xs text-center text-[#6b7280] italic mt-4">
-              Sharing knowledge is sadaqah. May Allah reward your generosity.
-            </p>
-          </div>
-        )}
+        </div>
       </main>
 
       <BottomNavigation />

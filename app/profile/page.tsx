@@ -4,7 +4,7 @@ import React from "react"
 
 import { useEffect, useState, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, User, Bookmark, Settings, LogOut, Camera, X, Loader2, Pencil, Check, ChevronDown, Star, Heart } from "lucide-react"
+import { ChevronLeft, User, Bookmark, Settings, LogOut, Camera, X, Loader2, Pencil, Check, ChevronDown, Star } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
@@ -424,23 +424,7 @@ function ProfileContent() {
                 </div>
                 <div className="flex-1 text-left">
                   <h3 className="font-semibold text-white">Go Premium</h3>
-                  <p className="text-sm text-white/80">Ad-free, advanced search & more</p>
-                </div>
-              </div>
-            </button>
-
-            {/* Sadaqah card */}
-            <button
-              onClick={() => router.push("/pricing?tab=donate")}
-              className="w-full rounded-xl overflow-hidden hover:-translate-y-0.5 transition-transform"
-            >
-              <div className="bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B] p-4 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
-                  <Heart className="w-5 h-5 text-white" />
-                </div>
-                <div className="flex-1 text-left">
-                  <h3 className="font-semibold text-white">Support with Sadaqah</h3>
-                  <p className="text-sm text-white/80">Help keep authentic hadith free</p>
+                  <p className="text-sm text-white/80">Advanced search, AI explanations & more</p>
                 </div>
               </div>
             </button>

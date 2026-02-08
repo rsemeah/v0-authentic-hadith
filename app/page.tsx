@@ -7,9 +7,9 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen marble-bg">
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10">
+      <header className="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 max-w-6xl mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
             <Image
               src="/images/gemini-generated-image-xw5svjxw5svjxw5s.jpeg"
               alt="Authentic Hadith Logo"
@@ -18,20 +18,20 @@ export default function LandingPage() {
               priority
             />
           </div>
-          <span className="text-lg font-bold gold-text tracking-[0.1em] uppercase">
+          <span className="text-sm md:text-lg font-bold gold-text tracking-[0.08em] uppercase">
             Authentic Hadith
           </span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           <Link
             href="/login"
-            className="px-4 py-2 text-sm font-medium text-[#2C2416] hover:text-[#C5A059] transition-colors"
+            className="px-3 py-2 text-xs md:text-sm font-medium text-[#2C2416] hover:text-[#C5A059] transition-colors"
           >
             Sign In
           </Link>
           <Link
             href="/login"
-            className="px-5 py-2 gold-button rounded-lg text-sm"
+            className="px-3 md:px-5 py-2 gold-button rounded-lg text-xs md:text-sm whitespace-nowrap"
           >
             Get Started
           </Link>
@@ -39,26 +39,26 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="px-6 pt-16 pb-20 max-w-4xl mx-auto text-center">
-        <h1 className="text-4xl md:text-5xl font-bold text-[#2C2416] leading-tight text-balance">
+      <section className="px-4 md:px-6 pt-10 md:pt-16 pb-12 md:pb-20 max-w-4xl mx-auto text-center">
+        <h1 className="text-3xl md:text-5xl font-bold text-[#2C2416] leading-tight text-balance">
           Your Journey to{" "}
           <span className="gold-text">Prophetic Wisdom</span>
         </h1>
-        <p className="mt-6 text-lg text-[#6b5d4d] max-w-2xl mx-auto leading-relaxed text-pretty">
+        <p className="mt-4 md:mt-6 text-base md:text-lg text-[#6b5d4d] max-w-2xl mx-auto leading-relaxed text-pretty">
           Access verified collections of prophetic traditions from the six major hadith
           compilations, meticulously authenticated and preserved for generations of
           knowledge seekers.
         </p>
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <div className="mt-6 md:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
             href="/login"
-            className="px-8 py-3 gold-button rounded-lg text-base"
+            className="w-full sm:w-auto px-8 py-3 gold-button rounded-lg text-base text-center"
           >
             Start Learning Free
           </Link>
           <Link
             href="/pricing"
-            className="px-8 py-3 emerald-button rounded-lg text-base"
+            className="w-full sm:w-auto px-8 py-3 emerald-button rounded-lg text-base text-center"
           >
             View Premium Plans
           </Link>
@@ -66,11 +66,11 @@ export default function LandingPage() {
       </section>
 
       {/* Features Grid */}
-      <section className="px-6 py-16 max-w-5xl mx-auto">
-        <h2 className="text-2xl font-bold text-center text-[#2C2416] mb-12">
+      <section className="px-4 md:px-6 py-10 md:py-16 max-w-5xl mx-auto">
+        <h2 className="text-xl md:text-2xl font-bold text-center text-[#2C2416] mb-8 md:mb-12">
           Everything You Need to Study Hadith
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
           {[
             {
               icon: BookOpen,
@@ -128,9 +128,9 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section - Real Products */}
-      <section id="pricing" className="px-6 py-16 max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl font-bold text-[#2C2416] mb-4">
+      <section id="pricing" className="px-4 md:px-6 py-10 md:py-16 max-w-5xl mx-auto">
+        <div className="text-center mb-8 md:mb-12">
+          <h2 className="text-xl md:text-2xl font-bold text-[#2C2416] mb-3 md:mb-4">
             Choose Your Plan
           </h2>
           <p className="text-[#6b5d4d] max-w-xl mx-auto">
@@ -139,7 +139,7 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto">
           {PRODUCTS.map((plan) => {
             const icons: Record<string, typeof Zap> = {
               "monthly-intro": Zap,
@@ -232,7 +232,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="px-6 py-12 border-t border-[#d4cfc7]">
+      <footer className="px-4 md:px-6 py-8 md:py-12 border-t border-[#d4cfc7]">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <div className="relative w-8 h-8">

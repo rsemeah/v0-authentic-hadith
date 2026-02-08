@@ -209,7 +209,7 @@ export default function LandingPage() {
                 )}
 
                 <Link
-                  href="/pricing"
+                  href={`/pricing?plan=${plan.id}`}
                   className={`block w-full py-3 rounded-xl font-semibold text-sm text-center transition-all ${
                     plan.highlighted
                       ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"

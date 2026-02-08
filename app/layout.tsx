@@ -23,6 +23,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Authentic Hadith - Learn From Verified Sources",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://authentichadith.app"),
   description:
     "Access verified collections of prophetic traditions, meticulously authenticated and preserved for generations of knowledge seekers.",
   generator: "v0.app",

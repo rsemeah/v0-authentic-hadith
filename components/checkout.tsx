@@ -12,12 +12,10 @@ export default function Checkout({ productId }: { productId: string }) {
 
   const fetchClientSecret = useCallback(async () => {
     try {
-      console.log("[v0] Starting checkout for product:", productId)
       const clientSecret = await startCheckoutSession(productId)
       if (!clientSecret) {
         throw new Error("No client secret returned from Stripe")
       }
-      console.log("[v0] Got client secret, loading checkout")
       return clientSecret
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to start checkout"

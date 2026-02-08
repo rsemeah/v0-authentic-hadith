@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { startCheckoutSession } from "@/app/actions/stripe"
@@ -8,11 +8,40 @@ import { startCheckoutSession } from "@/app/actions/stripe"
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
 export default function Checkout({ productId }: { productId: string }) {
-  const fetchClientSecret = useCallback(() => startCheckoutSession(productId), [productId])
+  const [error, setError] = useState<string | null>(null)
+
+  const fetchClientSecret = useCallback(async () => {
+    try {
+      console.log("[v0] Starting checkout for product:", productId)
+      const clientSecret = await startCheckoutSession(productId)
+      if (!clientSecret) {
+        throw new Error("No client secret returned from Stripe")
+      }
+      console.log("[v0] Got client secret, loading checkout")
+      return clientSecret
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to start checkout"
+      console.error("[v0] Checkout error:", message)
+      setError(message)
+      throw err
+    }
+  }, [productId])
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
+          <span className="text-red-500 text-xl">!</span>
+        </div>
+        <p className="text-[#1a1f36] font-medium mb-2">Checkout Error</p>
+        <p className="text-sm text-[#6b7280] mb-4 max-w-md mx-auto">{error}</p>
+      </div>
+    )
+  }
 
   return (
     <div id="checkout">
-      <EmbeddedCheckoutProvider stripe={stripePromise} options={{ clientSecret: fetchClientSecret }}>
+      <EmbeddedCheckoutProvider stripe={stripePromise} options={{ fetchClientSecret }}>
         <EmbeddedCheckout />
       </EmbeddedCheckoutProvider>
     </div>

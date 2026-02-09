@@ -19,12 +19,14 @@ import {
   LogOut,
   Bookmark,
   Sun,
+  Moon,
   Heart,
   Users,
   PenLine,
   BarChart3,
   HelpCircle,
 } from "lucide-react"
+import { useTheme } from "next-themes"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 interface NavGroup {
@@ -85,7 +87,13 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme, resolvedTheme } = useTheme()
   const supabase = getSupabaseBrowserClient()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -274,13 +282,36 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Collapse Toggle */}
-        <div className="p-2 border-t border-border">
+        {/* Theme Toggle & Collapse */}
+        <div className="p-2 border-t border-border flex items-center gap-2">
+          {/* Theme Toggle */}
+          {mounted && (
+            <button
+              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+              className={cn(
+                "flex items-center justify-center gap-2 py-2 rounded-lg",
+                "text-muted-foreground hover:text-foreground hover:bg-muted transition-all",
+                collapsed ? "w-full" : "px-3"
+              )}
+              aria-label="Toggle theme"
+              title={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {resolvedTheme === "dark" ? (
+                <Sun className="w-5 h-5 text-[#C5A059]" />
+              ) : (
+                <Moon className="w-5 h-5" />
+              )}
+              {!collapsed && <span className="text-xs">{resolvedTheme === "dark" ? "Light" : "Dark"}</span>}
+            </button>
+          )}
+          
+          {/* Collapse Toggle */}
           <button
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
-              "w-full flex items-center justify-center gap-2 py-2 rounded-lg",
+              "flex items-center justify-center gap-2 py-2 rounded-lg",
               "text-muted-foreground hover:text-foreground hover:bg-muted transition-all",
+              collapsed ? "w-full" : "flex-1"
             )}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >

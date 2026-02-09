@@ -22,6 +22,8 @@ import {
   Heart,
   Users,
   PenLine,
+  BarChart3,
+  HelpCircle,
 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
@@ -58,6 +60,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "today", icon: Sun, label: "Today", href: "/today" },
       { id: "reflections", icon: PenLine, label: "Reflections", href: "/reflections" },
+      { id: "progress", icon: BarChart3, label: "Progress", href: "/progress" },
     ],
   },
   {
@@ -65,6 +68,7 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "search", icon: Search, label: "Search", href: "/search" },
       { id: "assistant", icon: Bot, label: "AI Assistant", href: "/assistant" },
+      { id: "quiz", icon: HelpCircle, label: "Quiz", href: "/quiz" },
       { id: "saved", icon: Bookmark, label: "Saved", href: "/saved" },
     ],
   },

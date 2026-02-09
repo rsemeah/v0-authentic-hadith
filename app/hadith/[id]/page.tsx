@@ -101,9 +101,17 @@ export default function HadithDetailPage() {
     if (isRead) {
       await supabase.from("reading_progress").delete().eq("user_id", user.id).eq("hadith_id", hadith.id)
     } else {
+      // Find the collection_id for this hadith
+      const { data: collData } = await supabase
+        .from("collections")
+        .select("id")
+        .eq("slug", hadith.collection)
+        .single()
+
       await supabase.from("reading_progress").insert({
         user_id: user.id,
         hadith_id: hadith.id,
+        collection_id: collData?.id || null,
       })
     }
     setIsRead(!isRead)

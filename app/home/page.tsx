@@ -110,7 +110,7 @@ export default function HomePage() {
               setDailyHadith({ ...hadithData, is_saved: !!savedData })
             }
           } catch (e) {
-            console.log("[v0] Daily hadith fetch error:", e)
+            // Daily hadith fetch failed silently
           }
 
           // Fetch recently viewed
@@ -180,7 +180,7 @@ export default function HomePage() {
           .limit(4)
         if (featured) setFeaturedCollections(featured)
       } catch (err) {
-        console.log("[v0] Home fetch error:", err)
+        // Home fetch error
       }
       setLoading(false)
     }
@@ -201,7 +201,7 @@ export default function HomePage() {
       }
       setDailyHadith((prev) => (prev ? { ...prev, is_saved: !prev.is_saved } : null))
     } catch (err) {
-      console.log("[v0] Save error:", err)
+      // Save failed
     }
   }
 

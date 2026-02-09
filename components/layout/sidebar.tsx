@@ -1,5 +1,7 @@
 "use client"
 
+import React from "react"
+
 import { useState, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import Image from "next/image"
@@ -16,16 +18,56 @@ import {
   ChevronRight,
   LogOut,
   Bookmark,
+  Sun,
+  Heart,
+  Users,
+  PenLine,
 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
-const mainNavItems = [
-  { id: "home", icon: Home, label: "Home", href: "/home" },
-  { id: "collections", icon: BookOpen, label: "Collections", href: "/collections" },
-  { id: "search", icon: Search, label: "Search", href: "/search" },
-  { id: "assistant", icon: Bot, label: "AI Assistant", href: "/assistant" },
-  { id: "learn", icon: GraduationCap, label: "Learning Paths", href: "/learn" },
-  { id: "saved", icon: Bookmark, label: "Saved", href: "/saved" },
+interface NavGroup {
+  label: string
+  items: NavItem[]
+}
+
+interface NavItem {
+  id: string
+  icon: React.ComponentType<{ className?: string }>
+  label: string
+  href: string
+}
+
+const navGroups: NavGroup[] = [
+  {
+    label: "",
+    items: [
+      { id: "home", icon: Home, label: "Home", href: "/home" },
+    ],
+  },
+  {
+    label: "Study",
+    items: [
+      { id: "collections", icon: BookOpen, label: "Collections", href: "/collections" },
+      { id: "sunnah", icon: Heart, label: "Sunnah", href: "/sunnah" },
+      { id: "learn", icon: GraduationCap, label: "Learning Paths", href: "/learn" },
+      { id: "stories", icon: Users, label: "Stories", href: "/stories" },
+    ],
+  },
+  {
+    label: "Daily",
+    items: [
+      { id: "today", icon: Sun, label: "Today", href: "/today" },
+      { id: "reflections", icon: PenLine, label: "Reflections", href: "/reflections" },
+    ],
+  },
+  {
+    label: "Tools",
+    items: [
+      { id: "search", icon: Search, label: "Search", href: "/search" },
+      { id: "assistant", icon: Bot, label: "AI Assistant", href: "/assistant" },
+      { id: "saved", icon: Bookmark, label: "Saved", href: "/saved" },
+    ],
+  },
 ]
 
 const bottomNavItems = [
@@ -39,7 +81,7 @@ export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [userName, setUserName] = useState<string | null>(null)
   const [userAvatar, setUserAvatar] = useState<string | null>(null)
-  const supabase = getSupabaseBrowserClient() // Declare supabase variable
+  const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -59,8 +101,8 @@ export function Sidebar() {
             setUserAvatar(profile.avatar_url)
           }
         }
-      } catch (err) {
-        console.log("[v0] Sidebar: failed to fetch user", err)
+      } catch {
+        // Failed to fetch user
       }
     }
     fetchUser()
@@ -70,11 +112,13 @@ export function Sidebar() {
     try {
       const supabase = getSupabaseBrowserClient()
       await supabase.auth.signOut()
-    } catch (err) {
-      console.log("[v0] Sign out error:", err)
+    } catch {
+      // Sign out error
     }
     router.push("/")
   }
+
+  const isItemActive = (href: string) => pathname === href || pathname.startsWith(href + "/")
 
   return (
     <aside
@@ -102,50 +146,62 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* Main Navigation */}
-      <nav className="flex-1 py-4 overflow-y-auto">
-        <ul className="space-y-1 px-3">
-          {mainNavItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
-            return (
-              <li key={item.id}>
-                <button
-                  onClick={() => router.push(item.href)}
-                  className={cn(
-                    "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg",
-                    "transition-all duration-200 group",
-                    isActive
-                      ? "bg-gradient-to-r from-[#C5A059]/15 to-[#E8C77D]/10 text-[#8A6E3A]"
-                      : "text-foreground hover:bg-muted",
-                    collapsed && "justify-center px-0",
-                  )}
-                  title={collapsed ? item.label : undefined}
-                >
-                  {/* Active indicator bar */}
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-gradient-to-b from-[#C5A059] to-[#E8C77D]" />
-                  )}
-                  <item.icon
-                    className={cn(
-                      "w-5 h-5 flex-shrink-0 transition-colors",
-                      isActive ? "text-[#C5A059]" : "text-muted-foreground group-hover:text-foreground",
-                    )}
-                  />
-                  {!collapsed && (
-                    <span className={cn("font-medium text-sm whitespace-nowrap", isActive && "gold-text")}>
-                      {item.label}
-                    </span>
-                  )}
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+      {/* Main Navigation - Grouped */}
+      <nav className="flex-1 py-3 overflow-y-auto">
+        {navGroups.map((group, groupIdx) => (
+          <div key={group.label || `group-${groupIdx}`} className={cn(groupIdx > 0 && "mt-2")}>
+            {/* Group Label */}
+            {group.label && !collapsed && (
+              <div className="px-5 py-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60">
+                  {group.label}
+                </span>
+              </div>
+            )}
+            {group.label && collapsed && <div className="mx-4 my-1 border-t border-border/50" />}
+
+            <ul className="space-y-0.5 px-3">
+              {group.items.map((item) => {
+                const isActive = isItemActive(item.href)
+                return (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => router.push(item.href)}
+                      className={cn(
+                        "relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg",
+                        "transition-all duration-200 group",
+                        isActive
+                          ? "bg-gradient-to-r from-[#C5A059]/15 to-[#E8C77D]/10 text-[#8A6E3A]"
+                          : "text-foreground hover:bg-muted",
+                        collapsed && "justify-center px-0",
+                      )}
+                      title={collapsed ? item.label : undefined}
+                    >
+                      {isActive && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-gradient-to-b from-[#C5A059] to-[#E8C77D]" />
+                      )}
+                      <item.icon
+                        className={cn(
+                          "w-5 h-5 flex-shrink-0 transition-colors",
+                          isActive ? "text-[#C5A059]" : "text-muted-foreground group-hover:text-foreground",
+                        )}
+                      />
+                      {!collapsed && (
+                        <span className={cn("font-medium text-sm whitespace-nowrap", isActive && "gold-text")}>
+                          {item.label}
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))}
       </nav>
 
       {/* Bottom Section */}
       <div className="border-t border-border">
-        {/* Secondary Nav Items */}
         <ul className="py-2 px-3 space-y-1">
           {bottomNavItems.map((item) => {
             const isActive = pathname === item.href

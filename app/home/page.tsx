@@ -21,6 +21,10 @@ import {
   GraduationCap,
   Bot,
   TrendingUp,
+  Sun,
+  Heart,
+  Users,
+  PenLine,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
@@ -354,14 +358,46 @@ export default function HomePage() {
         {/* Quick Actions */}
         <section className="pb-6 md:pb-8" aria-label="Quick Actions">
           <h2 className="text-lg font-bold text-[#1a1f36] mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {[
               {
+                icon: Sun,
+                label: "Today",
+                desc: "Daily card",
+                href: "/today",
+                gradient: "from-[#C5A059] to-[#E8C77D]",
+                iconColor: "text-white",
+              },
+              {
                 icon: BookOpen,
-                label: "Browse Books",
-                desc: "8 collections",
+                label: "Collections",
+                desc: "8 books",
                 href: "/collections",
                 gradient: "from-[#1B5E43] to-[#2D7A5B]",
+                iconColor: "text-white",
+              },
+              {
+                icon: Heart,
+                label: "Sunnah",
+                desc: "Lived practice",
+                href: "/sunnah",
+                gradient: "from-[#1B5E43] to-[#4a9973]",
+                iconColor: "text-white",
+              },
+              {
+                icon: Users,
+                label: "Stories",
+                desc: "The Companions",
+                href: "/stories",
+                gradient: "from-[#8a6e3a] to-[#C5A059]",
+                iconColor: "text-white",
+              },
+              {
+                icon: PenLine,
+                label: "Reflections",
+                desc: "Your journal",
+                href: "/reflections",
+                gradient: "from-[#7c3aed] to-[#a78bfa]",
                 iconColor: "text-white",
               },
               {
@@ -369,23 +405,7 @@ export default function HomePage() {
                 label: "AI Chat",
                 desc: "Ask anything",
                 href: "/assistant",
-                gradient: "from-[#C5A059] to-[#E8C77D]",
-                iconColor: "text-white",
-              },
-              {
-                icon: GraduationCap,
-                label: "Learn",
-                desc: "Guided paths",
-                href: "/learn",
-                gradient: "from-[#1B5E43] to-[#4a9973]",
-                iconColor: "text-white",
-              },
-              {
-                icon: Bookmark,
-                label: "Saved",
-                desc: `${savedCount} hadiths`,
-                href: "/saved",
-                gradient: "from-[#8a6e3a] to-[#C5A059]",
+                gradient: "from-[#0369a1] to-[#38bdf8]",
                 iconColor: "text-white",
               },
             ].map((action) => (

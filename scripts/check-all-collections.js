@@ -8,41 +8,73 @@ const HEADERS = {
 };
 
 async function main() {
-  // 1. Get all collections
+  // 1. Get all collections - first discover column names
+  const schemaResp = await fetch(
+    `${SUPABASE_URL}/rest/v1/collections?select=*&limit=1`,
+    { headers: HEADERS }
+  );
+  const schemaData = await schemaResp.json();
+  console.log("=== COLLECTIONS TABLE COLUMNS ===");
+  if (Array.isArray(schemaData) && schemaData.length > 0) {
+    console.log("Columns:", Object.keys(schemaData[0]).join(", "));
+    console.log("Sample row:", JSON.stringify(schemaData[0], null, 2));
+  } else {
+    console.log("Response:", JSON.stringify(schemaData).slice(0, 500));
+  }
+
   const collResp = await fetch(
-    `${SUPABASE_URL}/rest/v1/collections?select=id,name,slug,total_hadiths,total_books&order=id.asc`,
+    `${SUPABASE_URL}/rest/v1/collections?select=*&order=id.asc`,
     { headers: HEADERS }
   );
   const collections = await collResp.json();
-  console.log("=== ALL COLLECTIONS ===");
+  if (!Array.isArray(collections)) {
+    console.log("ERROR: collections is not an array:", JSON.stringify(collections).slice(0, 500));
+    return;
+  }
+  console.log(`\n=== ALL ${collections.length} COLLECTIONS ===`);
   for (const c of collections) {
-    console.log(`  ${c.slug} (id=${c.id}): ${c.name} - ${c.total_hadiths} hadiths, ${c.total_books} books`);
+    const name = c.name_en || c.name || c.title || "unknown";
+    console.log(`  ${c.slug} (id=${c.id}): ${name} - ${c.total_hadiths} hadiths, ${c.total_books} books`);
   }
 
-  // 2. For each collection, query books the same way the page does
-  console.log("\n=== BOOKS PER COLLECTION (using page query) ===");
+  // 2. First discover books table columns
+  console.log("\n=== BOOKS TABLE COLUMNS ===");
+  const bSchemaResp = await fetch(
+    `${SUPABASE_URL}/rest/v1/books?select=*&limit=1`,
+    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+  );
+  const bSchema = await bSchemaResp.json();
+  if (Array.isArray(bSchema) && bSchema.length > 0) {
+    console.log("Columns:", Object.keys(bSchema[0]).join(", "));
+    console.log("Sample row:", JSON.stringify(bSchema[0], null, 2));
+  }
+
+  // 3. For each collection, query books
+  console.log("\n=== BOOKS PER COLLECTION ===");
   for (const c of collections) {
+    const name = c.name_en || c.name || c.title || "unknown";
     const booksResp = await fetch(
-      `${SUPABASE_URL}/rest/v1/books?collection_id=eq.${c.id}&select=id,name_english,sort_order,total_hadiths&order=sort_order.asc`,
-      { headers: HEADERS }
+      `${SUPABASE_URL}/rest/v1/books?collection_id=eq.${c.id}&select=*&order=sort_order.asc&limit=3`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
     );
     const books = await booksResp.json();
-    console.log(`\n  ${c.slug} (id=${c.id}): ${books.length} books found`);
-    if (books.length === 0) {
-      // Check if books exist with service role key
-      const svcResp = await fetch(
-        `${SUPABASE_URL}/rest/v1/books?collection_id=eq.${c.id}&select=id,name_english&limit=3`,
-        { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
-      );
-      const svcBooks = await svcResp.json();
-      console.log(`    Service role finds: ${svcBooks.length} books`);
-      if (svcBooks.length > 0) console.log(`    Example:`, svcBooks[0]);
-    } else {
-      // Show first 3 book names
-      for (const b of books.slice(0, 3)) {
-        console.log(`    Book ${b.sort_order}: ${b.name_english} (${b.total_hadiths} hadiths)`);
+    
+    // Get total count
+    const countResp = await fetch(
+      `${SUPABASE_URL}/rest/v1/books?collection_id=eq.${c.id}&select=id`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    const allBooks = await countResp.json();
+    const totalBooks = Array.isArray(allBooks) ? allBooks.length : 0;
+    
+    console.log(`\n  [${c.slug}] "${name}" (id=${c.id}): ${totalBooks} books in DB`);
+    if (Array.isArray(books) && books.length > 0) {
+      for (const b of books) {
+        const bName = b.name_en || b.name_english || b.name || "?";
+        console.log(`    #${b.sort_order}: "${bName}" (id=${b.id})`);
       }
-      if (books.length > 3) console.log(`    ... and ${books.length - 3} more`);
+    } else {
+      console.log(`    NO BOOKS! Response:`, JSON.stringify(books).slice(0, 300));
     }
   }
 

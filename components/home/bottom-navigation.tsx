@@ -1,13 +1,13 @@
 "use client"
 
 import { usePathname, useRouter } from "next/navigation"
-import { Home, BookOpen, Search, Bot, User } from "lucide-react"
+import { Home, BookOpen, Sun, Bot, User } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navItems = [
   { id: "home", icon: Home, label: "Home", href: "/home" },
-  { id: "collections", icon: BookOpen, label: "Books", href: "/collections" },
-  { id: "search", icon: Search, label: "Look", href: "/search" },
+  { id: "collections", icon: BookOpen, label: "Study", href: "/collections" },
+  { id: "today", icon: Sun, label: "Today", href: "/today" },
   { id: "assistant", icon: Bot, label: "Chat", href: "/assistant" },
   { id: "profile", icon: User, label: "Me", href: "/profile" },
 ]

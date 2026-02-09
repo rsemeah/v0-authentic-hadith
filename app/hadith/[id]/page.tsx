@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ChevronLeft, Bookmark, Share2, BookOpen } from "lucide-react"
+import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
+import { DiscussionSection } from "@/components/hadith/discussion-section"
 import { cn } from "@/lib/utils"
 import { parseEnglishTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 
@@ -26,6 +27,7 @@ export default function HadithDetailPage() {
   const supabase = getSupabaseBrowserClient()
   const [hadith, setHadith] = useState<Hadith | null>(null)
   const [isSaved, setIsSaved] = useState(false)
+  const [isRead, setIsRead] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -48,6 +50,15 @@ export default function HadithDetailPage() {
             .single()
 
           setIsSaved(!!savedData)
+
+          // Check if marked as read
+          const { data: readData } = await supabase
+            .from("reading_progress")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("hadith_id", data.id)
+            .single()
+          setIsRead(!!readData)
 
           // Track view
           await supabase
@@ -79,6 +90,31 @@ export default function HadithDetailPage() {
       })
     }
     setIsSaved(!isSaved)
+  }
+
+  const handleMarkRead = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user || !hadith) return
+
+    if (isRead) {
+      await supabase.from("reading_progress").delete().eq("user_id", user.id).eq("hadith_id", hadith.id)
+    } else {
+      // Find the collection_id for this hadith
+      const { data: collData } = await supabase
+        .from("collections")
+        .select("id")
+        .eq("slug", hadith.collection)
+        .single()
+
+      await supabase.from("reading_progress").insert({
+        user_id: user.id,
+        hadith_id: hadith.id,
+        collection_id: collData?.id || null,
+      })
+    }
+    setIsRead(!isRead)
   }
 
   const handleShare = async () => {
@@ -156,6 +192,13 @@ export default function HadithDetailPage() {
               <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
             </button>
             <button
+              onClick={() => router.push(`/share?hadith=${hadith?.id}`)}
+              className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center text-[#6b7280] hover:border-[#C5A059] transition-colors"
+              title="Create sharing card"
+            >
+              <ImageIcon className="w-5 h-5" />
+            </button>
+            <button
               onClick={handleShare}
               className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center text-[#6b7280] hover:border-[#C5A059] transition-colors"
             >
@@ -231,7 +274,26 @@ export default function HadithDetailPage() {
               <span className="text-[#1a1f36] font-medium">{gradeLabels[hadith.grade]}</span>
             </div>
           </div>
+
+          {/* Mark as Read Button */}
+          <div className="mt-6 pt-6 border-t border-[#e5e7eb]">
+            <button
+              onClick={handleMarkRead}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-medium transition-all",
+                isRead
+                  ? "bg-[#1B5E43]/10 border-2 border-[#1B5E43] text-[#1B5E43]"
+                  : "emerald-button text-white",
+              )}
+            >
+              <CheckCircle2 className={cn("w-5 h-5", isRead && "fill-[#1B5E43] text-white")} />
+              {isRead ? "Marked as Read" : "Mark as Read"}
+            </button>
+          </div>
         </div>
+
+        {/* Community Discussion */}
+        <DiscussionSection hadithId={hadith.id} />
       </main>
 
       <BottomNavigation />

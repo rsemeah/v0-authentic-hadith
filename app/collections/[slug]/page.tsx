@@ -54,13 +54,13 @@ export default function CollectionDetailPage() {
   useEffect(() => {
     const fetchCollection = async () => {
       // Fetch collection details
-      const { data: collectionData } = await supabase.from("collections").select("*").eq("slug", slug).single()
+      const { data: collectionData, error: collError } = await supabase.from("collections").select("*").eq("slug", slug).single()
 
       if (collectionData) {
         setCollection(collectionData)
 
         // Fetch books for this collection
-        const { data: booksData } = await supabase
+        const { data: booksData, error: booksError } = await supabase
           .from("books")
           .select("*")
           .eq("collection_id", collectionData.id)

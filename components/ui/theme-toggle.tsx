@@ -1,28 +1,33 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Moon, Sun, Monitor } from "lucide-react"
-import { useTheme } from "next-themes"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { Moon, Sun, Monitor } from "lucide-react";
+import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 
 interface ThemeToggleProps {
-  variant?: "default" | "compact" | "settings"
-  className?: string
+  variant?: "default" | "compact" | "settings";
+  className?: string;
 }
 
-export function ThemeToggle({ variant = "default", className }: ThemeToggleProps) {
-  const { theme, setTheme, resolvedTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+export function ThemeToggle({
+  variant = "default",
+  className,
+}: ThemeToggleProps) {
+  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
   // Prevent hydration mismatch
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return (
-      <div className={cn("h-10 w-10 rounded-lg bg-muted animate-pulse", className)} />
-    )
+      <div
+        className={cn("h-10 w-10 rounded-lg bg-muted animate-pulse", className)}
+      />
+    );
   }
 
   if (variant === "compact") {
@@ -34,14 +39,14 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
           "border border-[#e5e7eb] bg-[#F8F6F2] hover:border-[#C5A059]",
           "dark:border-[#374151] dark:bg-[#1f2937] dark:hover:border-[#C5A059]",
           "transition-colors duration-200",
-          className
+          className,
         )}
         aria-label="Toggle theme"
       >
         <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-[#C5A059]" />
         <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-[#C5A059]" />
       </button>
-    )
+    );
   }
 
   if (variant === "settings") {
@@ -49,7 +54,7 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
       { value: "light", icon: Sun, label: "Light" },
       { value: "dark", icon: Moon, label: "Dark" },
       { value: "system", icon: Monitor, label: "System" },
-    ]
+    ];
 
     return (
       <div className={cn("space-y-3", className)}>
@@ -62,7 +67,7 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
               "border",
               theme === item.value
                 ? "border-[#C5A059] bg-[#C5A059]/10 dark:bg-[#C5A059]/20"
-                : "border-[#e5e7eb] dark:border-[#374151] bg-white dark:bg-[#1f2937] hover:border-[#C5A059]/50"
+                : "border-[#e5e7eb] dark:border-[#374151] bg-white dark:bg-[#1f2937] hover:border-[#C5A059]/50",
             )}
           >
             <div
@@ -70,7 +75,7 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
                 "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
                 theme === item.value
                   ? "bg-[#C5A059] text-white"
-                  : "bg-[#C5A059]/10 text-[#C5A059]"
+                  : "bg-[#C5A059]/10 text-[#C5A059]",
               )}
             >
               <item.icon className="w-5 h-5" />
@@ -81,7 +86,7 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
                   "font-medium",
                   theme === item.value
                     ? "text-[#C5A059]"
-                    : "text-[#1a1f36] dark:text-white"
+                    : "text-[#1a1f36] dark:text-white",
                 )}
               >
                 {item.label}
@@ -112,12 +117,17 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
           </button>
         ))}
       </div>
-    )
+    );
   }
 
   // Default variant - dropdown style
   return (
-    <div className={cn("relative inline-flex gap-1 p-1 rounded-lg border border-[#e5e7eb] dark:border-[#374151] bg-[#F8F6F2] dark:bg-[#1f2937]", className)}>
+    <div
+      className={cn(
+        "relative inline-flex gap-1 p-1 rounded-lg border border-[#e5e7eb] dark:border-[#374151] bg-[#F8F6F2] dark:bg-[#1f2937]",
+        className,
+      )}
+    >
       {[
         { value: "light", icon: Sun },
         { value: "system", icon: Monitor },
@@ -130,7 +140,7 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
             "relative inline-flex h-8 w-8 items-center justify-center rounded-md transition-colors",
             theme === item.value
               ? "bg-white dark:bg-[#374151] shadow-sm text-[#C5A059]"
-              : "text-[#6b7280] hover:text-[#C5A059]"
+              : "text-[#6b7280] hover:text-[#C5A059]",
           )}
           aria-label={`${item.value} theme`}
         >
@@ -138,17 +148,17 @@ export function ThemeToggle({ variant = "default", className }: ThemeToggleProps
         </button>
       ))}
     </div>
-  )
+  );
 }
 
 // Export a simple hook for checking dark mode
 export function useIsDarkMode() {
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = React.useState(false)
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
-  return mounted ? resolvedTheme === "dark" : false
+  return mounted ? resolvedTheme === "dark" : false;
 }

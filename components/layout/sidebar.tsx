@@ -27,8 +27,6 @@ import {
   HelpCircle,
   Tags,
   Shield,
-} from "lucide-react"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";

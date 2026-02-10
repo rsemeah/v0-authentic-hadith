@@ -207,6 +207,7 @@ export default function LearnPage() {
   const supabase = getSupabaseBrowserClient()
   const [expandedPath, setExpandedPath] = useState<string | null>("foundations")
   const [collectionStats, setCollectionStats] = useState<Record<string, number>>({})
+  const [bookIdMap, setBookIdMap] = useState<Record<string, string>>({})
 
   useEffect(() => {
     async function loadStats() {
@@ -215,6 +216,22 @@ export default function LearnPage() {
         const stats: Record<string, number> = {}
         for (const c of data) stats[c.slug] = c.total_hadiths
         setCollectionStats(stats)
+      }
+
+      // Pre-load book IDs for deep-linking
+      const { data: books } = await supabase
+        .from("books")
+        .select("id, number, collection:collections!collection_id(slug)")
+
+      if (books) {
+        const map: Record<string, string> = {}
+        for (const b of books) {
+          const collSlug = (b.collection as { slug: string } | null)?.slug
+          if (collSlug) {
+            map[`${collSlug}:${b.number}`] = b.id
+          }
+        }
+        setBookIdMap(map)
       }
     }
     loadStats()
@@ -348,7 +365,12 @@ export default function LearnPage() {
                               key={lesson.id}
                               onClick={() => {
                                 if (lesson.bookNumber) {
-                                  router.push(`/collections/${lesson.collectionSlug}`)
+                                  const bookId = bookIdMap[`${lesson.collectionSlug}:${lesson.bookNumber}`]
+                                  if (bookId) {
+                                    router.push(`/collections/${lesson.collectionSlug}/books/${bookId}`)
+                                  } else {
+                                    router.push(`/collections/${lesson.collectionSlug}`)
+                                  }
                                 } else {
                                   router.push(`/collections/${lesson.collectionSlug}`)
                                 }

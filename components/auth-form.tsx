@@ -47,7 +47,7 @@ export function AuthForm() {
     setError(null)
 
     const supabase = getSupabaseBrowserClient()
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -61,10 +61,27 @@ export function AuthForm() {
     if (error) {
       setError(error.message)
       setLoading(false)
-    } else {
-      setMessage("Please check your email to confirm your account.")
-      setLoading(false)
+      return
     }
+
+    // If email confirmation is disabled in Supabase, the user gets a session immediately
+    if (data?.session) {
+      router.push("/onboarding")
+      router.refresh()
+      return
+    }
+
+    // If email confirmation is enabled but the user already exists (identities is empty),
+    // Supabase returns a fake success -- tell the user to sign in instead
+    if (data?.user?.identities?.length === 0) {
+      setError("An account with this email already exists. Please sign in instead.")
+      setLoading(false)
+      return
+    }
+
+    // Email confirmation is enabled -- session is null, user needs to confirm
+    setMessage("Account created! Please check your email (including spam/junk folder) to confirm your account, then sign in.")
+    setLoading(false)
   }
 
   const handleOAuthSignIn = async (provider: "google" | "apple") => {

@@ -14,6 +14,7 @@ import {
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 import { cn } from "@/lib/utils"
+import { ShareBanner } from "@/components/share-banner"
 
 interface Hadith {
   id: string
@@ -23,6 +24,29 @@ interface Hadith {
   reference: string
   grade: string
   narrator: string
+}
+
+const DAILY_ACTIONS = [
+  { text: 'Smile at someone today. The Prophet (peace be upon him) said: "Your smiling in the face of your brother is charity."', ref: "Jami at-Tirmidhi 1956" },
+  { text: 'Say "Bismillah" before eating. The Prophet (peace be upon him) said: "When any of you eats, let him mention the name of Allah."', ref: "Sahih Muslim 2017" },
+  { text: 'Remove something harmful from the path. The Prophet (peace be upon him) said: "Removing harmful things from the road is an act of charity."', ref: "Sahih Muslim 1009" },
+  { text: 'Greet someone you don\'t know with Salam. The Prophet (peace be upon him) was asked: "What is the best Islam?" He said: "Feeding others and greeting those you know and those you do not know."', ref: "Sahih al-Bukhari 12" },
+  { text: 'Make du\'a for someone in their absence. The Prophet (peace be upon him) said: "The supplication of a Muslim for his brother in his absence will certainly be answered."', ref: "Sahih Muslim 2733" },
+  { text: 'Give water to someone thirsty. The Prophet (peace be upon him) said: "The best charity is giving water to drink."', ref: "Musnad Ahmad 6657" },
+  { text: 'Be patient with a difficulty today. The Prophet (peace be upon him) said: "No fatigue, nor disease, nor anxiety... afflicts a Muslim, even if it were the prick of a thorn, but Allah expiates some of his sins for that."', ref: "Sahih al-Bukhari 5641" },
+  { text: 'Forgive someone who wronged you. The Prophet (peace be upon him) said: "Be merciful to others and you will receive mercy."', ref: "Musnad Ahmad 7001" },
+  { text: 'Visit or call someone who is sick. The Prophet (peace be upon him) said: "When a Muslim visits a sick Muslim in the morning, seventy thousand angels send blessings upon him until evening."', ref: "Jami at-Tirmidhi 969" },
+  { text: 'Share a meal with your neighbor. The Prophet (peace be upon him) said: "He is not a believer whose stomach is filled while the neighbour to his side goes hungry."', ref: "Al-Adab Al-Mufrad 112" },
+  { text: 'Lower your gaze and guard your modesty. Allah says: "Tell the believing men to lower their gaze and guard their private parts."', ref: "Surah An-Nur 24:30" },
+  { text: 'Sit in a gathering of remembrance. The Prophet (peace be upon him) said: "No people sit in a gathering remembering Allah, but the angels surround them."', ref: "Sahih Muslim 2700" },
+  { text: 'Help someone carry their load. The Prophet (peace be upon him) said: "Helping a man with his mount, lifting him onto it or helping lift his belongings onto it, is charity."', ref: "Sahih al-Bukhari 2989" },
+  { text: 'Recite Surah Al-Kahf (or part of it). The Prophet (peace be upon him) said: "Whoever reads Surah Al-Kahf on Friday will have a light between the two Fridays."', ref: "Sunan an-Nasai 6401" },
+]
+
+function getDailyAction(): { text: string; ref: string } {
+  const now = new Date()
+  const dayOfYear = Math.floor((now.getTime() - new Date(now.getFullYear(), 0, 0).getTime()) / 86400000)
+  return DAILY_ACTIONS[dayOfYear % DAILY_ACTIONS.length]
 }
 
 export default function TodayPage() {
@@ -197,9 +221,9 @@ export default function TodayPage() {
         <section className="premium-card rounded-xl p-5">
           <h2 className="text-sm font-bold text-[#1a1f36] mb-2">Today's Small Action</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Smile at someone today. The Prophet (peace be upon him) said: "Your smiling in the face of your brother is charity."
+            {getDailyAction().text}
           </p>
-          <p className="text-[10px] text-muted-foreground/60 mt-2 italic">Jami at-Tirmidhi 1956</p>
+          <p className="text-[10px] text-muted-foreground/60 mt-2 italic">{getDailyAction().ref}</p>
         </section>
 
         {/* Quick Links */}
@@ -221,6 +245,9 @@ export default function TodayPage() {
             <p className="text-xs text-muted-foreground mt-0.5">The Companions</p>
           </button>
         </div>
+
+        {/* Share prompt */}
+        <ShareBanner variant="compact" className="mt-6" />
       </main>
     </div>
   )

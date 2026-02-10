@@ -15,8 +15,12 @@ import {
   Utensils,
   Clock,
   BookOpen,
+  Share2,
+  Bookmark,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ShareBanner } from "@/components/share-banner"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 interface SunnahCategory {
   id: string
@@ -229,6 +233,28 @@ export default function SunnahPage() {
   const router = useRouter()
   const [expandedCategory, setExpandedCategory] = useState<string | null>("salah")
 
+  const sharePractice = async (practice: SunnahPractice, categoryTitle: string) => {
+    const text = `${practice.title}\n\n"${practice.description}"\n\n-- ${practice.collection}, ${practice.hadithRef}\n\nFrom the ${categoryTitle} collection on Authentic Hadith`
+    const url = typeof window !== "undefined" ? window.location.href : ""
+
+    if (navigator.share) {
+      await navigator.share({ title: practice.title, text, url })
+    } else {
+      await navigator.clipboard.writeText(`${text}\n\n${url}`)
+    }
+  }
+
+  const shareCategory = async (cat: SunnahCategory) => {
+    const text = `${cat.title} (${cat.titleAr})\n\n${cat.description}\n\n${cat.practices.length} practices to learn on Authentic Hadith`
+    const url = typeof window !== "undefined" ? window.location.href : ""
+
+    if (navigator.share) {
+      await navigator.share({ title: cat.title, text, url })
+    } else {
+      await navigator.clipboard.writeText(`${text}\n\n${url}`)
+    }
+  }
+
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
@@ -278,35 +304,64 @@ export default function SunnahPage() {
                 isExpanded ? "border-[#C5A059]/30 shadow-sm" : "border-[#e5e7eb]",
               )}
             >
-              <button
-                onClick={() => setExpandedCategory(isExpanded ? null : cat.id)}
-                className="w-full p-4 flex items-center gap-4 text-left premium-card"
-              >
-                <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center shrink-0", cat.bgColor)}>
-                  <Icon className={cn("w-5 h-5", cat.color)} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-[#1a1f36]">{cat.title}</h3>
-                    <span className="text-xs text-muted-foreground/60" dir="rtl">{cat.titleAr}</span>
+              <div className="w-full p-4 flex items-center gap-4 premium-card">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setExpandedCategory(isExpanded ? null : cat.id)}
+                  onKeyDown={(e) => e.key === "Enter" && setExpandedCategory(isExpanded ? null : cat.id)}
+                  className="flex items-center gap-4 flex-1 min-w-0 cursor-pointer text-left"
+                >
+                  <div className={cn("w-11 h-11 rounded-xl flex items-center justify-center shrink-0", cat.bgColor)}>
+                    <Icon className={cn("w-5 h-5", cat.color)} />
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{cat.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-sm font-semibold text-[#1a1f36]">{cat.title}</h3>
+                      <span className="text-xs text-muted-foreground/60" dir="rtl">{cat.titleAr}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{cat.description}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => shareCategory(cat)}
+                    className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A059]/10 transition-colors"
+                    aria-label={`Share ${cat.title}`}
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-[#C5A059]" />
+                  </button>
                   <span className="text-[10px] font-medium text-muted-foreground bg-[#f3f4f6] px-2 py-0.5 rounded-full">
                     {cat.practices.length}
                   </span>
-                  <ChevronRight
-                    className={cn("w-4 h-4 text-muted-foreground transition-transform", isExpanded && "rotate-90")}
-                  />
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setExpandedCategory(isExpanded ? null : cat.id)}
+                    onKeyDown={(e) => e.key === "Enter" && setExpandedCategory(isExpanded ? null : cat.id)}
+                    className="cursor-pointer"
+                  >
+                    <ChevronRight
+                      className={cn("w-4 h-4 text-muted-foreground transition-transform", isExpanded && "rotate-90")}
+                    />
+                  </div>
                 </div>
-              </button>
+              </div>
 
               {isExpanded && (
                 <div className="border-t border-[#e5e7eb] divide-y divide-[#f3f4f6]">
                   {cat.practices.map((practice) => (
                     <div key={practice.id} className="p-4">
-                      <h4 className="text-sm font-semibold text-[#1a1f36] mb-1">{practice.title}</h4>
+                      <div className="flex items-start justify-between gap-2">
+                        <h4 className="text-sm font-semibold text-[#1a1f36] mb-1">{practice.title}</h4>
+                        <button
+                          onClick={() => sharePractice(practice, cat.title)}
+                          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A059]/10 transition-colors shrink-0"
+                          aria-label={`Share ${practice.title}`}
+                        >
+                          <Share2 className="w-3.5 h-3.5 text-[#C5A059]" />
+                        </button>
+                      </div>
                       <p className="text-xs text-[#374151] leading-relaxed mb-2">{practice.description}</p>
                       <div className="flex items-center gap-2">
                         <BookOpen className="w-3 h-3 text-muted-foreground" />
@@ -322,6 +377,11 @@ export default function SunnahPage() {
           )
         })}
       </main>
+
+      {/* Share CTA */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 md:pb-8">
+        <ShareBanner variant="compact" />
+      </div>
     </div>
   )
 }

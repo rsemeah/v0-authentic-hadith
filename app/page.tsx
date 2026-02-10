@@ -1,7 +1,8 @@
 import Image from "next/image"
 import Link from "next/link"
-import { BookOpen, Search, Shield, MessageCircle, Star, Heart, Zap, Crown, Infinity, Check } from "lucide-react"
+import { BookOpen, Search, Shield, MessageCircle, Star, Heart, Zap, Crown, Infinity, Check, Share2, Users, Copy } from "lucide-react"
 import { PRODUCTS } from "@/lib/products"
+import { ShareBanner } from "@/components/share-banner"
 
 export default function LandingPage() {
   return (
@@ -42,7 +43,7 @@ export default function LandingPage() {
       <section className="px-4 md:px-6 pt-10 md:pt-16 pb-12 md:pb-20 max-w-4xl mx-auto text-center">
         <h1 className="text-3xl md:text-5xl font-bold text-[#2C2416] leading-tight text-balance">
           Your Journey to{" "}
-          <span className="gold-text">Prophetic Wisdom</span>
+          <span className="gold-text gold-text-heading">Prophetic Wisdom</span>
         </h1>
         <p className="mt-4 md:mt-6 text-base md:text-lg text-[#6b5d4d] max-w-2xl mx-auto leading-relaxed text-pretty">
           Access verified collections of prophetic traditions from the six major hadith
@@ -230,6 +231,9 @@ export default function LandingPage() {
           Not ready to commit? <Link href="/login" className="gold-text font-medium hover:underline">Start with our free tier</Link> -- browse all collections and basic search included.
         </p>
       </section>
+
+      {/* Share CTA */}
+      <ShareBanner />
 
       {/* Footer */}
       <footer className="px-4 md:px-6 py-8 md:py-12 border-t border-[#d4cfc7]">

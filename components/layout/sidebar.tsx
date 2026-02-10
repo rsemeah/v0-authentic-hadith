@@ -24,6 +24,8 @@ import {
   PenLine,
   BarChart3,
   HelpCircle,
+  Tags,
+  Shield,
 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
@@ -50,6 +52,7 @@ const navGroups: NavGroup[] = [
     label: "Study",
     items: [
       { id: "collections", icon: BookOpen, label: "Collections", href: "/collections" },
+      { id: "topics", icon: Tags, label: "Topics", href: "/topics" },
       { id: "sunnah", icon: Heart, label: "Sunnah", href: "/sunnah" },
       { id: "learn", icon: GraduationCap, label: "Learning Paths", href: "/learn" },
       { id: "stories", icon: Users, label: "Stories", href: "/stories" },

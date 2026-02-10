@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Bookmark, Share2, ChevronRight } from "lucide-react"
+import { Bookmark, Share2, ChevronRight, Hash } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
@@ -21,6 +21,9 @@ interface HadithCardCondensedProps {
     narrator_primary?: string
     hadith_number?: number
     reference?: string
+    summary_line?: string
+    category?: { slug: string; name_en: string } | null
+    tags?: Array<{ slug: string; name_en: string }>
   }
   referenceNumber: number
   collectionName: string
@@ -103,6 +106,11 @@ export function HadithCardCondensed({
   return (
     <div className="relative rounded-xl premium-card overflow-hidden border-l-4 border-l-[#C5A059]">
       <div className="p-5 md:p-6">
+        {/* Summary Line */}
+        {hadith.summary_line && (
+          <p className="text-sm font-semibold text-[#C5A059] mb-3 leading-snug">{hadith.summary_line}</p>
+        )}
+
         {/* Header */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="text-sm font-semibold text-[#1a1f36]">Hadith #{referenceNumber}</span>
@@ -134,8 +142,33 @@ export function HadithCardCondensed({
 
         {/* English Translation */}
         <div className="mb-4" dir="ltr" lang="en">
-          <p className="text-sm md:text-base text-[#4a5568] line-clamp-2 leading-relaxed">{englishText}</p>
+          <p className="text-sm md:text-base text-[#4a5568] line-clamp-4 leading-relaxed">{englishText}</p>
         </div>
+
+        {/* Category Badge */}
+        {hadith.category && (
+          <div className="mb-4">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1B5E43]/10 text-[#1B5E43] text-[11px] font-medium">
+              <Hash className="w-3 h-3" />
+              {hadith.category.name_en}
+            </span>
+          </div>
+        )}
+
+        {/* Enrichment Tags */}
+        {hadith.tags && hadith.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {hadith.tags.map((tag) => (
+              <span
+                key={tag.slug}
+                className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-[#C5A059]/10 text-[#8A6E3A] text-[11px] font-medium whitespace-nowrap"
+              >
+                <Hash className="w-2.5 h-2.5 shrink-0" />
+                {tag.name_en}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Action Bar */}
         <div className="flex items-center gap-2 pt-4 border-t border-[#e5e7eb]">

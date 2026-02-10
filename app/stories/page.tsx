@@ -4,8 +4,9 @@ import React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight, Users, BookOpen, Heart, Shield, Sword, Star } from "lucide-react"
+import { ChevronLeft, ChevronRight, Users, BookOpen, Heart, Shield, Sword, Star, Share2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ShareBanner } from "@/components/share-banner"
 
 interface Story {
   id: string
@@ -280,6 +281,10 @@ export default function StoriesPage() {
           )
         })}
       </main>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 md:pb-8">
+        <ShareBanner variant="compact" />
+      </div>
     </div>
   )
 }

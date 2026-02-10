@@ -1,29 +1,22 @@
-"use client"
+"use client";
 
-import React from "react"
-
-import { cn } from "@/lib/utils"
-import { BookOpen, Flame, Star, Bookmark, Share2, PenLine } from "lucide-react"
-
-const iconMap: Record<string, React.ElementType> = {
-  BookOpen,
-  Flame,
-  Star,
-  Bookmark,
-  Share2,
-  PenLine,
-}
+import type React from "react";
+import { cn } from "@/lib/utils";
+import { Star } from "lucide-react";
 
 interface StatCardProps {
-  icon: string
-  label: string
-  value: number | string
-  className?: string
+  icon: React.ElementType;
+  label: string;
+  value: number | string;
+  className?: string;
 }
 
-export function StatCard({ icon, label, value, className }: StatCardProps) {
-  const IconComponent = iconMap[icon] || Star
-
+export function StatCard({
+  icon: IconComponent = Star,
+  label,
+  value,
+  className,
+}: StatCardProps) {
   return (
     <div
       className={cn(
@@ -31,11 +24,11 @@ export function StatCard({ icon, label, value, className }: StatCardProps) {
         className,
       )}
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary/15">
-        <IconComponent className="h-5 w-5 text-secondary" />
+      <div className="flex h-10 w-10 items-center justify-center rounded-full gold-icon-bg">
+        <IconComponent className="h-5 w-5 text-[#C5A059]" />
       </div>
       <span className="text-2xl font-bold text-foreground">{value}</span>
       <span className="text-xs text-muted-foreground">{label}</span>
     </div>
-  )
+  );
 }

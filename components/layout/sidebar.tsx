@@ -27,6 +27,8 @@ import {
   HelpCircle,
   Tags,
   Shield,
+  Star,
+  Trophy,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -77,12 +79,19 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
+    label: "Personal",
+    items: [
+      { id: "my-hadith", icon: Star, label: "My Hadith", href: "/my-hadith" },
+      { id: "achievements", icon: Trophy, label: "Achievements", href: "/achievements" },
+      { id: "saved", icon: Bookmark, label: "Saved", href: "/saved" },
+    ],
+  },
+  {
     label: "Tools",
     items: [
       { id: "search", icon: Search, label: "Search", href: "/search" },
       { id: "assistant", icon: Bot, label: "AI Assistant", href: "/assistant" },
       { id: "quiz", icon: HelpCircle, label: "Quiz", href: "/quiz" },
-      { id: "saved", icon: Bookmark, label: "Saved", href: "/saved" },
     ],
   },
 ];

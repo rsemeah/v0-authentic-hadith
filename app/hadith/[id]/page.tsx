@@ -8,6 +8,7 @@ import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { DiscussionSection } from "@/components/hadith/discussion-section"
 import { cn } from "@/lib/utils"
 import { parseEnglishTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
+import { trackActivity } from "@/app/actions/track-activity"
 
 interface Hadith {
   id: string

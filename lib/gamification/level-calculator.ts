@@ -57,6 +57,39 @@ export function getTierColor(tier: number): string {
   }
 }
 
+const LEVEL_TITLES: Record<number, string> = {
+  1: "Seeker",
+  2: "Student",
+  3: "Learner",
+  4: "Scholar",
+  5: "Muhadith",
+  6: "Expert",
+  7: "Master",
+  8: "Sage",
+  9: "Luminary",
+  10: "Guardian",
+}
+
+export function getLevelTitle(level: number): string {
+  if (level >= 10) return LEVEL_TITLES[10]
+  return LEVEL_TITLES[level] || "Seeker"
+}
+
+export function getLevelInfo(totalXp: number) {
+  const level = calculateLevel(totalXp)
+  const progress = xpProgress(totalXp)
+  return {
+    level,
+    title: getLevelTitle(level),
+    currentXp: totalXp,
+    xpForCurrentLevel: xpForLevel(level),
+    xpForNextLevel: xpForNextLevel(level),
+    progressCurrent: progress.current,
+    progressRequired: progress.required,
+    progressPercentage: progress.percentage,
+  }
+}
+
 // Achievement icon map (number string -> descriptive icon name for lucide)
 export const ACHIEVEMENT_ICONS: Record<string, string> = {
   "1": "BookOpen",

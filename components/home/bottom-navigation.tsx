@@ -1,15 +1,16 @@
 "use client"
 
-import { usePathname, useRouter } from "next/navigation"
-import { Home, BookOpen, Sun, Bot, User } from "lucide-react"
 import { cn } from "@/lib/utils"
+
+import { usePathname, useRouter } from "next/navigation"
+import { Home, BookOpen, Sun, Bot, Star } from "lucide-react"
 
 const navItems = [
   { id: "home", icon: Home, label: "Home", href: "/home" },
   { id: "collections", icon: BookOpen, label: "Study", href: "/collections" },
   { id: "today", icon: Sun, label: "Today", href: "/today" },
   { id: "assistant", icon: Bot, label: "Chat", href: "/assistant" },
-  { id: "profile", icon: User, label: "Me", href: "/profile" },
+  { id: "my-hadith", icon: Star, label: "My Hadith", href: "/my-hadith" },
 ]
 
 const excludedPaths = ["/", "/onboarding", "/reset-password"]

@@ -212,7 +212,9 @@ export default function QuizPage() {
       setRevealed(false)
     } else {
       // Quiz complete - save attempt
-      const finalScore = selected === questions[currentIndex].correctIndex ? score : score
+      // score state may not reflect the last answer yet (React batching), so compute it directly
+      const lastWasCorrect = selected === questions[currentIndex].correctIndex
+      const finalScore = lastWasCorrect ? score + 1 : score
       const scorePct = Math.round((finalScore / questions.length) * 100)
       const timeTaken = Math.floor((Date.now() - startTime) / 1000)
 
@@ -230,6 +232,7 @@ export default function QuizPage() {
         })
       }
 
+      setScore(finalScore)
       setStage("results")
     }
   }

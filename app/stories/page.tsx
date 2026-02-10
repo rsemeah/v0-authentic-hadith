@@ -1,187 +1,111 @@
 "use client"
 
 import React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight, Users, BookOpen, Heart, Shield, Sword, Star } from "lucide-react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  BookOpen,
+  Clock,
+  CheckCircle2,
+  Bookmark,
+  Shield,
+  Sword,
+  Star,
+  Heart,
+  Users,
+} from "lucide-react"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { BottomNavigation } from "@/components/home/bottom-navigation"
+import { ShareBanner } from "@/components/share-banner"
 import { cn } from "@/lib/utils"
 
-interface Story {
-  id: string
-  title: string
-  subtitle: string
-  description: string
-  theme: string
-  icon: React.ComponentType<{ className?: string }>
-  color: string
-  bgColor: string
-  sections: StorySection[]
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  shield: Shield,
+  sword: Sword,
+  star: Star,
+  heart: Heart,
+  users: Users,
 }
 
-interface StorySection {
+interface SahabiCard {
   id: string
-  title: string
-  content: string
-  hadithRef?: string
-  collection?: string
+  slug: string
+  name_en: string
+  name_ar: string
+  title_en: string
+  title_ar: string | null
+  icon: string
+  color_theme: string
+  theme_primary: string
+  theme_secondary: string | null
+  notable_for: string[]
+  total_parts: number
+  estimated_read_time_minutes: number | null
+  display_order: number
 }
 
-const STORIES: Story[] = [
-  {
-    id: "abu-bakr",
-    title: "Abu Bakr al-Siddiq",
-    subtitle: "The Truthful",
-    description: "The first man to accept Islam, the closest companion, and the first Caliph. His life embodied loyalty, sacrifice, and unwavering faith.",
-    theme: "Loyalty & Sacrifice",
-    icon: Star,
-    color: "text-[#C5A059]",
-    bgColor: "bg-[#C5A059]/10",
-    sections: [
-      {
-        id: "conversion",
-        title: "The First to Believe",
-        content: "Abu Bakr was the first free adult male to accept Islam. When the Prophet (peace be upon him) shared the message with him, he accepted without hesitation. The Prophet said: 'I never invited anyone to Islam who did not have some hesitation -- except Abu Bakr.'",
-        hadithRef: "Siyar A'lam al-Nubala",
-      },
-      {
-        id: "cave",
-        title: "The Companion of the Cave",
-        content: "During the Hijrah, Abu Bakr accompanied the Prophet to the cave of Thawr. When he saw a snake hole, he plugged it with his foot to protect the Prophet. When the Quraysh came searching, the Prophet calmed him: 'Do not grieve, indeed Allah is with us.'",
-        hadithRef: "Book 62, Hadith 3653",
-        collection: "Sahih Bukhari",
-      },
-      {
-        id: "generosity",
-        title: "Complete Sacrifice",
-        content: "When the Prophet asked for donations for the expedition to Tabuk, Abu Bakr brought everything he owned. The Prophet asked: 'What have you left for your family?' He replied: 'I have left them Allah and His Messenger.'",
-        hadithRef: "Hadith 3675",
-        collection: "Jami at-Tirmidhi",
-      },
-    ],
-  },
-  {
-    id: "umar",
-    title: "Umar ibn al-Khattab",
-    subtitle: "The Just",
-    description: "Known for his justice, strength, and decisive leadership. His conversion strengthened the early Muslim community immensely.",
-    theme: "Justice & Strength",
-    icon: Shield,
-    color: "text-[#1B5E43]",
-    bgColor: "bg-[#1B5E43]/10",
-    sections: [
-      {
-        id: "conversion",
-        title: "A Dramatic Conversion",
-        content: "Umar set out to kill the Prophet but ended up embracing Islam after hearing Surah Taha being recited. His conversion was a turning point -- Muslims could finally pray openly at the Ka'bah.",
-        hadithRef: "Book 62",
-        collection: "Sahih Bukhari",
-      },
-      {
-        id: "justice",
-        title: "Justice as Caliph",
-        content: "Umar would walk the streets at night checking on his people. He once said: 'If a lost sheep on the bank of the Euphrates were to die without care, I would fear that Allah would hold me accountable for it.'",
-        hadithRef: "Kitab al-Kharaj",
-      },
-      {
-        id: "humility",
-        title: "Walking in Humility",
-        content: "The Prophet said: 'Among the nations before you there were inspired people, and if there is any such among my Ummah, then it is Umar.'",
-        hadithRef: "Book 62, Hadith 3689",
-        collection: "Sahih Bukhari",
-      },
-    ],
-  },
-  {
-    id: "khadijah",
-    title: "Khadijah bint Khuwaylid",
-    subtitle: "Mother of the Believers",
-    description: "The Prophet's first wife, first believer, and greatest supporter. She spent her wealth for Islam and comforted the Prophet in his hardest moments.",
-    theme: "Support & Devotion",
-    icon: Heart,
-    color: "text-[#dc2626]",
-    bgColor: "bg-red-50",
-    sections: [
-      {
-        id: "first-revelation",
-        title: "The First to Comfort",
-        content: "When the Prophet received the first revelation and came home trembling, it was Khadijah who comforted him: 'By Allah, Allah will never disgrace you. You maintain family ties, bear the burden of the weak, help the poor, serve guests generously, and assist those afflicted by calamity.'",
-        hadithRef: "Book 1, Hadith 3",
-        collection: "Sahih Bukhari",
-      },
-      {
-        id: "sacrifice",
-        title: "Spending for Islam",
-        content: "Khadijah spent her entire fortune supporting the Prophet's mission. She was among the wealthiest merchants of Makkah, yet gave everything for the cause of Islam without hesitation.",
-      },
-      {
-        id: "love",
-        title: "A Love That Lasted",
-        content: "Even years after her passing, the Prophet would remember Khadijah with deep emotion. Aisha said: 'I was never more jealous of any wife of the Prophet than Khadijah, though I never saw her, because the Prophet would always mention her.'",
-        hadithRef: "Book 62, Hadith 3818",
-        collection: "Sahih Bukhari",
-      },
-    ],
-  },
-  {
-    id: "bilal",
-    title: "Bilal ibn Rabah",
-    subtitle: "The Voice of Islam",
-    description: "A formerly enslaved man who endured severe torture for his faith and became the first muezzin, calling believers to prayer with his beautiful voice.",
-    theme: "Perseverance & Freedom",
-    icon: Sword,
-    color: "text-[#7c3aed]",
-    bgColor: "bg-purple-50",
-    sections: [
-      {
-        id: "torture",
-        title: "Steadfast Under Torture",
-        content: "Umayyah ibn Khalaf would place a heavy rock on Bilal's chest under the scorching desert sun, demanding he renounce Islam. Bilal would only repeat: 'Ahad, Ahad' (One, One) -- affirming the oneness of Allah.",
-      },
-      {
-        id: "freedom",
-        title: "Abu Bakr's Compassion",
-        content: "Abu Bakr purchased Bilal's freedom. When people praised him for it, he said: 'It was Allah who freed him.' Bilal became one of the closest companions of the Prophet.",
-      },
-      {
-        id: "adhan",
-        title: "The First Adhan",
-        content: "The Prophet chose Bilal to make the call to prayer because of his powerful, melodious voice. He gave the first ever adhan from the rooftop of the Ka'bah after the conquest of Makkah.",
-        hadithRef: "Book 10, Hadith 604",
-        collection: "Sahih Bukhari",
-      },
-    ],
-  },
-  {
-    id: "salman",
-    title: "Salman al-Farisi",
-    subtitle: "The Seeker of Truth",
-    description: "Born in Persia, Salman traveled across the known world seeking the truth -- from Zoroastrianism through Christianity until he found Islam.",
-    theme: "Search for Truth",
-    icon: BookOpen,
-    color: "text-[#0369a1]",
-    bgColor: "bg-sky-50",
-    sections: [
-      {
-        id: "journey",
-        title: "A Journey Across Lands",
-        content: "Salman left his wealthy Zoroastrian family in search of truth. He served Christian monks in Syria, each pointing him to the next, until the last one told him: 'A prophet will emerge in the land of Arabia. He will migrate to a land between two lava fields.'",
-        hadithRef: "Musnad Ahmad",
-      },
-      {
-        id: "trench",
-        title: "The Battle of the Trench",
-        content: "It was Salman who suggested digging a trench around Madinah to defend against the confederate army -- a strategy unknown to the Arabs. The Prophet said: 'Salman is one of us, the People of the House.'",
-        hadithRef: "Hadith 3932",
-        collection: "Jami at-Tirmidhi",
-      },
-    ],
-  },
-]
+interface ProgressMap {
+  [sahabiId: string]: {
+    current_part: number
+    parts_completed: number[]
+    is_completed: boolean
+    is_bookmarked: boolean
+  }
+}
 
 export default function StoriesPage() {
   const router = useRouter()
-  const [expandedStory, setExpandedStory] = useState<string | null>("abu-bakr")
+  const supabase = getSupabaseBrowserClient()
+  const [companions, setCompanions] = useState<SahabiCard[]>([])
+  const [progress, setProgress] = useState<ProgressMap>({})
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      const { data: sahabaData } = await supabase
+        .from("sahaba")
+        .select("*")
+        .order("display_order", { ascending: true })
+
+      if (sahabaData) setCompanions(sahabaData)
+
+      // Fetch user progress if logged in
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        const { data: progressData } = await supabase
+          .from("sahaba_reading_progress")
+          .select("*")
+          .eq("user_id", user.id)
+
+        if (progressData) {
+          const map: ProgressMap = {}
+          for (const p of progressData) {
+            map[p.sahabi_id] = {
+              current_part: p.current_part,
+              parts_completed: p.parts_completed || [],
+              is_completed: p.is_completed,
+              is_bookmarked: p.is_bookmarked,
+            }
+          }
+          setProgress(map)
+        }
+      }
+
+      setLoading(false)
+    }
+    load()
+  }, [supabase])
+
+  // Separate into: continue reading, not started, completed
+  const continueReading = companions.filter(
+    (c) => progress[c.id] && !progress[c.id].is_completed && (progress[c.id].parts_completed?.length || 0) > 0,
+  )
+  const notStarted = companions.filter((c) => !progress[c.id] || (progress[c.id].parts_completed?.length || 0) === 0)
+  const completed = companions.filter((c) => progress[c.id]?.is_completed)
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
@@ -189,14 +113,17 @@ export default function StoriesPage() {
       <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
-            onClick={() => router.back()}
+            onClick={() => router.push("/")}
             className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            aria-label="Go back home"
           >
             <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
           </button>
           <div>
             <h1 className="text-lg font-semibold text-[#1a1f36]">Stories of the Companions</h1>
-            <p className="text-xs text-muted-foreground">Lives that inspire</p>
+            <p className="text-xs text-muted-foreground">
+              {companions.length} companions, {companions.reduce((sum, c) => sum + c.total_parts, 0)} parts
+            </p>
           </div>
         </div>
       </header>
@@ -204,82 +131,203 @@ export default function StoriesPage() {
       {/* Intro */}
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-4">
         <p className="text-sm text-muted-foreground leading-relaxed">
-          The Companions (Sahaba) were the people who lived alongside the Prophet Muhammad (peace be upon him).
-          Their stories of faith, courage, sacrifice, and love for Allah continue to soften hearts and inspire
-          believers across generations.
+          The Companions (Sahaba) were the people who lived alongside the Prophet Muhammad (peace be upon
+          him). Read their full stories -- multi-part narratives with authentic references from the Quran and
+          Hadith.
         </p>
       </section>
 
-      {/* Stories */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-3">
-        {STORIES.map((story) => {
-          const isExpanded = expandedStory === story.id
-          const Icon = story.icon
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-6">
+        {loading ? (
+          <div className="flex flex-col gap-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="rounded-xl border border-[#e5e7eb] p-4 animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-xl bg-[#e5e7eb]" />
+                  <div className="flex-1">
+                    <div className="h-4 w-32 bg-[#e5e7eb] rounded mb-2" />
+                    <div className="h-3 w-24 bg-[#e5e7eb] rounded mb-2" />
+                    <div className="h-2 w-48 bg-[#e5e7eb] rounded" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <>
+            {/* Continue Reading */}
+            {continueReading.length > 0 && (
+              <section>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-[#1B5E43] mb-3 flex items-center gap-2">
+                  <BookOpen className="w-3.5 h-3.5" />
+                  Continue Reading
+                </h2>
+                <div className="flex flex-col gap-3">
+                  {continueReading.map((c) => (
+                    <CompanionCard
+                      key={c.id}
+                      companion={c}
+                      progress={progress[c.id]}
+                      onClick={() => router.push(`/stories/${c.slug}`)}
+                      featured
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
 
-          return (
-            <div
-              key={story.id}
-              className={cn(
-                "rounded-xl border transition-all overflow-hidden",
-                isExpanded ? "border-[#C5A059]/30 shadow-sm" : "border-[#e5e7eb]",
-              )}
-            >
-              <button
-                onClick={() => setExpandedStory(isExpanded ? null : story.id)}
-                className="w-full p-4 flex items-center gap-4 text-left premium-card"
-              >
-                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", story.bgColor)}>
-                  <Icon className={cn("w-6 h-6", story.color)} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-[#1a1f36]">{story.title}</h3>
-                  <p className="text-xs text-[#C5A059] font-medium">{story.subtitle}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-full bg-[#f3f4f6]">
-                      {story.theme}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {story.sections.length} parts
-                    </span>
-                  </div>
-                </div>
-                <ChevronRight
-                  className={cn("w-4 h-4 text-muted-foreground shrink-0 transition-transform", isExpanded && "rotate-90")}
-                />
-              </button>
+            {/* All Stories / Not Started */}
+            <section>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+                {continueReading.length > 0 ? "Not Yet Started" : "All Companions"}
+              </h2>
+              <div className="flex flex-col gap-3">
+                {(continueReading.length > 0 ? notStarted : companions).map((c) => (
+                  <CompanionCard
+                    key={c.id}
+                    companion={c}
+                    progress={progress[c.id]}
+                    onClick={() => router.push(`/stories/${c.slug}`)}
+                  />
+                ))}
+              </div>
+            </section>
 
-              {isExpanded && (
-                <div className="border-t border-[#e5e7eb]">
-                  <div className="p-4 pb-2">
-                    <p className="text-xs text-muted-foreground leading-relaxed">{story.description}</p>
-                  </div>
-                  <div className="divide-y divide-[#f3f4f6]">
-                    {story.sections.map((section, idx) => (
-                      <div key={section.id} className="p-4">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="w-5 h-5 rounded-full bg-[#f3f4f6] flex items-center justify-center text-[10px] font-bold text-muted-foreground">
-                            {idx + 1}
-                          </span>
-                          <h4 className="text-sm font-semibold text-[#1a1f36]">{section.title}</h4>
-                        </div>
-                        <p className="text-xs text-[#374151] leading-relaxed mb-2 pl-7">{section.content}</p>
-                        {section.collection && section.hadithRef && (
-                          <div className="flex items-center gap-2 pl-7">
-                            <BookOpen className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-[10px] text-muted-foreground">
-                              {section.collection} - {section.hadithRef}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+            {/* Completed */}
+            {completed.length > 0 && (
+              <section>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-[#C5A059] mb-3 flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  Completed
+                </h2>
+                <div className="flex flex-col gap-3">
+                  {completed.map((c) => (
+                    <CompanionCard
+                      key={c.id}
+                      companion={c}
+                      progress={progress[c.id]}
+                      onClick={() => router.push(`/stories/${c.slug}`)}
+                      isComplete
+                    />
+                  ))}
                 </div>
-              )}
-            </div>
-          )
-        })}
+              </section>
+            )}
+          </>
+        )}
       </main>
+
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 md:pb-8">
+        <ShareBanner variant="compact" />
+      </div>
+
+      <BottomNavigation />
     </div>
+  )
+}
+
+function CompanionCard({
+  companion,
+  progress,
+  onClick,
+  featured,
+  isComplete,
+}: {
+  companion: SahabiCard
+  progress?: ProgressMap[string]
+  onClick: () => void
+  featured?: boolean
+  isComplete?: boolean
+}) {
+  const Icon = ICON_MAP[companion.icon] || Star
+  const partsCompleted = progress?.parts_completed?.length || 0
+  const progressPercent = companion.total_parts > 0 ? (partsCompleted / companion.total_parts) * 100 : 0
+
+  return (
+    <button
+      onClick={onClick}
+      className={cn(
+        "w-full rounded-xl border text-left transition-all hover:shadow-md hover:border-[#C5A059]/30 premium-card overflow-hidden",
+        featured ? "border-[#C5A059]/30 shadow-sm" : "border-[#e5e7eb]",
+        isComplete && "border-[#1B5E43]/20 opacity-80",
+      )}
+    >
+      {/* Progress bar at top */}
+      {partsCompleted > 0 && !isComplete && (
+        <div className="h-1 bg-[#f3f4f6]">
+          <div
+            className="h-full transition-all"
+            style={{
+              width: `${progressPercent}%`,
+              background: `linear-gradient(to right, ${companion.theme_primary}, ${companion.theme_secondary || companion.theme_primary})`,
+            }}
+          />
+        </div>
+      )}
+
+      <div className="p-4 flex items-center gap-4">
+        {/* Icon */}
+        <div
+          className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
+          style={{ backgroundColor: `${companion.theme_primary}15` }}
+        >
+          <Icon className="w-6 h-6" style={{ color: companion.theme_primary }} />
+        </div>
+
+        {/* Details */}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-semibold text-[#1a1f36] truncate">{companion.name_en}</h3>
+            {isComplete && <CheckCircle2 className="w-3.5 h-3.5 text-[#1B5E43] shrink-0" />}
+            {progress?.is_bookmarked && <Bookmark className="w-3.5 h-3.5 text-[#C5A059] fill-[#C5A059] shrink-0" />}
+          </div>
+          <p className="text-xs font-medium" style={{ color: companion.theme_primary }}>
+            {companion.title_en}
+          </p>
+          <div className="flex items-center gap-3 mt-1.5">
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+              <BookOpen className="w-3 h-3" />
+              {companion.total_parts} parts
+            </span>
+            {companion.estimated_read_time_minutes && (
+              <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <Clock className="w-3 h-3" />
+                {companion.estimated_read_time_minutes} min
+              </span>
+            )}
+            {partsCompleted > 0 && !isComplete && (
+              <span
+                className="text-[10px] font-medium flex items-center gap-1"
+                style={{ color: companion.theme_primary }}
+              >
+                {partsCompleted}/{companion.total_parts} read
+              </span>
+            )}
+          </div>
+          {/* Notable tags */}
+          {companion.notable_for && companion.notable_for.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-2">
+              {companion.notable_for.slice(0, 2).map((tag, i) => (
+                <span key={i} className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-full bg-[#f3f4f6]">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Arrow */}
+        <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+      </div>
+
+      {/* Arabic name */}
+      {companion.name_ar && (
+        <div className="px-4 pb-3 pt-0">
+          <p className="text-sm text-muted-foreground/40 text-right font-serif" dir="rtl">
+            {companion.name_ar}
+          </p>
+        </div>
+      )}
+    </button>
   )
 }

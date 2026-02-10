@@ -17,6 +17,8 @@ import {
 } from "lucide-react"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { useSubscription } from "@/hooks/use-subscription"
+import { PremiumGate } from "@/components/premium-gate"
 import { cn } from "@/lib/utils"
 
 interface LearningPath {
@@ -205,8 +207,10 @@ const LEARNING_PATHS: LearningPath[] = [
 export default function LearnPage() {
   const router = useRouter()
   const supabase = getSupabaseBrowserClient()
+  const { isPremium } = useSubscription()
   const [expandedPath, setExpandedPath] = useState<string | null>("foundations")
   const [collectionStats, setCollectionStats] = useState<Record<string, number>>({})
+  const [bookIdMap, setBookIdMap] = useState<Record<string, string>>({})
 
   useEffect(() => {
     async function loadStats() {
@@ -215,6 +219,22 @@ export default function LearnPage() {
         const stats: Record<string, number> = {}
         for (const c of data) stats[c.slug] = c.total_hadiths
         setCollectionStats(stats)
+      }
+
+      // Pre-load book IDs for deep-linking
+      const { data: books } = await supabase
+        .from("books")
+        .select("id, number, collection:collections!collection_id(slug)")
+
+      if (books) {
+        const map: Record<string, string> = {}
+        for (const b of books) {
+          const collSlug = (b.collection as { slug: string } | null)?.slug
+          if (collSlug) {
+            map[`${collSlug}:${b.number}`] = b.id
+          }
+        }
+        setBookIdMap(map)
       }
     }
     loadStats()
@@ -327,50 +347,60 @@ export default function LearnPage() {
                 <div className="px-4 pb-4 border-t border-[#e5e7eb]">
                   <p className="text-xs text-muted-foreground py-3 leading-relaxed">{path.description}</p>
 
-                  <div className="flex flex-col gap-3">
-                    {path.modules.map((mod, modIdx) => (
-                      <div key={mod.id} className="rounded-lg border border-[#e5e7eb] overflow-hidden">
-                        {/* Module Header */}
-                        <div className="px-3 py-2.5 bg-[#f9fafb]">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                              Module {modIdx + 1}
-                            </span>
+                  {/* Premium gate */}
+                  {path.isPremium && !isPremium ? (
+                    <PremiumGate featureName={path.title} />
+                  ) : (
+                    <div className="flex flex-col gap-3">
+                      {path.modules.map((mod, modIdx) => (
+                        <div key={mod.id} className="rounded-lg border border-[#e5e7eb] overflow-hidden">
+                          {/* Module Header */}
+                          <div className="px-3 py-2.5 bg-[#f9fafb]">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                Module {modIdx + 1}
+                              </span>
+                            </div>
+                            <h4 className="text-sm font-semibold text-[#1a1f36] mt-0.5">{mod.title}</h4>
+                            <p className="text-xs text-muted-foreground mt-0.5">{mod.description}</p>
                           </div>
-                          <h4 className="text-sm font-semibold text-[#1a1f36] mt-0.5">{mod.title}</h4>
-                          <p className="text-xs text-muted-foreground mt-0.5">{mod.description}</p>
-                        </div>
 
-                        {/* Lessons */}
-                        <div className="divide-y divide-[#f3f4f6]">
-                          {mod.lessons.map((lesson) => (
-                            <button
-                              key={lesson.id}
-                              onClick={() => {
-                                if (lesson.bookNumber) {
-                                  router.push(`/collections/${lesson.collectionSlug}`)
-                                } else {
-                                  router.push(`/collections/${lesson.collectionSlug}`)
-                                }
-                              }}
-                              className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-[#f9fafb] transition-colors text-left"
-                            >
-                              <div className="w-6 h-6 rounded-full border border-[#e5e7eb] flex items-center justify-center shrink-0">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-muted-foreground/30" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm text-[#1a1f36] truncate">{lesson.title}</p>
-                                <p className="text-[10px] text-muted-foreground">
-                                  {lesson.hadithCount} hadiths
-                                </p>
-                              </div>
-                              <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                            </button>
-                          ))}
+                          {/* Lessons */}
+                          <div className="divide-y divide-[#f3f4f6]">
+                            {mod.lessons.map((lesson) => (
+                              <button
+                                key={lesson.id}
+                                onClick={() => {
+                                  if (lesson.bookNumber) {
+                                    const bookId = bookIdMap[`${lesson.collectionSlug}:${lesson.bookNumber}`]
+                                    if (bookId) {
+                                      router.push(`/collections/${lesson.collectionSlug}/books/${bookId}`)
+                                    } else {
+                                      router.push(`/collections/${lesson.collectionSlug}`)
+                                    }
+                                  } else {
+                                    router.push(`/collections/${lesson.collectionSlug}`)
+                                  }
+                                }}
+                                className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-[#f9fafb] transition-colors text-left"
+                              >
+                                <div className="w-6 h-6 rounded-full border border-[#e5e7eb] flex items-center justify-center shrink-0">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-muted-foreground/30" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-[#1a1f36] truncate">{lesson.title}</p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {lesson.hadithCount} hadiths
+                                  </p>
+                                </div>
+                                <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                              </button>
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

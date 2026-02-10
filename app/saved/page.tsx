@@ -14,6 +14,7 @@ import {
   Search,
   Filter,
   StickyNote,
+  Share2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -98,6 +99,17 @@ export default function SavedPage() {
     setSavedHadiths((prev) => prev.map((h) => (h.id === savedId ? { ...h, note: noteText || null } : h)))
     setEditingNoteId(null)
     setNoteText("")
+  }
+
+  const handleShare = async (hadith: SavedHadith["hadiths"]) => {
+    const url = `${window.location.origin}/hadith/${hadith.id}`
+    const text = (hadith.english_translation || "").substring(0, 200)
+
+    if (navigator.share) {
+      await navigator.share({ title: `${hadith.collection} - ${hadith.reference}`, text: text + "...", url })
+    } else {
+      await navigator.clipboard.writeText(url)
+    }
   }
 
   const handleMoveFolder = async (savedId: string, folder: string) => {
@@ -255,6 +267,13 @@ export default function SavedPage() {
                         )}
                       </div>
                       <button
+                        onClick={() => handleShare(saved.hadiths)}
+                        className="p-2 rounded-lg hover:bg-muted transition-colors"
+                        title="Share hadith"
+                      >
+                        <Share2 className="w-4 h-4 text-muted-foreground" />
+                      </button>
+                      <button
                         onClick={() => router.push(`/hadith/${saved.hadiths.id}`)}
                         className="p-2 rounded-lg hover:bg-muted transition-colors"
                         title="View full hadith"
@@ -280,7 +299,7 @@ export default function SavedPage() {
                   </p>
 
                   {/* English Translation */}
-                  <p className="text-foreground leading-relaxed line-clamp-3 mb-3">
+                  <p className="text-foreground leading-relaxed line-clamp-4 mb-3">
                     {saved.hadiths.english_translation}
                   </p>
 

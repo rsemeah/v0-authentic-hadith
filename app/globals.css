@@ -186,7 +186,16 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  text-shadow: 0 2px 4px rgba(138, 110, 58, 0.2);
+  -webkit-text-stroke: 0.3px rgba(44, 36, 22, 0.35);
+  paint-order: stroke fill;
+  text-shadow: none;
+}
+
+/* Headings get a slightly heavier stroke for readability at large sizes */
+h1 .gold-text,
+h2 .gold-text,
+.gold-text-heading {
+  -webkit-text-stroke: 0.5px rgba(44, 36, 22, 0.4);
 }
 
 /* Gold gradient border */

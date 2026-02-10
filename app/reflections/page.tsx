@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { PenLine, ChevronLeft, Plus, Trash2, Calendar, BookOpen } from "lucide-react"
+import { PenLine, ChevronLeft, Plus, Trash2, Calendar, BookOpen, Share2 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
@@ -15,12 +15,12 @@ interface Reflection {
 }
 
 const TAG_OPTIONS = [
-  { value: "gratitude", label: "Gratitude", color: "bg-[#1B5E43]/10 text-[#1B5E43]" },
-  { value: "patience", label: "Patience", color: "bg-[#C5A059]/10 text-[#C5A059]" },
-  { value: "tawakkul", label: "Tawakkul", color: "bg-blue-50 text-blue-600" },
-  { value: "repentance", label: "Repentance", color: "bg-purple-50 text-purple-600" },
-  { value: "hope", label: "Hope", color: "bg-emerald-50 text-emerald-600" },
-  { value: "general", label: "General", color: "bg-[#f3f4f6] text-[#6b7280]" },
+  { value: "gratitude", label: "Gratitude", color: "bg-[#1B5E43]/15 text-[#1B5E43] border border-[#1B5E43]/20", dot: "bg-[#1B5E43]" },
+  { value: "patience", label: "Patience", color: "bg-[#C5A059]/15 text-[#8A6E3A] border border-[#C5A059]/20", dot: "bg-[#C5A059]" },
+  { value: "tawakkul", label: "Tawakkul", color: "bg-blue-50 text-blue-700 border border-blue-200", dot: "bg-blue-500" },
+  { value: "repentance", label: "Repentance", color: "bg-purple-50 text-purple-700 border border-purple-200", dot: "bg-purple-500" },
+  { value: "hope", label: "Hope", color: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
+  { value: "general", label: "General", color: "bg-[#f3f4f6] text-[#4b5563] border border-[#e5e7eb]", dot: "bg-[#6b7280]" },
 ]
 
 export default function ReflectionsPage() {
@@ -88,6 +88,18 @@ export default function ReflectionsPage() {
       // Failed to save
     }
     setSaving(false)
+  }
+
+  const handleShareReflection = async (ref: Reflection) => {
+    const tagLabel = TAG_OPTIONS.find((t) => t.value === ref.tag)?.label || ""
+    const text = `${ref.content}${ref.hadith_ref ? `\n\nRef: ${ref.hadith_ref}` : ""}${tagLabel ? `\n\n#${tagLabel}` : ""}\n\nWritten on Authentic Hadith`
+    const url = typeof window !== "undefined" ? window.location.origin : ""
+
+    if (navigator.share) {
+      await navigator.share({ title: "Reflection", text, url })
+    } else {
+      await navigator.clipboard.writeText(`${text}\n\n${url}`)
+    }
   }
 
   const handleDelete = async (id: string) => {
@@ -220,17 +232,27 @@ export default function ReflectionsPage() {
                     <div className="flex items-center gap-2">
                       <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                       <span className="text-xs text-muted-foreground">{formatDate(ref.created_at)}</span>
-                      <span className={cn("px-2 py-0.5 rounded-full text-[10px] font-medium", tagInfo.color)}>
+                      <span className={cn("inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-semibold", tagInfo.color)}>
+                        <span className={cn("w-1.5 h-1.5 rounded-full", tagInfo.dot)} />
                         {tagInfo.label}
                       </span>
                     </div>
-                    <button
-                      onClick={() => handleDelete(ref.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-red-50 transition-all"
-                      aria-label="Delete reflection"
-                    >
-                      <Trash2 className="w-3.5 h-3.5 text-red-400" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleShareReflection(ref)}
+                        className="p-1.5 rounded hover:bg-[#C5A059]/10 transition-all"
+                        aria-label="Share reflection"
+                      >
+                        <Share2 className="w-3.5 h-3.5 text-[#C5A059]" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(ref.id)}
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-red-50 transition-all"
+                        aria-label="Delete reflection"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                      </button>
+                    </div>
                   </div>
                   <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-wrap">{ref.content}</p>
                   {ref.hadith_ref && (

@@ -37,7 +37,7 @@ export function ChapterCard({ chapter, collectionSlug, bookId }: ChapterCardProp
       </div>
 
       {chapter.excerpt && (
-        <p className="text-xs text-muted-foreground italic line-clamp-2 mb-3">"{chapter.excerpt}..."</p>
+        <p className="text-xs text-muted-foreground italic line-clamp-3 mb-3">"{chapter.excerpt}..."</p>
       )}
 
       <div className="mt-auto flex items-center text-sm font-semibold text-[#C5A059] group-hover:text-[#E8C77D] transition-colors">

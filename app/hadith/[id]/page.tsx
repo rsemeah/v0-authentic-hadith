@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2 } from "lucide-react"
+import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2, Hash, FolderOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { DiscussionSection } from "@/components/hadith/discussion-section"
@@ -29,6 +29,11 @@ export default function HadithDetailPage() {
   const [isSaved, setIsSaved] = useState(false)
   const [isRead, setIsRead] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [enrichment, setEnrichment] = useState<{
+    summary_line: string | null
+    category: { slug: string; name_en: string } | null
+    tags: Array<{ slug: string; name_en: string }>
+  } | null>(null)
 
   useEffect(() => {
     const fetchHadith = async () => {
@@ -69,6 +74,29 @@ export default function HadithDetailPage() {
             )
         }
       }
+      // Fetch enrichment data
+      const { data: enrichData } = await supabase
+        .from("hadith_enrichment")
+        .select("summary_line, category:categories!category_id(slug, name_en)")
+        .eq("hadith_id", params.id)
+        .eq("status", "published")
+        .single()
+
+      if (enrichData) {
+        // Fetch tags
+        const { data: tagData } = await supabase
+          .from("hadith_tags")
+          .select("tag:tags!tag_id(slug, name_en)")
+          .eq("hadith_id", params.id as string)
+          .eq("status", "published")
+
+        setEnrichment({
+          summary_line: enrichData.summary_line,
+          category: enrichData.category as { slug: string; name_en: string } | null,
+          tags: (tagData || []).map((t: { tag: { slug: string; name_en: string } | null }) => t.tag).filter(Boolean) as Array<{ slug: string; name_en: string }>,
+        })
+      }
+
       setLoading(false)
     }
 
@@ -225,6 +253,38 @@ export default function HadithDetailPage() {
               {gradeLabels[hadith.grade]}
             </span>
           </div>
+
+          {/* Enrichment: Summary + Tags */}
+          {enrichment && (
+            <div className="mb-6 space-y-3">
+              {enrichment.summary_line && (
+                <p className="text-base font-semibold text-[#C5A059] leading-snug">
+                  {enrichment.summary_line}
+                </p>
+              )}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {enrichment.category && (
+                  <button
+                    onClick={() => router.push(`/topics/${enrichment.category!.slug}`)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#1B5E43]/10 text-[#1B5E43] text-xs font-medium hover:bg-[#1B5E43]/20 transition-colors"
+                  >
+                    <FolderOpen className="w-3 h-3" />
+                    {enrichment.category.name_en}
+                  </button>
+                )}
+                {enrichment.tags.map((tag) => (
+                  <button
+                    key={tag.slug}
+                    onClick={() => router.push(`/topics/tag/${tag.slug}`)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C5A059]/10 text-[#8A6E3A] text-xs font-medium hover:bg-[#C5A059]/20 transition-colors"
+                  >
+                    <Hash className="w-3 h-3" />
+                    {tag.name_en}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Arabic Text */}
           <div className="mb-8" dir="rtl" lang="ar">

@@ -9,6 +9,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { DailyHadithCard } from "@/components/home/daily-hadith-card"
 import { AIAssistantBlock } from "@/components/home/ai-assistant-block"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
+import { ShareBanner } from "@/components/share-banner"
+import { ReminderBanner } from "@/components/home/reminder-banner"
 import {
   User,
   Search,
@@ -25,6 +27,7 @@ import {
   Heart,
   Users,
   PenLine,
+  PlayCircle,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
@@ -52,6 +55,15 @@ interface RecentHadith {
   viewed_at: string
 }
 
+interface ContinueReading {
+  collection_name: string
+  collection_slug: string
+  last_hadith_id: string
+  hadith_number: number
+  total_hadiths: number
+  progress_percent: number
+}
+
 interface FeaturedCollection {
   id: string
   name_en: string
@@ -77,6 +89,9 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [savedCount, setSavedCount] = useState(0)
   const [streakDays, setStreakDays] = useState(0)
+  const [continueReading, setContinueReading] = useState<ContinueReading[]>([])
+  const [totalReadCount, setTotalReadCount] = useState(0)
+  const [lastActiveDate, setLastActiveDate] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -167,6 +182,63 @@ export default function HomePage() {
               }
             }
             setStreakDays(streak)
+          }
+
+          // Fetch total read count for reminder banner
+          const { count: readCount } = await supabase
+            .from("reading_progress")
+            .select("id", { count: "exact", head: true })
+            .eq("user_id", user.id)
+          setTotalReadCount(readCount || 0)
+
+          // Fetch last active date from streaks
+          const { data: streakRow } = await supabase
+            .from("user_streaks")
+            .select("last_active_date")
+            .eq("user_id", user.id)
+            .single()
+          if (streakRow) setLastActiveDate(streakRow.last_active_date)
+
+          // Fetch continue reading -- last read hadith per collection
+          const { data: lastReadData } = await supabase
+            .from("reading_progress")
+            .select("hadith_id, collection_id, created_at, collections!collection_id(name_en, slug, total_hadiths)")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(50)
+
+          if (lastReadData && lastReadData.length > 0) {
+            // Group by collection, keep the latest per collection
+            const byCollection = new Map<string, typeof lastReadData[0]>()
+            let readCountByCollection = new Map<string, number>()
+            for (const rp of lastReadData) {
+              if (!rp.collection_id) continue
+              readCountByCollection.set(rp.collection_id, (readCountByCollection.get(rp.collection_id) || 0) + 1)
+              if (!byCollection.has(rp.collection_id)) {
+                byCollection.set(rp.collection_id, rp)
+              }
+            }
+
+            // For each latest entry, get the hadith number
+            const continueItems: ContinueReading[] = []
+            for (const [collId, rp] of byCollection) {
+              const coll = rp.collections as { name_en: string; slug: string; total_hadiths: number } | null
+              if (!coll) continue
+              const { data: hData } = await supabase
+                .from("hadiths")
+                .select("hadith_number")
+                .eq("id", rp.hadith_id)
+                .single()
+              continueItems.push({
+                collection_name: coll.name_en,
+                collection_slug: coll.slug,
+                last_hadith_id: rp.hadith_id,
+                hadith_number: hData?.hadith_number || 0,
+                total_hadiths: coll.total_hadiths,
+                progress_percent: coll.total_hadiths > 0 ? Math.round(((readCountByCollection.get(collId) || 0) / coll.total_hadiths) * 100) : 0,
+              })
+            }
+            setContinueReading(continueItems.slice(0, 3))
           }
         }
 
@@ -346,6 +418,15 @@ export default function HomePage() {
       </section>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Smart Reminder Banner */}
+        <section className="pt-6 md:pt-8">
+          <ReminderBanner
+            streakDays={streakDays}
+            totalRead={totalReadCount}
+            lastActiveDate={lastActiveDate}
+          />
+        </section>
+
         {/* Daily Hadith */}
         <section className="py-6 md:py-8" aria-label="Daily featured hadith">
           <div className="flex items-center gap-2 mb-4">
@@ -354,6 +435,49 @@ export default function HomePage() {
           </div>
           <DailyHadithCard hadith={displayHadith} onSave={handleSaveHadith} onShare={handleShareHadith} />
         </section>
+
+        {/* Continue Reading */}
+        {continueReading.length > 0 && (
+          <section className="pb-6 md:pb-8" aria-label="Continue Reading">
+            <div className="flex items-center gap-2 mb-4">
+              <PlayCircle className="w-5 h-5 text-[#1B5E43]" />
+              <h2 className="text-lg font-bold text-[#1a1f36]">Continue Reading</h2>
+            </div>
+            <div className="flex flex-col gap-3">
+              {continueReading.map((item) => (
+                <button
+                  key={item.collection_slug}
+                  onClick={() => router.push(`/hadith/${item.last_hadith_id}`)}
+                  className="w-full premium-card rounded-xl p-4 text-left hover:shadow-md transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-11 h-11 rounded-xl bg-[#1B5E43]/10 flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5 text-[#1B5E43]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-[#1a1f36] group-hover:text-[#1B5E43] transition-colors">
+                        {item.collection_name}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Hadith #{item.hadith_number} -- {item.progress_percent}% complete
+                      </p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-[#C5A059] transition-colors shrink-0" />
+                  </div>
+                  <div className="mt-3 flex items-center gap-3">
+                    <div className="flex-1 h-1.5 rounded-full bg-[#f3f4f6] overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B] transition-all"
+                        style={{ width: `${Math.max(item.progress_percent, 1)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-medium text-[#1B5E43]">{item.progress_percent}%</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Quick Actions */}
         <section className="pb-6 md:pb-8" aria-label="Quick Actions">
@@ -607,6 +731,11 @@ export default function HomePage() {
               <h2 className="text-lg font-bold text-[#1a1f36]">AI Assistant</h2>
             </div>
             <AIAssistantBlock />
+          </div>
+
+          {/* Share prompt */}
+          <div className="lg:col-span-2">
+            <ShareBanner variant="compact" />
           </div>
         </div>
       </main>

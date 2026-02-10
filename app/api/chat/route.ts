@@ -7,7 +7,7 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
-const SYSTEM_PROMPT = `You are TruthSerum, a knowledgeable Islamic scholar assistant specializing in hadith studies.
+const SYSTEM_PROMPT = `You are HadithChat, a knowledgeable Islamic scholar assistant specializing in hadith studies.
 
 Your role:
 1. Help users understand the meanings and context of hadiths
@@ -86,7 +86,7 @@ export async function POST(req: Request) {
 
     return result.toDataStreamResponse()
   } catch (error) {
-    console.error("[TruthSerum] Chat API error:", error)
+    console.error("[HadithChat] Chat API error:", error)
     return new Response(
       JSON.stringify({
         error: "Failed to process your request. Please try again.",

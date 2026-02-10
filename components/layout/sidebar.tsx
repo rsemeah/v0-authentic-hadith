@@ -27,8 +27,6 @@ import {
   HelpCircle,
   Tags,
   Shield,
-} from "lucide-react"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -55,12 +53,6 @@ const navGroups: NavGroup[] = [
     items: [
       { id: "collections", icon: BookOpen, label: "Collections", href: "/collections" },
       { id: "topics", icon: Tags, label: "Topics", href: "/topics" },
-      {
-        id: "collections",
-        icon: BookOpen,
-        label: "Collections",
-        href: "/collections",
-      },
       { id: "sunnah", icon: Heart, label: "Sunnah", href: "/sunnah" },
       {
         id: "learn",

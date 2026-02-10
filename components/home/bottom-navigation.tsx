@@ -13,7 +13,7 @@ const navItems = [
   { id: "my-hadith", icon: Star, label: "My Hadith", href: "/my-hadith" },
 ]
 
-const excludedPaths = ["/", "/onboarding", "/reset-password"]
+const excludedPaths = ["/", "/login", "/onboarding", "/reset-password"]
 
 export function BottomNavigation() {
   const pathname = usePathname()

@@ -2,7 +2,7 @@
 
 import React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import {
   Heart,
@@ -229,9 +229,59 @@ const CATEGORIES: SunnahCategory[] = [
   },
 ]
 
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Moon, HandHeart, Home: HomeIcon, Users, Utensils, Clock,
+}
+
 export default function SunnahPage() {
   const router = useRouter()
+  const supabase = getSupabaseBrowserClient()
   const [expandedCategory, setExpandedCategory] = useState<string | null>("salah")
+  const [categories, setCategories] = useState<SunnahCategory[]>(CATEGORIES)
+
+  useEffect(() => {
+    async function loadFromDB() {
+      const { data: cats } = await supabase
+        .from("sunnah_categories")
+        .select("*")
+        .order("sort_order", { ascending: true })
+
+      if (!cats || cats.length === 0) return // fallback to hardcoded
+
+      const { data: practices } = await supabase
+        .from("sunnah_practices")
+        .select("*")
+        .order("sort_order", { ascending: true })
+
+      const dbCategories: SunnahCategory[] = cats.map((cat: any) => {
+        const IconComponent = ICON_MAP[cat.icon] || Moon
+        const catPractices = (practices || [])
+          .filter((p: any) => p.category_id === cat.id)
+          .map((p: any) => ({
+            id: p.id,
+            title: p.title,
+            description: p.description,
+            hadithRef: p.hadith_ref,
+            collection: p.collection,
+          }))
+
+        return {
+          id: cat.slug,
+          title: cat.title,
+          titleAr: cat.title_ar,
+          description: cat.description,
+          icon: IconComponent,
+          color: cat.color,
+          bgColor: cat.bg_color,
+          practices: catPractices,
+        }
+      })
+
+      setCategories(dbCategories)
+    }
+
+    loadFromDB()
+  }, [supabase])
 
   const sharePractice = async (practice: SunnahPractice, categoryTitle: string) => {
     const text = `${practice.title}\n\n"${practice.description}"\n\n-- ${practice.collection}, ${practice.hadithRef}\n\nFrom the ${categoryTitle} collection on Authentic Hadith`
@@ -292,7 +342,7 @@ export default function SunnahPage() {
 
       {/* Categories */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-3">
-        {CATEGORIES.map((cat) => {
+        {categories.map((cat) => {
           const isExpanded = expandedCategory === cat.id
           const Icon = cat.icon
 

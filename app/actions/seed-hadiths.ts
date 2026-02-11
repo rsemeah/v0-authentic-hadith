@@ -13,49 +13,15 @@ import {
   sleep,
   type CdnHadith,
 } from "@/lib/seed-helpers"
-
-// ── Global progress state (per-process; SSE reads this) ─────
-export type SeedProgress = {
-  collectionSlug: string
-  phase: "fetching" | "books" | "hadiths" | "backfill" | "totals" | "done" | "error"
-  message: string
-  booksTotal: number
-  booksProcessed: number
-  hadithsTotal: number
-  hadithsInserted: number
-  hadithsUpdated: number
-  errors: string[]
-  startedAt: number
-}
-
-const progressMap = new Map<string, SeedProgress>()
-
-export function getProgress(slug: string): SeedProgress | undefined {
-  return progressMap.get(slug)
-}
-
-export function getAllProgress(): Record<string, SeedProgress> {
-  return Object.fromEntries(progressMap)
-}
+import { createProgress, type SeedProgress } from "@/lib/seed-progress"
 
 // ── Seed a single collection ────────────────────────────────
 export async function seedCollection(collectionSlug: string) {
   const config = COLLECTION_MAPPING[collectionSlug]
   if (!config) return { success: false, message: `Unknown collection: ${collectionSlug}` }
 
-  const progress: SeedProgress = {
-    collectionSlug,
-    phase: "fetching",
-    message: `Fetching ${config.name_en} from CDN...`,
-    booksTotal: 0,
-    booksProcessed: 0,
-    hadithsTotal: 0,
-    hadithsInserted: 0,
-    hadithsUpdated: 0,
-    errors: [],
-    startedAt: Date.now(),
-  }
-  progressMap.set(collectionSlug, progress)
+  const progress = createProgress(collectionSlug)
+  progress.message = `Fetching ${config.name_en} from CDN...`
 
   const supabase = getSupabaseAdmin()
 

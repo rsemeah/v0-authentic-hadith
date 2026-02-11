@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
-import { seedCollection, seedAllCollections, type SeedProgress } from "@/app/actions/seed-hadiths"
+import { seedCollection, seedAllCollections } from "@/app/actions/seed-hadiths"
+import type { SeedProgress } from "@/lib/seed-progress"
 import { COLLECTION_MAPPING, ALL_COLLECTION_SLUGS } from "@/lib/hadith-cdn-mapping"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import {

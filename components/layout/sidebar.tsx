@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { useTheme } from "next-themes"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import {
   Home,
   BookOpen,
@@ -27,8 +29,6 @@ import {
   Star,
   Trophy,
 } from "lucide-react"
-import { useTheme } from "next-themes"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 interface NavGroup {
   label: string

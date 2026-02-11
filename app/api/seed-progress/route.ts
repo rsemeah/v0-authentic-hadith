@@ -1,4 +1,4 @@
-import { getAllProgress } from "@/app/actions/seed-hadiths"
+import { getAllProgress } from "@/lib/seed-progress"
 
 export const dynamic = "force-dynamic"
 

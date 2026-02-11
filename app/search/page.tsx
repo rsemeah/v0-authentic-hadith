@@ -5,7 +5,7 @@ import React from "react"
 import { useState, useEffect, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Search, ChevronLeft, BookOpen, Hash, FolderOpen, Bookmark, Share2 } from "lucide-react"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
@@ -227,7 +227,6 @@ function SearchContent() {
         )}
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Search, ChevronLeft, ChevronRight, BookOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { CollectionCard } from "@/components/collections/collection-card"
 import { CollectionFilters } from "@/components/collections/collection-filters"
 
@@ -258,7 +258,6 @@ function CollectionsContent() {
         </div>
       </section>
 
-      <BottomNavigation />
     </div>
   )
 }

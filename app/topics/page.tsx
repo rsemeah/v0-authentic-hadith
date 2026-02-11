@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronLeft, ChevronRight, BookOpen, Hash, Loader2 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { cn } from "@/lib/utils"
 
 interface Category {
@@ -228,7 +228,6 @@ export default function TopicsPage() {
         </section>
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { ChevronLeft, Bookmark, Share2, BookOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { Breadcrumb } from "@/components/collections/breadcrumb"
 import { BookCard } from "@/components/collections/book-card"
 import { cn } from "@/lib/utils"
@@ -384,7 +384,6 @@ export default function CollectionDetailPage() {
         )}
       </section>
 
-      <BottomNavigation />
     </div>
   )
 }

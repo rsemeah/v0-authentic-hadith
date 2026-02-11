@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2, Hash, FolderOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { DiscussionSection } from "@/components/hadith/discussion-section"
 import { cn } from "@/lib/utils"
 import { parseEnglishTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
@@ -379,7 +379,6 @@ export default function HadithDetailPage() {
         <DiscussionSection hadithId={hadith.id} />
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

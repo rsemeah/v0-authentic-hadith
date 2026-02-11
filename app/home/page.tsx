@@ -8,7 +8,7 @@ import Image from "next/image"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { DailyHadithCard } from "@/components/home/daily-hadith-card"
 import { AIAssistantBlock } from "@/components/home/ai-assistant-block"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { ShareBanner } from "@/components/share-banner"
 import { ReminderBanner } from "@/components/home/reminder-banner"
 import {
@@ -740,7 +740,6 @@ export default function HomePage() {
         </div>
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

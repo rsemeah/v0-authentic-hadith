@@ -17,7 +17,7 @@ import {
   Users,
 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { ShareBanner } from "@/components/share-banner"
 import { cn } from "@/lib/utils"
 
@@ -221,7 +221,6 @@ export default function StoriesPage() {
         <ShareBanner variant="compact" />
       </div>
 
-      <BottomNavigation />
     </div>
   )
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { ChevronLeft, Hash, Loader2, BookOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { HadithCardCondensed } from "@/components/collections/hadith-card-condensed"
 
 interface EnrichedHadith {
@@ -144,7 +144,6 @@ export default function TagDetailPage() {
         )}
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

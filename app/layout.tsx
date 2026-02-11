@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Cinzel, Geist, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
+import { ThemeProvider } from "@/components/theme-provider"
 import { AppShell } from "@/components/layout/app-shell"
 import "./globals.css"
 
@@ -59,9 +60,11 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="bg-background">
+    <html lang="en" className="bg-background" suppressHydrationWarning>
       <body className={`${cinzel.variable} ${geist.variable} ${geistMono.variable} font-sans antialiased bg-background text-foreground`}>
-        <AppShell>{children}</AppShell>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <AppShell>{children}</AppShell>
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

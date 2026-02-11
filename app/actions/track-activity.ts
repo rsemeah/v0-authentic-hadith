@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { getSupabaseServerClient } from "@/lib/supabase/server";
 
 const XP_REWARDS: Record<string, number> = {
   hadith_read: 5,
@@ -15,7 +15,7 @@ export async function trackActivity(
   activityType: string,
   itemId?: string
 ) {
-  const supabase = await createClient();
+  const supabase = await getSupabaseServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -75,7 +75,7 @@ export async function trackActivity(
 
 async function checkAndUnlockAchievements(
   userId: string,
-  supabase: Awaited<ReturnType<typeof createClient>>
+  supabase: Awaited<ReturnType<typeof getSupabaseServerClient>>
 ) {
   // Get user stats
   const { data: stats } = await supabase

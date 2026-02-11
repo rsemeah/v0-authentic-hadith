@@ -29,6 +29,10 @@ import {
   Star,
   Trophy,
 } from "lucide-react"
+  Shield,
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 interface NavGroup {
   label: string

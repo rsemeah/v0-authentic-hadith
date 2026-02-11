@@ -73,7 +73,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
       {/* Arabic Text */}
       <div className="mb-6" dir="rtl" lang="ar">
         <p
-          className="text-2xl sm:text-3xl leading-[1.8] text-[#1a1f36] font-serif text-right"
+          className="text-2xl sm:text-3xl leading-[1.8] text-foreground font-serif text-right"
           style={{ fontFamily: "Amiri, serif" }}
         >
           {hadith.arabic_text}
@@ -82,7 +82,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
 
       {/* English Translation */}
       <div className="mb-6" dir="ltr" lang="en">
-        <p className="text-base sm:text-lg leading-relaxed text-[#4a5568]">{displayText}</p>
+        <p className="text-base sm:text-lg leading-relaxed text-muted-foreground">{displayText}</p>
       </div>
 
       {/* Metadata */}
@@ -102,7 +102,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
               "w-11 h-11 rounded-lg flex items-center justify-center transition-all",
               isPlaying
                 ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                : "bg-[#fafaf9] border border-[#e5e7eb] text-[#1a1f36] hover:bg-[#C5A059] hover:text-white hover:border-transparent",
+                : "bg-muted/50 border border-[#e5e7eb] text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent",
             )}
             aria-label={isPlaying ? "Pause audio recitation" : "Play audio recitation"}
           >
@@ -114,7 +114,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
               "w-11 h-11 rounded-lg flex items-center justify-center transition-all",
               isSaved
                 ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                : "bg-[#fafaf9] border border-[#e5e7eb] text-[#1a1f36] hover:bg-[#C5A059] hover:text-white hover:border-transparent",
+                : "bg-muted/50 border border-[#e5e7eb] text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent",
             )}
             aria-label={isSaved ? "Remove from saved" : "Save this hadith"}
           >
@@ -122,7 +122,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
           </button>
           <button
             onClick={() => onShare?.(hadith.id)}
-            className="w-11 h-11 rounded-lg flex items-center justify-center bg-[#fafaf9] border border-[#e5e7eb] text-[#1a1f36] hover:bg-[#C5A059] hover:text-white hover:border-transparent transition-all"
+            className="w-11 h-11 rounded-lg flex items-center justify-center bg-muted/50 border border-[#e5e7eb] text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent transition-all"
             aria-label="Share this hadith"
           >
             <Share2 className="w-5 h-5" />

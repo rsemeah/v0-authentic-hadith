@@ -6,7 +6,7 @@ import { useEffect, useState, useRef, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, User, Bookmark, Settings, LogOut, Camera, X, Loader2, Pencil, Check, ChevronDown, Star } from "lucide-react"
 import { Input } from "@/components/ui/input"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 interface UserProfile {
@@ -476,7 +476,6 @@ function ProfileContent() {
         )}
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

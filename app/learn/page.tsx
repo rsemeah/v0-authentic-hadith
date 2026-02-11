@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   Clock,
 } from "lucide-react"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useSubscription } from "@/hooks/use-subscription"
 import { PremiumGate } from "@/components/premium-gate"
@@ -408,7 +408,6 @@ export default function LearnPage() {
         })}
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

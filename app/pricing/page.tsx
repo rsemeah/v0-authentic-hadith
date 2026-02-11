@@ -5,7 +5,7 @@ import React from "react"
 import { useState, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ChevronLeft, Check, Star, Crown, Zap, Infinity, X } from "lucide-react"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { PRODUCTS } from "@/lib/products"
 import type { Product } from "@/lib/products"
 import dynamic from "next/dynamic"
@@ -202,7 +202,6 @@ function PricingContent() {
         </div>
       </main>
 
-      <BottomNavigation />
     </div>
   )
 }

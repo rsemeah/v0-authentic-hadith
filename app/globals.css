@@ -149,7 +149,7 @@
 
 /* Premium marble background with veining effect */
 .marble-bg {
-  background-color: var(--marble-base);
+  background-color: var(--background);
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.02' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E"),
     linear-gradient(
       135deg,
@@ -171,6 +171,30 @@
   50% {
     background-position: 0 0, 100% 50%;
   }
+}
+
+.dark .marble-bg {
+  background-image: none;
+  background-color: var(--background);
+}
+
+/* Dark mode premium card */
+.dark .premium-card {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(45, 122, 91, 0.3);
+}
+
+.dark .gold-border {
+  background: linear-gradient(var(--card), var(--card)) padding-box,
+    linear-gradient(
+      135deg,
+      var(--gold-shadow) 0%,
+      var(--gold-mid) 25%,
+      var(--gold-highlight) 50%,
+      var(--gold-specular) 75%,
+      var(--gold-mid) 100%
+    )
+    border-box;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(252, 238, 181, 0.1);
 }
 
 /* Gold gradient text effect */

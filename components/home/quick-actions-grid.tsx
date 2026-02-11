@@ -42,15 +42,15 @@ export function QuickActionsGrid() {
           onClick={() => router.push(action.href)}
           className={cn(
             "group relative aspect-square flex flex-col items-center justify-center gap-3 p-4",
-            "bg-[#F8F6F2] border border-[#C5A059] rounded-xl",
+            "bg-card border border-secondary rounded-xl",
             "hover:bg-gradient-to-br hover:from-[#C5A059] hover:to-[#E8C77D]",
             "hover:-translate-y-1 hover:shadow-lg",
             "transition-all duration-200",
           )}
           aria-label={action.label}
         >
-          <action.icon className="w-8 h-8 text-[#1a1f36] group-hover:text-white transition-colors" />
-          <span className="text-sm font-medium text-[#1a1f36] group-hover:text-white text-center transition-colors">
+          <action.icon className="w-8 h-8 text-foreground group-hover:text-white transition-colors" />
+          <span className="text-sm font-medium text-foreground group-hover:text-white text-center transition-colors">
             {action.label}
           </span>
         </button>

@@ -6,7 +6,7 @@ import { Suspense, useRef, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Bot, ChevronLeft, Send, Sparkles, Loader2 } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 
 const promptTemplates = [
   { label: "Explain the hadith about intentions", icon: "📖" },
@@ -146,7 +146,6 @@ function AssistantContent() {
         </form>
       </div>
 
-      <BottomNavigation />
     </div>
   )
 }

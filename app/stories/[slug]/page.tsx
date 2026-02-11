@@ -13,7 +13,7 @@ import {
   Quote,
 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { BottomNavigation } from "@/components/home/bottom-navigation"
+
 import { cn } from "@/lib/utils"
 
 interface Sahabi {
@@ -556,7 +556,6 @@ export default function StoryReaderPage() {
         </div>
       </div>
 
-      <BottomNavigation />
     </div>
   )
 }

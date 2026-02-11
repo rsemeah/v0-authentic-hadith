@@ -44,20 +44,20 @@ function AssistantContent() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
             aria-label="Go back"
           >
-            <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] flex items-center justify-center">
               <Bot className="w-4 h-4 text-white" />
             </div>
-            <h1 className="text-lg font-semibold text-[#1a1f36]">TruthSerum</h1>
+            <h1 className="text-lg font-semibold text-foreground">HadithChat</h1>
           </div>
         </div>
       </header>
@@ -69,11 +69,11 @@ function AssistantContent() {
             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] flex items-center justify-center mx-auto mb-6">
               <Sparkles className="w-8 h-8 text-[#E8C77D]" />
             </div>
-            <h2 className="text-2xl font-bold text-[#1a1f36] mb-2 text-balance">How can I help you today?</h2>
-            <p className="text-[#6b7280] mb-2">
+            <h2 className="text-2xl font-bold text-foreground mb-2 text-balance">How can I help you today?</h2>
+            <p className="text-muted-foreground mb-2">
               Ask me anything about hadiths, their meanings, or Islamic teachings.
             </p>
-            <p className="text-xs text-[#9ca3af] mb-8">
+            <p className="text-xs text-muted-foreground/70 mb-8">
               I only answer using authenticated hadith. If none are found, I will say so.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-lg mx-auto">
@@ -84,7 +84,7 @@ function AssistantContent() {
                   className="gold-border rounded-xl p-4 premium-card text-left hover:-translate-y-0.5 transition-transform"
                 >
                   <span className="text-xl mb-2 block">{template.icon}</span>
-                  <span className="text-sm text-[#1a1f36]">{template.label}</span>
+                  <span className="text-sm text-foreground">{template.label}</span>
                 </button>
               ))}
             </div>
@@ -97,7 +97,7 @@ function AssistantContent() {
                   className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                     msg.role === "user"
                       ? "bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white"
-                      : "gold-border premium-card text-[#1a1f36]"
+                      : "gold-border premium-card text-foreground"
                   }`}
                 >
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
@@ -108,7 +108,7 @@ function AssistantContent() {
               <div className="flex justify-start">
                 <div className="gold-border premium-card rounded-2xl px-4 py-3 flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-[#C5A059]" />
-                  <span className="text-sm text-[#6b7280]">Thinking...</span>
+                  <span className="text-sm text-muted-foreground">Thinking...</span>
                 </div>
               </div>
             )}
@@ -125,14 +125,14 @@ function AssistantContent() {
       </main>
 
       {/* Input */}
-      <div className="sticky bottom-20 md:bottom-0 bg-[#F8F6F2] border-t border-[#e5e7eb] p-4">
+      <div className="sticky bottom-20 md:bottom-0 bg-card border-t border-border p-4">
         <form onSubmit={onFormSubmit} className="max-w-3xl mx-auto flex items-center gap-3">
           <input
             type="text"
             value={input}
             onChange={handleInputChange}
             placeholder="Ask about hadiths..."
-            className="flex-1 px-4 py-3 rounded-xl border border-[#e5e7eb] bg-white focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all text-[#1a1f36]"
+            className="flex-1 px-4 py-3 rounded-xl border border-border bg-background focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all text-foreground"
             disabled={isLoading}
           />
           <button

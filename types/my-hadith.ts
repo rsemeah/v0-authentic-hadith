@@ -86,7 +86,7 @@ export interface FolderComment {
   saved_hadith_id: string
   user_id: string
   comment: string
-  mentions?: string[]
+  mentions?: string[] // UUIDs stored as strings
   created_at: string
   updated_at: string
   user?: {
@@ -102,4 +102,21 @@ export interface FolderShare {
   views: number
   last_viewed_at?: string
   created_at: string
+}
+
+export interface HadithFolderWithHadiths extends HadithFolder {
+  saved_hadiths?: Array<{
+    id: string
+    hadith_id: string
+    notes?: string
+    created_at: string
+    hadiths?: {
+      id: string
+      arabic_text: string
+      english_translation: string
+      collection: string
+      reference: string
+      grade: string
+    }
+  }>
 }

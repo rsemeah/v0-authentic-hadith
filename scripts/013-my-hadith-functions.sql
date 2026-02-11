@@ -34,18 +34,29 @@ CREATE OR REPLACE FUNCTION track_folder_view(p_share_token TEXT, p_viewer_ip TEX
 RETURNS void AS $$
 DECLARE
   v_folder_id UUID;
+  v_share_id UUID;
 BEGIN
   SELECT id INTO v_folder_id 
   FROM hadith_folders 
   WHERE share_token = p_share_token;
   
   IF v_folder_id IS NOT NULL THEN
-    INSERT INTO folder_shares (folder_id, share_token, views, last_viewed_at, viewer_ip)
-    VALUES (v_folder_id, p_share_token, 1, NOW(), p_viewer_ip)
-    ON CONFLICT (folder_id, share_token) 
-    DO UPDATE SET 
-      views = folder_shares.views + 1,
-      last_viewed_at = NOW();
+    -- Check if record exists
+    SELECT id INTO v_share_id
+    FROM folder_shares
+    WHERE folder_id = v_folder_id AND share_token = p_share_token;
+    
+    IF v_share_id IS NOT NULL THEN
+      -- Update existing record
+      UPDATE folder_shares 
+      SET views = views + 1,
+          last_viewed_at = NOW()
+      WHERE id = v_share_id;
+    ELSE
+      -- Insert new record
+      INSERT INTO folder_shares (folder_id, share_token, views, last_viewed_at, viewer_ip)
+      VALUES (v_folder_id, p_share_token, 1, NOW(), p_viewer_ip);
+    END IF;
   END IF;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;

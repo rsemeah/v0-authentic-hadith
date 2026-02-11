@@ -15,7 +15,7 @@ export async function getUserFolders(userId: string) {
         profiles(email, full_name, avatar_url)
       )
     `)
-    .or(`user_id.eq.${userId},folder_collaborators.user_id.eq.${userId}`)
+    .eq('user_id', userId)
     .order('updated_at', { ascending: false })
   
   if (error) throw error
@@ -166,7 +166,7 @@ export async function saveHadithToFolder(
       hadith_id: hadithId,
       folder_id: folderId,
       notes,
-      notes_html: notes // TODO: Convert markdown to HTML
+      notes_html: notes // For now, store as plain text; convert to HTML on frontend display
     })
     .select()
     .single()

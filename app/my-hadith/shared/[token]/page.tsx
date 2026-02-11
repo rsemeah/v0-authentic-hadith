@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation"
 import { getFolderByShareToken } from "@/lib/api/my-hadith"
 import { Eye, Lock, Globe } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { HadithFolder } from "@/types/my-hadith"
+import type { HadithFolderWithHadiths } from "@/types/my-hadith"
 
 interface SavedHadith {
   id: string
@@ -27,7 +27,7 @@ export default function SharedFolderPage() {
   const params = useParams()
   const token = params.token as string
   
-  const [folder, setFolder] = useState<HadithFolder | null>(null)
+  const [folder, setFolder] = useState<HadithFolderWithHadiths | null>(null)
   const [hadiths, setHadiths] = useState<SavedHadith[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -35,10 +35,10 @@ export default function SharedFolderPage() {
   useEffect(() => {
     const fetchSharedFolder = async () => {
       try {
-        const data = await getFolderByShareToken(token)
+        const data = await getFolderByShareToken(token) as HadithFolderWithHadiths
         setFolder(data)
         // Extract hadiths from the response
-        const hadithsData = (data as any).saved_hadiths || []
+        const hadithsData = data.saved_hadiths || []
         setHadiths(hadithsData)
       } catch (err) {
         console.error('Error fetching shared folder:', err)

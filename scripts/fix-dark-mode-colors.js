@@ -1,5 +1,5 @@
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'fs';
-import { join, extname } from 'path';
+const { readFileSync, writeFileSync, readdirSync, statSync } = require('fs');
+const { join, extname } = require('path');
 
 // Color replacements: hardcoded light-only colors -> semantic tokens
 const replacements = [

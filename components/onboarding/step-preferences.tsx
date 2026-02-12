@@ -61,13 +61,13 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
     <div className="space-y-8">
       {/* Heading */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-[#1a1f36] mb-2">Customize your experience</h2>
+        <h2 className="text-2xl font-bold text-foreground mb-2">Customize your experience</h2>
         <p className="text-muted-foreground">Set your preferences to personalize your learning journey</p>
       </div>
 
       {/* Language Preference */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-[#2C2416]">Preferred Language</label>
+        <label className="text-sm font-medium text-foreground">Preferred Language</label>
         <div className="grid grid-cols-3 gap-3">
           {LANGUAGES.map((lang) => (
             <button
@@ -78,8 +78,8 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
                 "relative p-4 rounded-xl border-2 transition-all duration-200",
                 "hover:-translate-y-0.5",
                 data.language === lang.id
-                  ? "border-[#C5A059] bg-[#F8F6F2]"
-                  : "border-[#e5e7eb] bg-white hover:border-[#d4d4d8]",
+                  ? "border-[#C5A059] bg-muted"
+                  : "border-border bg-card hover:border-[#d4d4d8]",
               )}
             >
               {data.language === lang.id && (
@@ -88,7 +88,7 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
                 </div>
               )}
               <div className="text-2xl mb-2">{lang.icon}</div>
-              <div className="text-sm font-medium text-[#1a1f36]">{lang.label}</div>
+              <div className="text-sm font-medium text-foreground">{lang.label}</div>
             </button>
           ))}
         </div>
@@ -96,7 +96,7 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
 
       {/* Collections of Interest */}
       <div className="space-y-3">
-        <label className="text-sm font-medium text-[#2C2416]">Collections of Interest</label>
+        <label className="text-sm font-medium text-foreground">Collections of Interest</label>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           {COLLECTIONS.map((collection) => {
             const isSelected = data.collections.includes(collection.id)
@@ -108,7 +108,7 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
                 className={cn(
                   "flex items-center gap-3 p-4 rounded-lg border transition-all",
                   "hover:bg-[#fafaf9] text-left",
-                  isSelected ? "border-[#C5A059] bg-[#F8F6F2]" : "border-[#e5e7eb]",
+                  isSelected ? "border-[#C5A059] bg-muted" : "border-border",
                 )}
               >
                 <div
@@ -120,7 +120,7 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
                   {isSelected && <Check className="w-3 h-3 text-white" />}
                 </div>
                 <div>
-                  <div className="text-sm font-medium text-[#1a1f36]">{collection.name}</div>
+                  <div className="text-sm font-medium text-foreground">{collection.name}</div>
                   <div className="text-xs text-muted-foreground">{collection.count}</div>
                 </div>
               </button>
@@ -131,7 +131,7 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
 
       {/* Learning Level Toggle */}
       <div className="space-y-4">
-        <label className="text-sm font-medium text-[#2C2416]">Learning Level</label>
+        <label className="text-sm font-medium text-foreground">Learning Level</label>
         <div className="relative flex items-center bg-[#F3F0EA] rounded-xl p-1" role="radiogroup" aria-label="Select your learning level">
           {/* Sliding indicator */}
           <div
@@ -154,7 +154,7 @@ export function StepPreferences({ data, onUpdate }: StepPreferencesProps) {
                 "relative z-10 flex-1 py-2.5 text-sm font-medium rounded-lg text-center transition-colors duration-200",
                 data.learningLevel === level
                   ? "text-white"
-                  : "text-[#6B6455] hover:text-[#2C2416]",
+                  : "text-[#6B6455] hover:text-foreground",
               )}
             >
               {level}

@@ -117,7 +117,7 @@ export default function StoriesPage() {
             className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
             aria-label="Go back home"
           >
-            <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
           <div>
             <h1 className="text-lg font-semibold text-foreground">Stories of the Companions</h1>

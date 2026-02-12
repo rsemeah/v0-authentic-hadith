@@ -260,7 +260,7 @@ export default function StoryReaderPage() {
             className="my-6 border-l-4 rounded-r-xl px-5 py-4"
             style={{ borderColor: sahabi.theme_primary, backgroundColor: `${sahabi.theme_primary}08` }}
           >
-            <p className="text-base leading-relaxed text-[#1a1f36] italic">{p}</p>
+            <p className="text-base leading-relaxed text-foreground italic">{p}</p>
           </div>
         )
       }
@@ -271,13 +271,13 @@ export default function StoryReaderPage() {
             key={i}
             className="my-6 border-l-4 border-[#C5A059] rounded-r-xl bg-[#C5A059]/5 px-5 py-4"
           >
-            <p className="text-base leading-relaxed text-[#1a1f36]">{p}</p>
+            <p className="text-base leading-relaxed text-foreground">{p}</p>
           </div>
         )
       }
 
       return (
-        <p key={i} className="text-base leading-[1.8] text-[#374151] mb-4">
+        <p key={i} className="text-base leading-[1.8] text-foreground/80 mb-4">
           {p}
         </p>
       )
@@ -287,18 +287,18 @@ export default function StoryReaderPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-[#e5e7eb]">
+      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button
               onClick={() => router.push("/stories")}
-              className="w-9 h-9 rounded-full bg-[#f3f4f6] flex items-center justify-center hover:bg-[#e5e7eb] transition-colors"
+              className="w-9 h-9 rounded-full bg-muted flex items-center justify-center hover:bg-muted transition-colors"
               aria-label="Back to stories"
             >
-              <ChevronLeft className="w-4 h-4 text-[#374151]" />
+              <ChevronLeft className="w-4 h-4 text-foreground/80" />
             </button>
             <div>
-              <h1 className="text-sm font-bold text-[#1a1f36] line-clamp-1">{sahabi.name_en}</h1>
+              <h1 className="text-sm font-bold text-foreground line-clamp-1">{sahabi.name_en}</h1>
               <p className="text-[10px] text-muted-foreground">
                 Part {currentPart} of {sahabi.total_parts}
               </p>
@@ -309,7 +309,7 @@ export default function StoryReaderPage() {
               onClick={handleBookmark}
               className={cn(
                 "w-9 h-9 rounded-full flex items-center justify-center transition-colors",
-                isBookmarked ? "bg-[#C5A059]/10 text-[#C5A059]" : "text-muted-foreground hover:bg-[#f3f4f6]",
+                isBookmarked ? "bg-[#C5A059]/10 text-[#C5A059]" : "text-muted-foreground hover:bg-muted",
               )}
               aria-label={isBookmarked ? "Remove bookmark" : "Bookmark story"}
             >
@@ -317,7 +317,7 @@ export default function StoryReaderPage() {
             </button>
             <button
               onClick={() => handleShare()}
-              className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-[#f3f4f6] transition-colors"
+              className="w-9 h-9 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
               aria-label="Share story"
             >
               <Share2 className="w-4 h-4" />
@@ -326,7 +326,7 @@ export default function StoryReaderPage() {
         </div>
 
         {/* Progress bar */}
-        <div className="h-1 bg-[#f3f4f6]">
+        <div className="h-1 bg-muted">
           <div
             className="h-full transition-all duration-500"
             style={{
@@ -352,7 +352,7 @@ export default function StoryReaderPage() {
                 </span>
                 {isPartCompleted && <CheckCircle2 className="w-3.5 h-3.5 text-[#1B5E43]" />}
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-[#1a1f36] leading-tight text-balance mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-foreground leading-tight text-balance mb-2">
                 {part.title_en}
               </h2>
               {part.title_ar && (
@@ -379,7 +379,7 @@ export default function StoryReaderPage() {
                   backgroundColor: `${sahabi.theme_primary}08`,
                 }}
               >
-                <p className="text-lg font-medium italic text-[#1a1f36] leading-relaxed">
+                <p className="text-lg font-medium italic text-foreground leading-relaxed">
                   {part.opening_hook}
                 </p>
               </div>
@@ -397,7 +397,7 @@ export default function StoryReaderPage() {
                     Key Lesson
                   </span>
                 </div>
-                <p className="text-base font-medium text-[#1a1f36] leading-relaxed">
+                <p className="text-base font-medium text-foreground leading-relaxed">
                   {part.key_lesson}
                 </p>
               </div>
@@ -485,7 +485,7 @@ export default function StoryReaderPage() {
       </main>
 
       {/* Bottom Navigation */}
-      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-[#e5e7eb] z-40">
+      <div className="fixed bottom-16 md:bottom-0 left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border z-40">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
             onClick={handlePrev}
@@ -494,7 +494,7 @@ export default function StoryReaderPage() {
               "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all",
               currentPart <= 1
                 ? "text-muted-foreground/30 cursor-not-allowed"
-                : "text-[#374151] hover:bg-[#f3f4f6]",
+                : "text-foreground/80 hover:bg-muted",
             )}
           >
             <ChevronLeft className="w-4 h-4" />
@@ -516,7 +516,7 @@ export default function StoryReaderPage() {
                     ? "w-6 rounded-full"
                     : progress?.parts_completed?.includes(num)
                       ? "bg-[#1B5E43]/40"
-                      : "bg-[#e5e7eb]",
+                      : "bg-muted",
                 )}
                 style={
                   num === currentPart

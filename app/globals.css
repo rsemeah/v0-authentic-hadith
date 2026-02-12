@@ -62,6 +62,11 @@
 }
 
 .dark {
+  --marble-base: #0a2a1f;
+  --marble-vein: #1f6b4e;
+  --marble-vein-light: #153d2e;
+  --marble-shadow: #0f3529;
+
   --background: #0a2a1f;
   --foreground: #f0ede7;
   --card: #122f24;
@@ -420,8 +425,8 @@ h2 .gold-text,
     to right,
     var(--gold-mid) 0%,
     var(--gold-highlight) var(--slider-progress, 50%),
-    #e5e7eb var(--slider-progress, 50%),
-    #e5e7eb 100%
+    var(--muted) var(--slider-progress, 50%),
+    var(--muted) 100%
   );
   outline: none;
   cursor: pointer;

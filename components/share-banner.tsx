@@ -36,7 +36,7 @@ export function ShareBanner({ variant = "full", className }: ShareBannerProps) {
     return (
       <div className={`flex items-center gap-3 p-3 rounded-xl border border-[#C5A059]/20 bg-[#C5A059]/5 ${className || ""}`}>
         <Heart className="w-4 h-4 text-[#C5A059] shrink-0" />
-        <p className="text-xs text-[#6b5d4d] flex-1">
+        <p className="text-xs text-muted-foreground flex-1">
           Share this app with someone who could benefit.
         </p>
         <button
@@ -74,7 +74,7 @@ export function ShareBanner({ variant = "full", className }: ShareBannerProps) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               onClick={handleShare}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-[#2C2416] font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-foreground font-semibold text-sm hover:opacity-90 transition-opacity shadow-lg"
             >
               <Share2 className="w-4 h-4" />
               Share with Friends

@@ -289,13 +289,13 @@ export default function OnboardingPage() {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#e5e7eb]">
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
             {/* Skip Link (Step 1 only) */}
             {currentStep === 1 ? (
               <button
                 type="button"
                 onClick={handleSkip}
-                className="text-sm text-muted-foreground hover:text-[#2C2416] transition-colors"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 Skip for now
               </button>
@@ -303,7 +303,7 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#C5A059] text-[#C5A059] hover:bg-[#F8F6F2] transition-colors text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#C5A059] text-[#C5A059] hover:bg-muted transition-colors text-sm font-medium"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back
@@ -318,7 +318,7 @@ export default function OnboardingPage() {
                 disabled={!canProceed()}
                 className={cn(
                   "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all",
-                  canProceed() ? "gold-button" : "bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed",
+                  canProceed() ? "gold-button" : "bg-[#e5e7eb] text-muted-foreground cursor-not-allowed",
                 )}
               >
                 Next
@@ -331,7 +331,7 @@ export default function OnboardingPage() {
                 disabled={!canProceed() || loading}
                 className={cn(
                   "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all",
-                  canProceed() && !loading ? "gold-button" : "bg-[#e5e7eb] text-[#9ca3af] cursor-not-allowed",
+                  canProceed() && !loading ? "gold-button" : "bg-[#e5e7eb] text-muted-foreground cursor-not-allowed",
                 )}
               >
                 {loading ? (

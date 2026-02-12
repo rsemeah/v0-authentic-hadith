@@ -32,8 +32,8 @@ export default function Checkout({ productId }: { productId: string }) {
         <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
           <span className="text-red-500 text-xl">!</span>
         </div>
-        <p className="text-[#1a1f36] font-medium mb-2">Payment Setup Required</p>
-        <p className="text-sm text-[#6b7280] mb-4 max-w-md mx-auto">
+        <p className="text-foreground font-medium mb-2">Payment Setup Required</p>
+        <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
           Stripe publishable key is not configured. Please check your environment variables.
         </p>
       </div>
@@ -46,8 +46,8 @@ export default function Checkout({ productId }: { productId: string }) {
         <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-50 flex items-center justify-center">
           <span className="text-red-500 text-xl">!</span>
         </div>
-        <p className="text-[#1a1f36] font-medium mb-2">Checkout Error</p>
-        <p className="text-sm text-[#6b7280] mb-4 max-w-md mx-auto">{error}</p>
+        <p className="text-foreground font-medium mb-2">Checkout Error</p>
+        <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">{error}</p>
       </div>
     )
   }

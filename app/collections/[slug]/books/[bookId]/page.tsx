@@ -238,17 +238,17 @@ export default function BookDetailPage() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-muted/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center gap-4 mb-2">
             <button
               onClick={() => router.push(`/collections/${slug}`)}
-              className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+              className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div className="flex items-center gap-3 md:hidden">
-              <h1 className="text-lg font-semibold text-[#1a1f36] truncate">Book {book.number}</h1>
+              <h1 className="text-lg font-semibold text-foreground truncate">Book {book.number}</h1>
             </div>
           </div>
           <Breadcrumb
@@ -262,12 +262,12 @@ export default function BookDetailPage() {
       </header>
 
       {/* Book Header */}
-      <section className="border-b border-[#e5e7eb]">
+      <section className="border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 md:py-8">
           <span className="text-sm font-bold text-[#C5A059] uppercase tracking-wider mb-2 block">
             Book {book.number}
           </span>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#1a1f36] mb-2" style={{ fontFamily: "Cinzel, serif" }}>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2" style={{ fontFamily: "Cinzel, serif" }}>
             {book.name_en}
           </h1>
           <p className="text-lg text-[#C5A059] mb-4 font-arabic" dir="rtl">
@@ -283,7 +283,7 @@ export default function BookDetailPage() {
       <section className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-8">
         {showDirectHadiths ? (
           <>
-            <h2 className="text-lg font-bold text-[#1a1f36] mb-4">
+            <h2 className="text-lg font-bold text-foreground mb-4">
               Hadiths
               <span className="text-sm font-normal text-muted-foreground ml-2">
                 ({book.total_hadiths} total)
@@ -321,7 +321,7 @@ export default function BookDetailPage() {
           </>
         ) : (
           <>
-            <h2 className="text-lg font-bold text-[#1a1f36] mb-4">Chapters</h2>
+            <h2 className="text-lg font-bold text-foreground mb-4">Chapters</h2>
 
             {chapters.length === 0 ? (
               <div className="text-center py-12">

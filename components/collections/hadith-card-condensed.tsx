@@ -113,7 +113,7 @@ export function HadithCardCondensed({
 
         {/* Header */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
-          <span className="text-sm font-semibold text-[#1a1f36]">Hadith #{referenceNumber}</span>
+          <span className="text-sm font-semibold text-foreground">Hadith #{referenceNumber}</span>
           <span className="text-xs text-muted-foreground">
             ({collectionName} {hadith.hadith_number || referenceNumber})
           </span>
@@ -133,7 +133,7 @@ export function HadithCardCondensed({
         {/* Arabic Text */}
         <div className="mb-4" dir="rtl" lang="ar">
           <p
-            className="text-lg md:text-xl leading-[2] text-[#1a1f36] line-clamp-3"
+            className="text-lg md:text-xl leading-[2] text-foreground line-clamp-3"
             style={{ fontFamily: "Amiri, serif" }}
           >
             {arabicText}
@@ -142,7 +142,7 @@ export function HadithCardCondensed({
 
         {/* English Translation */}
         <div className="mb-4" dir="ltr" lang="en">
-          <p className="text-sm md:text-base text-[#4a5568] line-clamp-4 leading-relaxed">{englishText}</p>
+          <p className="text-sm md:text-base text-muted-foreground line-clamp-4 leading-relaxed">{englishText}</p>
         </div>
 
         {/* Category Badge */}
@@ -171,7 +171,7 @@ export function HadithCardCondensed({
         )}
 
         {/* Action Bar */}
-        <div className="flex items-center gap-2 pt-4 border-t border-[#e5e7eb]">
+        <div className="flex items-center gap-2 pt-4 border-t border-border">
           <button
             onClick={handleSave}
             disabled={saving}
@@ -179,7 +179,7 @@ export function HadithCardCondensed({
               "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
               saved
                 ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                : "border border-[#d4cfc7] text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059]",
+                : "border border-border text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059]",
             )}
           >
             <Bookmark className={cn("w-4 h-4", saved && "fill-current")} />
@@ -188,7 +188,7 @@ export function HadithCardCondensed({
 
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[#d4cfc7] text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059] transition-all"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059] transition-all"
           >
             <Share2 className="w-4 h-4" />
             Share

@@ -123,11 +123,11 @@ export default function TodayPage() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6">
           <div className="flex items-center gap-3 mb-1">
             <Sun className="w-6 h-6 text-[#C5A059]" />
-            <h1 className="text-xl font-bold text-[#1a1f36]">Today</h1>
+            <h1 className="text-xl font-bold text-foreground">Today</h1>
           </div>
           <p className="text-sm text-muted-foreground">{todayDate}</p>
         </div>
@@ -143,12 +143,12 @@ export default function TodayPage() {
             </div>
 
             {/* Arabic */}
-            <p className="text-lg leading-loose text-[#1a1f36] font-serif text-right mb-4" dir="rtl">
+            <p className="text-lg leading-loose text-foreground font-serif text-right mb-4" dir="rtl">
               {hadith.arabic_text}
             </p>
 
             {/* English */}
-            <p className="text-sm leading-relaxed text-[#374151] mb-4">
+            <p className="text-sm leading-relaxed text-foreground/80 mb-4">
               {getCleanTranslation(hadith.english_translation)}
             </p>
 
@@ -173,12 +173,12 @@ export default function TodayPage() {
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-2 pt-3 border-t border-[#e5e7eb]">
+            <div className="flex items-center gap-2 pt-3 border-t border-border">
               <button
                 onClick={handleSave}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors",
-                  isSaved ? "bg-[#C5A059]/10 text-[#C5A059]" : "bg-[#f3f4f6] text-[#6b7280] hover:bg-[#e5e7eb]"
+                  isSaved ? "bg-[#C5A059]/10 text-[#C5A059]" : "bg-muted text-muted-foreground hover:bg-muted"
                 )}
               >
                 <Bookmark className={cn("w-4 h-4", isSaved && "fill-current")} />
@@ -186,14 +186,14 @@ export default function TodayPage() {
               </button>
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[#f3f4f6] text-[#6b7280] hover:bg-[#e5e7eb] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-muted transition-colors"
               >
                 <Share2 className="w-4 h-4" />
                 Share
               </button>
               <button
                 onClick={() => router.push(`/hadith/${hadith.id}`)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-[#f3f4f6] text-[#6b7280] hover:bg-[#e5e7eb] transition-colors ml-auto"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium bg-muted text-muted-foreground hover:bg-muted transition-colors ml-auto"
               >
                 Read more
                 <ChevronRight className="w-3.5 h-3.5" />
@@ -204,7 +204,7 @@ export default function TodayPage() {
 
         {/* Reflection Prompt */}
         <section className="premium-card rounded-xl p-5">
-          <h2 className="text-sm font-bold text-[#1a1f36] mb-2">Reflection</h2>
+          <h2 className="text-sm font-bold text-foreground mb-2">Reflection</h2>
           <p className="text-sm text-muted-foreground leading-relaxed mb-3">
             How does today's hadith relate to a challenge you are currently facing? Take a moment to reflect.
           </p>
@@ -219,7 +219,7 @@ export default function TodayPage() {
 
         {/* Small Action */}
         <section className="premium-card rounded-xl p-5">
-          <h2 className="text-sm font-bold text-[#1a1f36] mb-2">Today's Small Action</h2>
+          <h2 className="text-sm font-bold text-foreground mb-2">Today's Small Action</h2>
           <p className="text-sm text-muted-foreground leading-relaxed">
             {getDailyAction().text}
           </p>
@@ -233,7 +233,7 @@ export default function TodayPage() {
             className="premium-card rounded-xl p-4 text-left hover:shadow-md transition-shadow"
           >
             <BookOpen className="w-5 h-5 text-[#1B5E43] mb-2" />
-            <p className="text-sm font-semibold text-[#1a1f36]">Daily Sunnah</p>
+            <p className="text-sm font-semibold text-foreground">Daily Sunnah</p>
             <p className="text-xs text-muted-foreground mt-0.5">Lived practice</p>
           </button>
           <button
@@ -241,7 +241,7 @@ export default function TodayPage() {
             className="premium-card rounded-xl p-4 text-left hover:shadow-md transition-shadow"
           >
             <RefreshCw className="w-5 h-5 text-[#C5A059] mb-2" />
-            <p className="text-sm font-semibold text-[#1a1f36]">Stories</p>
+            <p className="text-sm font-semibold text-foreground">Stories</p>
             <p className="text-xs text-muted-foreground mt-0.5">The Companions</p>
           </button>
         </div>

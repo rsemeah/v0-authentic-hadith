@@ -134,7 +134,7 @@ export function AuthForm() {
               setMessage(null)
             }}
             className={`flex-1 pb-3 text-sm font-semibold tracking-[0.1em] uppercase transition-colors ${
-              mode === "signin" ? "text-[#2C2416]" : "text-muted-foreground hover:text-[#2C2416]"
+              mode === "signin" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Sign In
@@ -147,7 +147,7 @@ export function AuthForm() {
               setMessage(null)
             }}
             className={`flex-1 pb-3 text-sm font-semibold tracking-[0.1em] uppercase transition-colors ${
-              mode === "signup" ? "text-[#2C2416]" : "text-muted-foreground hover:text-[#2C2416]"
+              mode === "signup" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Sign Up
@@ -166,7 +166,7 @@ export function AuthForm() {
       {/* Forgot Password Header */}
       {mode === "forgot" && (
         <div className="text-center mb-6">
-          <h2 className="text-lg font-semibold text-[#2C2416] tracking-wide">Reset Password</h2>
+          <h2 className="text-lg font-semibold text-foreground tracking-wide">Reset Password</h2>
           <p className="text-sm text-muted-foreground mt-1">Enter your email to receive a reset link</p>
         </div>
       )}
@@ -179,7 +179,7 @@ export function AuthForm() {
         {/* Full Name - only for signup */}
         {mode === "signup" && (
           <div className="space-y-2">
-            <label htmlFor="fullName" className="text-sm font-medium text-[#2C2416]">
+            <label htmlFor="fullName" className="text-sm font-medium text-foreground">
               Full Name
             </label>
             <div className="relative">
@@ -199,7 +199,7 @@ export function AuthForm() {
 
         {/* Email */}
         <div className="space-y-2">
-          <label htmlFor="email" className="text-sm font-medium text-[#2C2416]">
+          <label htmlFor="email" className="text-sm font-medium text-foreground">
             Email Address
           </label>
           <div className="relative">
@@ -219,7 +219,7 @@ export function AuthForm() {
         {/* Password - not for forgot */}
         {mode !== "forgot" && (
           <div className="space-y-2">
-            <label htmlFor="password" className="text-sm font-medium text-[#2C2416]">
+            <label htmlFor="password" className="text-sm font-medium text-foreground">
               Password
             </label>
             <div className="relative">
@@ -237,7 +237,7 @@ export function AuthForm() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-[#2C2416] transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -313,7 +313,7 @@ export function AuthForm() {
             type="button"
             onClick={() => handleOAuthSignIn("google")}
             disabled={loading}
-            className="h-11 flex items-center justify-center gap-2 rounded-md border border-[#D4CFC7] bg-white hover:bg-[#F8F6F2] transition-colors text-sm font-medium text-[#2C2416] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="h-11 flex items-center justify-center gap-2 rounded-md border border-border bg-card hover:bg-muted transition-colors text-sm font-medium text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path

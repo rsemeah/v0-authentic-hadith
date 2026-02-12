@@ -17,7 +17,7 @@ export function PremiumGate({ variant = "card", featureName, className }: Premiu
 
   if (variant === "overlay") {
     return (
-      <div className={cn("absolute inset-0 z-10 flex items-center justify-center bg-[#F8F6F2]/80 backdrop-blur-[2px] rounded-xl", className)}>
+      <div className={cn("absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-[2px] rounded-xl", className)}>
         <button
           onClick={() => router.push("/pricing")}
           className="flex flex-col items-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white shadow-lg hover:shadow-xl transition-all hover:scale-105"
@@ -43,7 +43,7 @@ export function PremiumGate({ variant = "card", featureName, className }: Premiu
           <Crown className="w-5 h-5 text-white" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[#1a1f36]">
+          <p className="text-sm font-semibold text-foreground">
             Unlock {featureName || "Premium Content"}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">

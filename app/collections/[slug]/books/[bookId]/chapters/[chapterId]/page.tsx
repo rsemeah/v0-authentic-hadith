@@ -163,17 +163,17 @@ export default function ChapterDetailPage() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-muted/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center gap-4 mb-2">
             <button
               onClick={() => router.push(`/collections/${slug}/books/${bookId}`)}
-              className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+              className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div className="flex items-center gap-3 md:hidden">
-              <h1 className="text-lg font-semibold text-[#1a1f36] truncate">Chapter {chapter.number}</h1>
+              <h1 className="text-lg font-semibold text-foreground truncate">Chapter {chapter.number}</h1>
             </div>
           </div>
           <Breadcrumb
@@ -188,12 +188,12 @@ export default function ChapterDetailPage() {
       </header>
 
       {/* Chapter Header */}
-      <section className="border-b border-[#e5e7eb]">
+      <section className="border-b border-border">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 md:py-8">
           <span className="text-sm font-bold text-[#1B5E43] uppercase tracking-wider mb-2 block">
             Chapter {chapter.number}
           </span>
-          <h1 className="text-xl md:text-2xl font-bold text-[#1a1f36] mb-2" style={{ fontFamily: "Cinzel, serif" }}>
+          <h1 className="text-xl md:text-2xl font-bold text-foreground mb-2" style={{ fontFamily: "Cinzel, serif" }}>
             {chapter.name_en}
           </h1>
           <p className="text-lg text-[#C5A059] mb-4 font-arabic" dir="rtl">

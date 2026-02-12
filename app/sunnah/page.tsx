@@ -308,16 +308,16 @@ export default function SunnahPage() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
           <div>
-            <h1 className="text-lg font-semibold text-[#1a1f36]">Sunnah</h1>
+            <h1 className="text-lg font-semibold text-foreground">Sunnah</h1>
             <p className="text-xs text-muted-foreground">The lived practice of the Prophet</p>
           </div>
         </div>
@@ -331,7 +331,7 @@ export default function SunnahPage() {
               <Heart className="w-5 h-5 text-[#C5A059]" />
             </div>
             <div>
-              <p className="text-sm text-[#374151] leading-relaxed">
+              <p className="text-sm text-foreground/80 leading-relaxed">
                 Beyond the academic study of hadith, the <strong>Sunnah</strong> is the living tradition --
                 the daily acts, habits, and character of the Prophet (peace be upon him) that we can embody today.
               </p>
@@ -351,7 +351,7 @@ export default function SunnahPage() {
               key={cat.id}
               className={cn(
                 "rounded-xl border transition-all overflow-hidden",
-                isExpanded ? "border-[#C5A059]/30 shadow-sm" : "border-[#e5e7eb]",
+                isExpanded ? "border-[#C5A059]/30 shadow-sm" : "border-border",
               )}
             >
               <div className="w-full p-4 flex items-center gap-4 premium-card">
@@ -367,7 +367,7 @@ export default function SunnahPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm font-semibold text-[#1a1f36]">{cat.title}</h3>
+                      <h3 className="text-sm font-semibold text-foreground">{cat.title}</h3>
                       <span className="text-xs text-muted-foreground/60" dir="rtl">{cat.titleAr}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{cat.description}</p>
@@ -381,7 +381,7 @@ export default function SunnahPage() {
                   >
                     <Share2 className="w-3.5 h-3.5 text-[#C5A059]" />
                   </button>
-                  <span className="text-[10px] font-medium text-muted-foreground bg-[#f3f4f6] px-2 py-0.5 rounded-full">
+                  <span className="text-[10px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                     {cat.practices.length}
                   </span>
                   <div
@@ -399,11 +399,11 @@ export default function SunnahPage() {
               </div>
 
               {isExpanded && (
-                <div className="border-t border-[#e5e7eb] divide-y divide-[#f3f4f6]">
+                <div className="border-t border-border divide-y divide-border/50">
                   {cat.practices.map((practice) => (
                     <div key={practice.id} className="p-4">
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="text-sm font-semibold text-[#1a1f36] mb-1">{practice.title}</h4>
+                        <h4 className="text-sm font-semibold text-foreground mb-1">{practice.title}</h4>
                         <button
                           onClick={() => sharePractice(practice, cat.title)}
                           className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A059]/10 transition-colors shrink-0"
@@ -412,7 +412,7 @@ export default function SunnahPage() {
                           <Share2 className="w-3.5 h-3.5 text-[#C5A059]" />
                         </button>
                       </div>
-                      <p className="text-xs text-[#374151] leading-relaxed mb-2">{practice.description}</p>
+                      <p className="text-xs text-foreground/80 leading-relaxed mb-2">{practice.description}</p>
                       <div className="flex items-center gap-2">
                         <BookOpen className="w-3 h-3 text-muted-foreground" />
                         <span className="text-[10px] text-muted-foreground">

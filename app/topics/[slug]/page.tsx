@@ -159,18 +159,18 @@ export default function CategoryDetailPage() {
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-muted/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => router.push("/topics")}
-            className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
           <div className="flex items-center gap-3">
             {category.icon && <span className="text-2xl">{category.icon}</span>}
             <div>
-              <h1 className="text-lg font-bold text-[#1a1f36]">{category.name_en}</h1>
+              <h1 className="text-lg font-bold text-foreground">{category.name_en}</h1>
               <p className="text-xs text-muted-foreground">{hadiths.length} hadiths</p>
             </div>
           </div>
@@ -192,7 +192,7 @@ export default function CategoryDetailPage() {
                 "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                 !activeTag
                   ? "bg-[#1B5E43] text-white"
-                  : "bg-white border border-[#e5e7eb] text-muted-foreground hover:border-[#1B5E43]",
+                  : "bg-card border border-border text-muted-foreground hover:border-[#1B5E43]",
               )}
             >
               All
@@ -205,7 +205,7 @@ export default function CategoryDetailPage() {
                   "flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                   tag.id === activeTag
                     ? "bg-[#C5A059] text-white"
-                    : "bg-white border border-[#e5e7eb] text-muted-foreground hover:border-[#C5A059]",
+                    : "bg-card border border-border text-muted-foreground hover:border-[#C5A059]",
                 )}
               >
                 <Hash className="w-3 h-3" />

@@ -102,7 +102,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
               "w-11 h-11 rounded-lg flex items-center justify-center transition-all",
               isPlaying
                 ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                : "bg-muted/50 border border-[#e5e7eb] text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent",
+                : "bg-muted/50 border border-border text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent",
             )}
             aria-label={isPlaying ? "Pause audio recitation" : "Play audio recitation"}
           >
@@ -114,7 +114,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
               "w-11 h-11 rounded-lg flex items-center justify-center transition-all",
               isSaved
                 ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                : "bg-muted/50 border border-[#e5e7eb] text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent",
+                : "bg-muted/50 border border-border text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent",
             )}
             aria-label={isSaved ? "Remove from saved" : "Save this hadith"}
           >
@@ -122,7 +122,7 @@ export function DailyHadithCard({ hadith, onSave, onShare, onPlayAudio }: DailyH
           </button>
           <button
             onClick={() => onShare?.(hadith.id)}
-            className="w-11 h-11 rounded-lg flex items-center justify-center bg-muted/50 border border-[#e5e7eb] text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent transition-all"
+            className="w-11 h-11 rounded-lg flex items-center justify-center bg-muted/50 border border-border text-foreground hover:bg-[#C5A059] hover:text-white hover:border-transparent transition-all"
             aria-label="Share this hadith"
           >
             <Share2 className="w-5 h-5" />

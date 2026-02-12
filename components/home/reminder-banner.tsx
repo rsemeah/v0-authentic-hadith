@@ -47,7 +47,7 @@ export function ReminderBanner({ streakDays, totalRead, lastActiveDate }: Remind
         <Icon className={cn("w-5 h-5", reminder.color)} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-[#1a1f36] leading-snug">{reminder.message}</p>
+        <p className="text-sm font-medium text-foreground leading-snug">{reminder.message}</p>
         <button
           onClick={() => router.push(reminder.href)}
           className={cn("mt-2 text-xs font-semibold transition-colors hover:underline", reminder.color)}
@@ -60,7 +60,7 @@ export function ReminderBanner({ streakDays, totalRead, lastActiveDate }: Remind
         className="w-6 h-6 rounded-full flex items-center justify-center hover:bg-black/5 transition-colors shrink-0"
         aria-label="Dismiss reminder"
       >
-        <X className="w-3.5 h-3.5 text-[#6b7280]" />
+        <X className="w-3.5 h-3.5 text-muted-foreground" />
       </button>
     </div>
   )

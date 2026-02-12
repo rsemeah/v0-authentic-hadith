@@ -76,23 +76,23 @@ function SearchContent() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors shrink-0"
+            className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors shrink-0"
             aria-label="Go back"
           >
-            <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
-          <div className="flex-1 flex items-center gap-3 px-4 py-2.5 rounded-full bg-white border-2 border-[#C5A059]">
-            <Search className="w-5 h-5 text-[#6b7280]" />
+          <div className="flex-1 flex items-center gap-3 px-4 py-2.5 rounded-full bg-card border-2 border-[#C5A059]">
+            <Search className="w-5 h-5 text-muted-foreground" />
             <input
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
               placeholder="Search hadiths..."
-              className="flex-1 bg-transparent outline-none text-[#1a1f36]"
+              className="flex-1 bg-transparent outline-none text-foreground"
               autoFocus
             />
           </div>
@@ -105,26 +105,26 @@ function SearchContent() {
           <div className="space-y-4">
             <div className="h-4 w-32 rounded bg-[#e5e7eb] animate-pulse" />
             {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-xl p-4 premium-card border border-[#e5e7eb] space-y-3">
+              <div key={i} className="rounded-xl p-4 premium-card border border-border space-y-3">
                 <div className="flex items-center gap-2">
                   <div className="h-6 w-28 rounded bg-[#e5e7eb] animate-pulse" />
-                  <div className="h-4 w-24 rounded bg-[#f3f4f6] animate-pulse" />
+                  <div className="h-4 w-24 rounded bg-muted animate-pulse" />
                 </div>
                 <div className="space-y-2">
-                  <div className="h-4 w-full rounded bg-[#f3f4f6] animate-pulse" />
-                  <div className="h-4 w-5/6 rounded bg-[#f3f4f6] animate-pulse" />
-                  <div className="h-4 w-3/4 rounded bg-[#f3f4f6] animate-pulse" />
+                  <div className="h-4 w-full rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-5/6 rounded bg-muted animate-pulse" />
+                  <div className="h-4 w-3/4 rounded bg-muted animate-pulse" />
                 </div>
-                <div className="flex items-center gap-2 pt-3 border-t border-[#e5e7eb]">
-                  <div className="h-8 w-16 rounded-lg bg-[#f3f4f6] animate-pulse" />
-                  <div className="h-8 w-16 rounded-lg bg-[#f3f4f6] animate-pulse" />
+                <div className="flex items-center gap-2 pt-3 border-t border-border">
+                  <div className="h-8 w-16 rounded-lg bg-muted animate-pulse" />
+                  <div className="h-8 w-16 rounded-lg bg-muted animate-pulse" />
                 </div>
               </div>
             ))}
           </div>
         ) : results.length > 0 ? (
           <div className="space-y-4">
-            <p className="text-sm text-[#6b7280] mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Found {results.length} result{results.length !== 1 ? "s" : ""}
             </p>
             {results.map((hadith: any) => (
@@ -144,7 +144,7 @@ function SearchContent() {
                   <span className="px-2 py-1 rounded text-xs font-bold text-white bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]">
                     {getCollectionDisplayName(hadith.collection)}
                   </span>
-                  <span className="text-xs text-[#6b7280]">
+                  <span className="text-xs text-muted-foreground">
                     Book {hadith.book_number} / Hadith {hadith.hadith_number}
                   </span>
                   {hadith.grade && (
@@ -154,9 +154,9 @@ function SearchContent() {
                   )}
                 </div>
                 {hadith.narrator && (
-                  <p className="text-xs text-[#6b7280] mb-1">Narrated by: {hadith.narrator}</p>
+                  <p className="text-xs text-muted-foreground mb-1">Narrated by: {hadith.narrator}</p>
                 )}
-                <p className="text-sm text-[#1a1f36] line-clamp-4 leading-relaxed">{getCleanTranslation(hadith.english_translation)}</p>
+                <p className="text-sm text-foreground line-clamp-4 leading-relaxed">{getCleanTranslation(hadith.english_translation)}</p>
                 {/* Enrichment tags */}
                 {(hadith.tags?.length > 0 || hadith.category) && (
                   <div className="flex flex-wrap items-center gap-1.5 mt-3">
@@ -178,14 +178,14 @@ function SearchContent() {
                   </div>
                 )}
                 {/* Save / Share actions */}
-                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-[#e5e7eb]">
+                <div className="flex items-center gap-2 mt-3 pt-3 border-t border-border">
                   <button
                     onClick={(e) => handleSave(e, hadith.id)}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-all",
                       savedIds.has(hadith.id)
                         ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                        : "border border-[#d4cfc7] text-[#6b7280] hover:border-[#C5A059] hover:text-[#C5A059]",
+                        : "border border-border text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059]",
                     )}
                   >
                     <Bookmark className={cn("w-3.5 h-3.5", savedIds.has(hadith.id) && "fill-current")} />
@@ -193,7 +193,7 @@ function SearchContent() {
                   </button>
                   <button
                     onClick={(e) => handleShare(e, hadith)}
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-[#d4cfc7] text-[#6b7280] hover:border-[#C5A059] hover:text-[#C5A059] transition-all"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border border-border text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059] transition-all"
                   >
                     <Share2 className="w-3.5 h-3.5" />
                     Share
@@ -204,14 +204,14 @@ function SearchContent() {
           </div>
         ) : debouncedQuery.length > 1 ? (
           <div className="text-center py-12">
-            <BookOpen className="w-12 h-12 mx-auto mb-4 text-[#d1d5db]" />
-            <p className="text-[#6b7280] mb-4">No hadiths found for &ldquo;{debouncedQuery}&rdquo;</p>
-            <p className="text-sm text-[#9ca3af]">Try searching for: {suggestedTerms.join(", ")}</p>
+            <BookOpen className="w-12 h-12 mx-auto mb-4 text-muted-foreground/40" />
+            <p className="text-muted-foreground mb-4">No hadiths found for &ldquo;{debouncedQuery}&rdquo;</p>
+            <p className="text-sm text-muted-foreground/60">Try searching for: {suggestedTerms.join(", ")}</p>
           </div>
         ) : (
           <div className="text-center py-12">
-            <Search className="w-12 h-12 mx-auto mb-4 text-[#d1d5db]" />
-            <p className="text-[#6b7280] mb-6">Enter a search term to find hadiths</p>
+            <Search className="w-12 h-12 mx-auto mb-4 text-muted-foreground/40" />
+            <p className="text-muted-foreground mb-6">Enter a search term to find hadiths</p>
             <div className="flex flex-wrap justify-center gap-2 max-w-md mx-auto">
               {suggestedTerms.map((term) => (
                 <button

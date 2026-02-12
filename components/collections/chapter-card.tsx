@@ -26,7 +26,7 @@ export function ChapterCard({ chapter, collectionSlug, bookId }: ChapterCardProp
     >
       <span className="text-xs font-bold text-[#1B5E43] uppercase tracking-wider mb-2">Chapter {chapter.number}</span>
 
-      <h3 className="text-base font-bold text-[#1a1f36] mb-1 line-clamp-2">{chapter.name_en}</h3>
+      <h3 className="text-base font-bold text-foreground mb-1 line-clamp-2">{chapter.name_en}</h3>
       <p className="text-sm text-[#C5A059] mb-3 font-arabic" dir="rtl">
         {chapter.name_ar}
       </p>

@@ -203,15 +203,15 @@ function ProfileContent() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => router.back()}
-            className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
-          <h1 className="text-lg font-semibold text-[#1a1f36]">Profile</h1>
+          <h1 className="text-lg font-semibold text-foreground">Profile</h1>
         </div>
       </header>
 
@@ -236,7 +236,7 @@ function ProfileContent() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#F8F6F2] flex items-center justify-center">
+                  <div className="w-full h-full bg-background flex items-center justify-center">
                     <User className="w-10 h-10 text-[#C5A059]" />
                   </div>
                 )}
@@ -299,7 +299,7 @@ function ProfileContent() {
                       onClick={() => setSchoolDropdownOpen(!schoolDropdownOpen)}
                       className="w-full h-10 px-3 flex items-center justify-between premium-input rounded-lg text-left text-sm"
                     >
-                      <span className={editSchool ? "text-[#2C2416]" : "text-muted-foreground"}>
+                      <span className={editSchool ? "text-foreground" : "text-muted-foreground"}>
                         {editSchool || "Select school"}
                       </span>
                       <ChevronDown className="w-4 h-4 text-muted-foreground" />
@@ -314,9 +314,9 @@ function ProfileContent() {
                               setEditSchool(school)
                               setSchoolDropdownOpen(false)
                             }}
-                            className="w-full px-3 py-2.5 text-left text-sm hover:bg-[#F8F6F2] transition-colors flex items-center justify-between"
+                            className="w-full px-3 py-2.5 text-left text-sm hover:bg-background transition-colors flex items-center justify-between"
                           >
-                            <span className="text-[#2C2416]">{school}</span>
+                            <span className="text-foreground">{school}</span>
                             {editSchool === school && <Check className="w-4 h-4 text-[#C5A059]" />}
                           </button>
                         ))}
@@ -339,7 +339,7 @@ function ProfileContent() {
                         setEditing(false)
                         setSchoolDropdownOpen(false)
                       }}
-                      className="px-4 py-1.5 rounded-lg border border-[#e5e7eb] text-sm font-medium text-muted-foreground hover:text-[#2C2416] transition-colors"
+                      className="px-4 py-1.5 rounded-lg border border-border text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                     >
                       Cancel
                     </button>
@@ -348,11 +348,11 @@ function ProfileContent() {
               ) : (
                 <>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-xl font-semibold text-[#1a1f36]">{profile?.name || "User"}</h2>
+                    <h2 className="text-xl font-semibold text-foreground">{profile?.name || "User"}</h2>
                     <button
                       type="button"
                       onClick={startEditing}
-                      className="p-1 rounded-md hover:bg-[#F8F6F2] transition-colors"
+                      className="p-1 rounded-md hover:bg-background transition-colors"
                       aria-label="Edit profile"
                     >
                       <Pencil className="w-4 h-4 text-[#C5A059]" />
@@ -394,7 +394,7 @@ function ProfileContent() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               tab === "profile"
                 ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                : "bg-[#F8F6F2] border border-[#e5e7eb] text-[#1a1f36]"
+                : "bg-background border border-border text-foreground"
             }`}
           >
             Profile
@@ -404,7 +404,7 @@ function ProfileContent() {
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
               tab === "saved"
                 ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white"
-                : "bg-[#F8F6F2] border border-[#e5e7eb] text-[#1a1f36]"
+                : "bg-background border border-border text-foreground"
             }`}
           >
             Saved
@@ -436,7 +436,7 @@ function ProfileContent() {
               <div className="w-10 h-10 rounded-lg gold-icon-bg flex items-center justify-center">
                 <Settings className="w-5 h-5 text-[#C5A059]" />
               </div>
-              <span className="font-medium text-[#1a1f36]">Settings</span>
+              <span className="font-medium text-foreground">Settings</span>
             </button>
             <button
               onClick={handleSignOut}
@@ -462,7 +462,7 @@ function ProfileContent() {
                       {hadith.collection}
                     </span>
                   </div>
-                  <p className="text-sm text-[#1a1f36] line-clamp-2">{hadith.english_translation}</p>
+                  <p className="text-sm text-foreground line-clamp-2">{hadith.english_translation}</p>
                 </button>
               ))
             ) : (

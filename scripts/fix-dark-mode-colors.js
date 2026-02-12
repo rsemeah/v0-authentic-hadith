@@ -92,9 +92,41 @@ function walkDir(dir, ext, files = []) {
 let totalReplacements = 0;
 let filesChanged = 0;
 
+// Find the project root by looking for common project files
+const { execSync } = require('child_process');
+let basePath;
+try {
+  const findResult = execSync('find / -name "page.tsx" -path "*/app/page.tsx" 2>/dev/null | head -1').toString().trim();
+  console.log('Found page.tsx at:', findResult);
+  if (findResult) {
+    basePath = findResult.replace('/app/page.tsx', '');
+  }
+} catch(e) {
+  console.log('find failed, trying locate...');
+}
+
+if (!basePath) {
+  // Try common paths
+  const candidates = ['/home/user', '/workspace', '/project', process.cwd()];
+  for (const c of candidates) {
+    try {
+      readdirSync(join(c, 'app'));
+      basePath = c;
+      break;
+    } catch(e) {}
+  }
+}
+
+if (!basePath) {
+  console.log('Could not find project directory');
+  process.exit(1);
+}
+
+console.log('Using basePath:', basePath);
+
 const tsxFiles = [
-  ...walkDir('/app', '.tsx'),
-  ...walkDir('/components', '.tsx'),
+  ...walkDir(join(basePath, 'app'), '.tsx'),
+  ...walkDir(join(basePath, 'components'), '.tsx'),
 ];
 
 console.log(`Found ${tsxFiles.length} .tsx files to process`);

@@ -130,7 +130,7 @@ function CollectionsContent() {
             onClick={() => router.push("/home")}
             className="md:hidden w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
           >
-            <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+            <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
           <div className="flex items-center gap-3">
             <div className="relative w-8 h-8">

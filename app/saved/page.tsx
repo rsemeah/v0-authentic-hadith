@@ -186,7 +186,7 @@ export default function SavedPage() {
                     "flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all",
                     activeFolder === folder.id
                       ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-[#2c2416]"
-                      : "border border-[#d4cfc7] text-muted-foreground hover:border-[#C5A059]",
+                      : "border border-border text-muted-foreground hover:border-[#C5A059]",
                   )}
                 >
                   {folder.label} ({count})
@@ -356,7 +356,7 @@ export default function SavedPage() {
                         setEditingNoteId(saved.id)
                         setNoteText("")
                       }}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-dashed border-[#d4cfc7] text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059] transition-colors"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium border border-dashed border-border text-muted-foreground hover:border-[#C5A059] hover:text-[#C5A059] transition-colors"
                     >
                       <PenLine className="w-3 h-3" />
                       Add a note

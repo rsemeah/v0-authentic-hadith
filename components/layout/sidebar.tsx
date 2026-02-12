@@ -41,36 +41,38 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>
   label: string
   href: string
+  iconColor?: string // resting color class
+  iconHover?: string // hover color class
 }
 
 const navGroups: NavGroup[] = [
   {
     label: "",
-    items: [{ id: "home", icon: Home, label: "Home", href: "/home" }],
+    items: [{ id: "home", icon: Home, label: "Home", href: "/home", iconColor: "text-[#c5a059]/70", iconHover: "group-hover:text-[#c5a059]" }],
   },
   {
     label: "Study",
     items: [
-      { id: "collections", icon: BookOpen, label: "Collections", href: "/collections" },
-      { id: "topics", icon: Tags, label: "Topics", href: "/topics" },
-      { id: "sunnah", icon: Heart, label: "Sunnah", href: "/sunnah" },
-      { id: "learn", icon: GraduationCap, label: "Learning Paths", href: "/learn" },
+      { id: "collections", icon: BookOpen, label: "Collections", href: "/collections", iconColor: "text-[#1b5e43]/60", iconHover: "group-hover:text-[#1b5e43]" },
+      { id: "topics", icon: Tags, label: "Topics", href: "/topics", iconColor: "text-[#e8c77d]/80", iconHover: "group-hover:text-[#c5a059]" },
+      { id: "sunnah", icon: Heart, label: "Sunnah", href: "/sunnah", iconColor: "text-[#c5a059]/60", iconHover: "group-hover:text-[#c5a059]" },
+      { id: "learn", icon: GraduationCap, label: "Learning Paths", href: "/learn", iconColor: "text-[#2d7a5b]/60", iconHover: "group-hover:text-[#1b5e43]" },
       { id: "stories", icon: Users, label: "Stories", href: "/stories" },
     ],
   },
   {
     label: "Daily",
     items: [
-      { id: "today", icon: Sun, label: "Today", href: "/today" },
+      { id: "today", icon: Sun, label: "Today", href: "/today", iconColor: "text-[#e8c77d]/80", iconHover: "group-hover:text-[#c5a059]" },
       { id: "reflections", icon: PenLine, label: "Reflections", href: "/reflections" },
-      { id: "progress", icon: BarChart3, label: "Progress", href: "/progress" },
+      { id: "progress", icon: BarChart3, label: "Progress", href: "/progress", iconColor: "text-[#2d7a5b]/60", iconHover: "group-hover:text-[#1b5e43]" },
     ],
   },
   {
     label: "Personal",
     items: [
-      { id: "my-hadith", icon: Star, label: "My Hadith", href: "/my-hadith" },
-      { id: "achievements", icon: Trophy, label: "Achievements", href: "/achievements" },
+      { id: "my-hadith", icon: Star, label: "My Hadith", href: "/my-hadith", iconColor: "text-[#c5a059]/70", iconHover: "group-hover:text-[#c5a059]" },
+      { id: "achievements", icon: Trophy, label: "Achievements", href: "/achievements", iconColor: "text-[#e8c77d]/80", iconHover: "group-hover:text-[#c5a059]" },
       { id: "saved", icon: Bookmark, label: "Saved", href: "/saved" },
     ],
   },
@@ -78,7 +80,7 @@ const navGroups: NavGroup[] = [
     label: "Tools",
     items: [
       { id: "search", icon: Search, label: "Search", href: "/search" },
-      { id: "assistant", icon: Bot, label: "AI Assistant", href: "/assistant" },
+      { id: "assistant", icon: Bot, label: "AI Assistant", href: "/assistant", iconColor: "text-[#1b5e43]/60", iconHover: "group-hover:text-[#1b5e43]" },
       { id: "quiz", icon: HelpCircle, label: "Quiz", href: "/quiz" },
     ],
   },
@@ -209,7 +211,11 @@ export function Sidebar() {
                       <item.icon
                         className={cn(
                           "w-5 h-5 flex-shrink-0 transition-colors",
-                          isActive ? "text-[#C5A059]" : "text-muted-foreground group-hover:text-foreground",
+                          isActive
+                            ? "text-[#C5A059]"
+                            : item.iconColor
+                              ? cn(item.iconColor, item.iconHover)
+                              : "text-muted-foreground group-hover:text-foreground",
                         )}
                       />
                       {!collapsed && (

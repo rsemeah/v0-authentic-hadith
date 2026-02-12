@@ -110,17 +110,17 @@ export default function StoriesPage() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => router.push("/")}
-            className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
             aria-label="Go back home"
           >
             <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
           </button>
           <div>
-            <h1 className="text-lg font-semibold text-[#1a1f36]">Stories of the Companions</h1>
+            <h1 className="text-lg font-semibold text-foreground">Stories of the Companions</h1>
             <p className="text-xs text-muted-foreground">
               {companions.length} companions, {companions.reduce((sum, c) => sum + c.total_parts, 0)} parts
             </p>
@@ -141,13 +141,13 @@ export default function StoriesPage() {
         {loading ? (
           <div className="flex flex-col gap-3">
             {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="rounded-xl border border-[#e5e7eb] p-4 animate-pulse">
+              <div key={i} className="rounded-xl border border-border p-4 animate-pulse">
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-[#e5e7eb]" />
+                  <div className="w-14 h-14 rounded-xl bg-muted" />
                   <div className="flex-1">
-                    <div className="h-4 w-32 bg-[#e5e7eb] rounded mb-2" />
-                    <div className="h-3 w-24 bg-[#e5e7eb] rounded mb-2" />
-                    <div className="h-2 w-48 bg-[#e5e7eb] rounded" />
+                    <div className="h-4 w-32 bg-muted rounded mb-2" />
+                    <div className="h-3 w-24 bg-muted rounded mb-2" />
+                    <div className="h-2 w-48 bg-muted rounded" />
                   </div>
                 </div>
               </div>
@@ -247,13 +247,13 @@ function CompanionCard({
       onClick={onClick}
       className={cn(
         "w-full rounded-xl border text-left transition-all hover:shadow-md hover:border-[#C5A059]/30 premium-card overflow-hidden",
-        featured ? "border-[#C5A059]/30 shadow-sm" : "border-[#e5e7eb]",
+        featured ? "border-[#C5A059]/30 shadow-sm" : "border-border",
         isComplete && "border-[#1B5E43]/20 opacity-80",
       )}
     >
       {/* Progress bar at top */}
       {partsCompleted > 0 && !isComplete && (
-        <div className="h-1 bg-[#f3f4f6]">
+        <div className="h-1 bg-muted">
           <div
             className="h-full transition-all"
             style={{
@@ -276,7 +276,7 @@ function CompanionCard({
         {/* Details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-semibold text-[#1a1f36] truncate">{companion.name_en}</h3>
+            <h3 className="text-sm font-semibold text-foreground truncate">{companion.name_en}</h3>
             {isComplete && <CheckCircle2 className="w-3.5 h-3.5 text-[#1B5E43] shrink-0" />}
             {progress?.is_bookmarked && <Bookmark className="w-3.5 h-3.5 text-[#C5A059] fill-[#C5A059] shrink-0" />}
           </div>
@@ -307,7 +307,7 @@ function CompanionCard({
           {companion.notable_for && companion.notable_for.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {companion.notable_for.slice(0, 2).map((tag, i) => (
-                <span key={i} className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-full bg-[#f3f4f6]">
+                <span key={i} className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-full bg-muted">
                   {tag}
                 </span>
               ))}

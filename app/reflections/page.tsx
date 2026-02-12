@@ -20,7 +20,7 @@ const TAG_OPTIONS = [
   { value: "tawakkul", label: "Tawakkul", color: "bg-blue-50 text-blue-700 border border-blue-200", dot: "bg-blue-500" },
   { value: "repentance", label: "Repentance", color: "bg-purple-50 text-purple-700 border border-purple-200", dot: "bg-purple-500" },
   { value: "hope", label: "Hope", color: "bg-emerald-50 text-emerald-700 border border-emerald-200", dot: "bg-emerald-500" },
-  { value: "general", label: "General", color: "bg-[#f3f4f6] text-[#4b5563] border border-[#e5e7eb]", dot: "bg-[#6b7280]" },
+  { value: "general", label: "General", color: "bg-muted text-muted-foreground border border-border", dot: "bg-[#6b7280]" },
 ]
 
 export default function ReflectionsPage() {
@@ -123,17 +123,17 @@ export default function ReflectionsPage() {
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-[#e5e7eb] bg-[#F8F6F2]/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => router.back()}
-              className="w-10 h-10 rounded-full bg-[#F8F6F2] border border-[#e5e7eb] flex items-center justify-center hover:border-[#C5A059] transition-colors"
+              className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-[#6b7280]" />
+              <ChevronLeft className="w-5 h-5 text-muted-foreground" />
             </button>
             <div>
-              <h1 className="text-lg font-semibold text-[#1a1f36]">Reflections</h1>
+              <h1 className="text-lg font-semibold text-foreground">Reflections</h1>
               <p className="text-xs text-muted-foreground">Your private journal</p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function ReflectionsPage() {
         {/* Compose */}
         {showCompose && (
           <section className="premium-card rounded-xl p-4 mb-6 border border-[#C5A059]/30">
-            <h2 className="text-sm font-semibold text-[#1a1f36] mb-3 flex items-center gap-2">
+            <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
               <PenLine className="w-4 h-4 text-[#C5A059]" />
               New Reflection
             </h2>
@@ -158,14 +158,14 @@ export default function ReflectionsPage() {
               value={newContent}
               onChange={(e) => setNewContent(e.target.value)}
               placeholder="What is on your mind? Reflect on a hadith, an ayah, or a moment in your day..."
-              className="w-full px-3 py-2.5 rounded-lg border border-[#d4cfc7] bg-white text-sm resize-none focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all"
+              className="w-full px-3 py-2.5 rounded-lg border border-border bg-card text-sm resize-none focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all"
               rows={4}
             />
             <input
               value={newRef}
               onChange={(e) => setNewRef(e.target.value)}
               placeholder="Hadith or Ayah reference (optional)"
-              className="w-full mt-2 px-3 py-2 rounded-lg border border-[#d4cfc7] bg-white text-xs focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all"
+              className="w-full mt-2 px-3 py-2 rounded-lg border border-border bg-card text-xs focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all"
             />
             <div className="flex flex-wrap gap-1.5 mt-3">
               {TAG_OPTIONS.map((tag) => (
@@ -176,7 +176,7 @@ export default function ReflectionsPage() {
                     "px-2.5 py-1 rounded-full text-[10px] font-medium transition-all",
                     newTag === tag.value
                       ? tag.color + " ring-1 ring-current"
-                      : "bg-[#f3f4f6] text-[#9ca3af] hover:text-[#6b7280]"
+                      : "bg-muted text-muted-foreground/60 hover:text-muted-foreground"
                   )}
                 >
                   {tag.label}
@@ -193,7 +193,7 @@ export default function ReflectionsPage() {
               </button>
               <button
                 onClick={() => { setShowCompose(false); setNewContent(""); setNewRef(""); }}
-                className="px-4 py-2 rounded-lg bg-[#f3f4f6] text-[#6b7280] text-xs font-medium hover:bg-[#e5e7eb] transition-colors"
+                className="px-4 py-2 rounded-lg bg-muted text-muted-foreground text-xs font-medium hover:bg-muted transition-colors"
               >
                 Cancel
               </button>
@@ -207,7 +207,7 @@ export default function ReflectionsPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[#C5A059]/10 flex items-center justify-center">
               <PenLine className="w-7 h-7 text-[#C5A059]" />
             </div>
-            <h2 className="text-base font-semibold text-[#1a1f36] mb-2">Your Sacred Space</h2>
+            <h2 className="text-base font-semibold text-foreground mb-2">Your Sacred Space</h2>
             <p className="text-sm text-muted-foreground max-w-sm mx-auto mb-6 leading-relaxed">
               Use this journal to reflect on hadiths, ayahs, or moments in your spiritual journey.
               Everything here is private -- just between you and Allah.
@@ -254,9 +254,9 @@ export default function ReflectionsPage() {
                       </button>
                     </div>
                   </div>
-                  <p className="text-sm text-[#374151] leading-relaxed whitespace-pre-wrap">{ref.content}</p>
+                  <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{ref.content}</p>
                   {ref.hadith_ref && (
-                    <div className="flex items-center gap-2 mt-3 pt-2 border-t border-[#f3f4f6]">
+                    <div className="flex items-center gap-2 mt-3 pt-2 border-t border-border/50">
                       <BookOpen className="w-3 h-3 text-muted-foreground" />
                       <span className="text-[10px] text-muted-foreground">{ref.hadith_ref}</span>
                     </div>

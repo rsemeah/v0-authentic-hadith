@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { SignOutButton } from "@/components/sign-out-button"
+import { ContinueLearningWidget } from "@/components/continue-learning-widget"
 import Image from "next/image"
 
 export default async function DashboardPage() {
@@ -33,7 +34,10 @@ export default async function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-6">
+        {/* Continue Learning */}
+        <ContinueLearningWidget />
+
         <div className="bg-card border border-border rounded-2xl p-8 text-center">
           <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
             <span className="text-3xl text-primary font-bold">{user.email?.charAt(0).toUpperCase()}</span>

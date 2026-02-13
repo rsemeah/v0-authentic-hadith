@@ -207,6 +207,14 @@ export default function LearnPage() {
   const totalLessons = (pathId: string) => (lessonsByPath[pathId] ?? []).length
   const totalHadiths = (pathId: string) =>
     (lessonsByPath[pathId] ?? []).reduce((sum, l) => sum + l.hadith_count, 0)
+  const estimatedTimeRemaining = (pathId: string) => {
+    const lessons = lessonsByPath[pathId] ?? []
+    const remaining = lessons.filter((l) => lessonProgress.get(l.id)?.state !== "completed")
+    const totalMin = remaining.reduce((sum, l) => sum + (l.hadith_count * 2 || 10), 0)
+    if (totalMin < 60) return `~${totalMin} min`
+    const hours = Math.round(totalMin / 60)
+    return `~${hours}h`
+  }
 
   const getPathPercent = (pathId: string) => {
     const lessons = lessonsByPath[pathId] ?? []
@@ -351,8 +359,10 @@ export default function LearnPage() {
                     <div className="mt-2">
                       <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
                         <span>{percent}% complete</span>
-                        {pp.status === "completed" && (
+                        {pp.status === "completed" ? (
                           <span className="text-[#1B5E43] font-semibold">Completed</span>
+                        ) : (
+                          <span>{estimatedTimeRemaining(path.id)} remaining</span>
                         )}
                       </div>
                       <div className="h-1.5 rounded-full bg-muted overflow-hidden">

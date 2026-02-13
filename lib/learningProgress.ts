@@ -1,6 +1,7 @@
 "use server"
 
 import { getSupabaseServerClient } from "@/lib/supabase/server"
+import { trackLearningEvent } from "@/lib/gamification/track-learning"
 
 type StartPathArgs = { pathId: string }
 type MarkLessonCompleteArgs = { pathId: string; lessonId: string }
@@ -26,6 +27,10 @@ export async function startLearningPath({ pathId }: StartPathArgs) {
     .single()
 
   if (ulppErr) throw ulppErr
+
+  // Fire gamification event
+  trackLearningEvent(user.id, "path_started", { path_id: pathId }).catch(() => {})
+
   return ulpp
 }
 
@@ -57,6 +62,12 @@ export async function markLessonComplete({
     )
 
   if (lessonErr) throw lessonErr
+
+  // Fire gamification event
+  trackLearningEvent(user.id, "lesson_completed", {
+    path_id: pathId,
+    lesson_id: lessonId,
+  }).catch(() => {})
 
   // Update path progress resume point
   const { error: pathErr } = await supabase
@@ -98,6 +109,9 @@ export async function markLessonComplete({
       .update({ status: "completed", completed_at: nowIso })
       .eq("user_id", user.id)
       .eq("path_id", pathId)
+
+    // Fire path completion gamification event
+    trackLearningEvent(user.id, "path_completed", { path_id: pathId }).catch(() => {})
   }
 
   return { ok: true }

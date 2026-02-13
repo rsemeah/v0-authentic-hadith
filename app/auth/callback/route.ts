@@ -65,7 +65,7 @@ export async function GET(request: Request) {
       .single()
 
     if (!profile) {
-      await supabase.from('profiles').insert({
+      const { error: insertError } = await supabase.from('profiles').insert({
         id: user.id,
         email: user.email,
         full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
@@ -73,6 +73,12 @@ export async function GET(request: Request) {
         is_premium: false,
         role: 'user',
       })
+      
+      if (insertError) {
+        console.error('Failed to create profile for OAuth user:', insertError)
+        // Continue with onboarding even if profile creation fails
+        // The profile might already exist from a previous attempt
+      }
     }
 
     // Check if user has completed onboarding

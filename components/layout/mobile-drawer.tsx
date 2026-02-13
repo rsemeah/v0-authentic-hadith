@@ -16,6 +16,7 @@ import {
   Bookmark,
   Search,
   HelpCircle,
+  Info,
   User,
   Settings,
   LogOut,
@@ -65,7 +66,7 @@ const drawerGroups = [
     items: [
       { icon: User, label: "Profile", href: "/profile" },
       { icon: Settings, label: "Settings", href: "/settings" },
-      { icon: HelpCircle, label: "About", href: "/about" },
+      { icon: Info, label: "About", href: "/about" },
     ],
   },
 ]

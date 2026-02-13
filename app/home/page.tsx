@@ -101,6 +101,11 @@ export default function HomePage() {
           data: { user },
         } = await supabase.auth.getUser()
 
+        if (!user) {
+          router.push("/login")
+          return
+        }
+
         if (user) {
           // Fetch profile
           const { data: profileData } = await supabase

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle, Star, ChevronDown, Info, ChevronRight } from "lucide-react"
+import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle, Star, ChevronDown, Info, ChevronRight, Trash2, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
@@ -19,6 +19,10 @@ const settingsItems = [
 export default function SettingsPage() {
   const router = useRouter()
   const [expanded, setExpanded] = useState<ExpandedSection>("appearance")
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleteText, setDeleteText] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   const toggleSection = (id: ExpandedSection) => {
     setExpanded(expanded === id ? null : id)
@@ -96,10 +100,70 @@ export default function SettingsPage() {
                   )}
 
                   {item.id === "privacy" && (
-                    <div className="pt-2 border-t border-border">
+                    <div className="pt-2 border-t border-border space-y-4">
                       <p className="text-sm text-muted-foreground mt-3">
-                        Your data is stored securely. You can delete your account and all associated data at any time from your profile settings.
+                        Your data is stored securely. You can delete your account and all associated data below.
                       </p>
+                      {!showDeleteConfirm ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowDeleteConfirm(true)}
+                          className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors text-sm font-medium"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Delete My Account
+                        </button>
+                      ) : (
+                        <div className="p-4 rounded-lg border border-red-300 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20 space-y-3">
+                          <p className="text-sm font-medium text-red-700 dark:text-red-400">
+                            This will permanently delete your account and all data (saved hadiths, progress, notes, subscription). This cannot be undone.
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Type <span className="font-mono font-semibold">DELETE</span> to confirm:
+                          </p>
+                          <input
+                            type="text"
+                            value={deleteText}
+                            onChange={(e) => { setDeleteText(e.target.value); setDeleteError(null) }}
+                            placeholder="Type DELETE"
+                            className="w-full px-3 py-2 rounded-md border border-border bg-background text-foreground text-sm font-mono"
+                            autoComplete="off"
+                          />
+                          {deleteError && (
+                            <p className="text-sm text-red-600 dark:text-red-400">{deleteError}</p>
+                          )}
+                          <div className="flex gap-2">
+                            <button
+                              type="button"
+                              disabled={deleteText !== "DELETE" || isDeleting}
+                              onClick={async () => {
+                                setIsDeleting(true)
+                                setDeleteError(null)
+                                try {
+                                  const res = await fetch("/api/delete-account", { method: "POST" })
+                                  const body = await res.json()
+                                  if (!res.ok) throw new Error(body.error || "Deletion failed")
+                                  router.push("/login?deleted=1")
+                                } catch (err) {
+                                  setDeleteError(err instanceof Error ? err.message : "Deletion failed")
+                                  setIsDeleting(false)
+                                }
+                              }}
+                              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium disabled:opacity-40 disabled:cursor-not-allowed hover:bg-red-700 transition-colors"
+                            >
+                              {isDeleting && <Loader2 className="w-4 h-4 animate-spin" />}
+                              {isDeleting ? "Deleting..." : "Permanently Delete"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => { setShowDeleteConfirm(false); setDeleteText(""); setDeleteError(null) }}
+                              className="px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:bg-muted/50 transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 

@@ -4,26 +4,38 @@ import { getSupabaseAdmin } from "@/lib/supabase/admin"
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Verify the caller is authenticated (anon-key session)
-    const supabase = await getSupabaseServerClient()
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    let userId: string | null = null
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      )
+    // ── Auth strategy 1: Bearer token (mobile app) ──
+    const authHeader = req.headers.get("authorization")
+    if (authHeader?.startsWith("Bearer ")) {
+      const token = authHeader.slice(7)
+      const admin = getSupabaseAdmin()
+      const { data, error } = await admin.auth.getUser(token)
+      if (!error && data.user) {
+        userId = data.user.id
+      }
     }
 
-    // 2. Use service-role client to run the RPC + delete auth user
+    // ── Auth strategy 2: Cookie session (web) ──
+    if (!userId) {
+      const supabase = await getSupabaseServerClient()
+      const { data: { user }, error } = await supabase.auth.getUser()
+      if (!error && user) {
+        userId = user.id
+      }
+    }
+
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    // ── Use service-role client to run the RPC + delete auth user ──
     const admin = getSupabaseAdmin()
 
     // Archive & purge all user data via the SECURITY DEFINER function
     const { error: rpcError } = await admin.rpc("delete_user_account", {
-      p_user_id: user.id,
+      p_user_id: userId,
     })
 
     if (rpcError) {
@@ -34,9 +46,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // 3. Delete the auth.users row (removes login credentials)
+    // Delete the auth.users row (removes login credentials)
     const { error: deleteAuthError } =
-      await admin.auth.admin.deleteUser(user.id)
+      await admin.auth.admin.deleteUser(userId)
 
     if (deleteAuthError) {
       console.error("deleteUser auth failed:", deleteAuthError)

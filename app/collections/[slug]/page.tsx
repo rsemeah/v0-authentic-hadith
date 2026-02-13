@@ -7,6 +7,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 import { Breadcrumb } from "@/components/collections/breadcrumb"
 import { BookCard } from "@/components/collections/book-card"
+import { LearningProgressBanner } from "@/components/learning-progress-banner"
 import { cn } from "@/lib/utils"
 
 interface Collection {
@@ -235,6 +236,9 @@ export default function CollectionDetailPage() {
           <Breadcrumb items={[{ label: "Collections", href: "/collections" }, { label: collection.name_en }]} />
         </div>
       </header>
+
+      {/* Learning Path Progress Banner */}
+      <LearningProgressBanner />
 
       {/* Collection Header */}
       <section className="relative overflow-hidden border-b border-border">

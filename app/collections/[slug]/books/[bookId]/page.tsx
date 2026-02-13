@@ -8,6 +8,7 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Breadcrumb } from "@/components/collections/breadcrumb"
 import { ChapterCard } from "@/components/collections/chapter-card"
 import { HadithCardCondensed } from "@/components/collections/hadith-card-condensed"
+import { LearningProgressBanner } from "@/components/learning-progress-banner"
 
 interface Book {
   id: string
@@ -260,6 +261,9 @@ export default function BookDetailPage() {
           />
         </div>
       </header>
+
+      {/* Learning Path Progress Banner */}
+      <LearningProgressBanner />
 
       {/* Book Header */}
       <section className="border-b border-border">

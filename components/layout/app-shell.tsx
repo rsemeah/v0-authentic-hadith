@@ -3,6 +3,7 @@
 import type { ReactNode } from "react"
 import { usePathname } from "next/navigation"
 import { Sidebar } from "./sidebar"
+import { MobileTopBar } from "./mobile-top-bar"
 import { BottomNavigation } from "@/components/home/bottom-navigation"
 import { cn } from "@/lib/utils"
 
@@ -27,6 +28,9 @@ export function AppShell({ children }: AppShellProps) {
     <div className="min-h-screen">
       {/* Desktop Sidebar */}
       <Sidebar />
+
+      {/* Mobile Top Bar with back/home buttons */}
+      <MobileTopBar />
 
       {/* Main Content - Shifted right on desktop to account for sidebar */}
       <div

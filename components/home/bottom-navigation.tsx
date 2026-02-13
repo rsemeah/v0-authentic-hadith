@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter } from "next/navigation"
 import { Home, BookOpen, Sun, Bot, Star, Menu } from "lucide-react"
@@ -20,6 +20,7 @@ export function BottomNavigation() {
   const pathname = usePathname()
   const router = useRouter()
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const handleCloseDrawer = useCallback(() => setDrawerOpen(false), [])
 
   const isExcluded = excludedPaths.some((path) => pathname === path || (path !== "/" && pathname.startsWith(path)))
 
@@ -77,7 +78,7 @@ export function BottomNavigation() {
         </div>
       </nav>
 
-      <MobileDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <MobileDrawer open={drawerOpen} onClose={handleCloseDrawer} />
     </>
   )
 }

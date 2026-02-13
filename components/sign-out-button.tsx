@@ -10,7 +10,11 @@ export function SignOutButton() {
   const supabase = getSupabaseBrowserClient()
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
+    // Clear server-side session cookies first
+    await fetch("/api/auth/signout", { method: "POST" })
+    // Then clear client-side session
+    await supabase.auth.signOut({ scope: "global" })
+    document.cookie = "qbos_onboarded=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT"
     router.push("/login")
     router.refresh()
   }

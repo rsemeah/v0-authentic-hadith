@@ -26,7 +26,7 @@ export function AuthForm() {
     setError(null)
 
     const supabase = getSupabaseBrowserClient()
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
@@ -34,11 +34,26 @@ export function AuthForm() {
     if (error) {
       setError(error.message)
       setLoading(false)
-    } else {
-      // Redirect to home - middleware will handle onboarding check
-      router.push("/home")
-      router.refresh()
+      return
     }
+
+    // Check if user has completed onboarding
+    if (data?.user) {
+      const { data: prefs } = await supabase
+        .from("user_preferences")
+        .select("onboarded")
+        .eq("user_id", data.user.id)
+        .single()
+
+      if (prefs?.onboarded) {
+        router.push("/home")
+      } else {
+        router.push("/onboarding")
+      }
+    } else {
+      router.push("/home")
+    }
+    router.refresh()
   }
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -88,18 +103,27 @@ export function AuthForm() {
     setLoading(true)
     setError(null)
 
-    const supabase = getSupabaseBrowserClient()
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo:
-          process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
-          `${window.location.origin}/auth/callback`,
-      },
-    })
+    try {
+      const supabase = getSupabaseBrowserClient()
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo:
+            process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL ||
+            `${window.location.origin}/auth/callback`,
+        },
+      })
 
-    if (error) {
-      setError(error.message)
+      if (error) {
+        if (error.message.includes("provider is not enabled") || error.message.includes("unsupported")) {
+          setError(`Sign in with ${provider === "google" ? "Google" : "Apple"} is not available yet. Please use email and password.`)
+        } else {
+          setError(error.message)
+        }
+        setLoading(false)
+      }
+    } catch {
+      setError(`Sign in with ${provider === "google" ? "Google" : "Apple"} is not available yet. Please use email and password.`)
       setLoading(false)
     }
   }

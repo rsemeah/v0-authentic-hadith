@@ -2,6 +2,7 @@ import { streamText, tool } from "ai"
 import { createGroq } from "@ai-sdk/groq"
 import { z } from "zod"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
+import { checkAIQuota, incrementAIUsage } from "@/lib/quotas/check"
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
@@ -32,6 +33,40 @@ Use the searchHadiths tool to find relevant hadiths before answering questions.`
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json()
+
+    // Auth check
+    const supabase = await getSupabaseServerClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      return new Response(
+        JSON.stringify({ error: "You must be logged in to use the AI assistant." }),
+        { status: 401, headers: { "Content-Type": "application/json" } },
+      )
+    }
+
+    // Quota check
+    const quotaCheck = await checkAIQuota(user.id)
+
+    if (!quotaCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: "quota_exceeded",
+          message: quotaCheck.reason,
+          quota: {
+            daily_remaining: quotaCheck.daily_remaining,
+            monthly_remaining: quotaCheck.monthly_remaining,
+            daily_limit: quotaCheck.daily_limit,
+            monthly_limit: quotaCheck.monthly_limit,
+            tier: quotaCheck.tier,
+          },
+          upgrade_url: "/pricing",
+        }),
+        { status: 429, headers: { "Content-Type": "application/json" } },
+      )
+    }
 
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
@@ -82,6 +117,10 @@ export async function POST(req: Request) {
         }),
       },
       maxSteps: 3,
+      onFinish: async () => {
+        // Increment usage after successful response
+        await incrementAIUsage(user.id)
+      },
     })
 
     return result.toDataStreamResponse()

@@ -38,6 +38,7 @@ function getPageTitle(pathname: string): string {
     hadith: "Hadith",
     share: "Share",
     dashboard: "Dashboard",
+    about: "About",
   }
 
   // For deep pages, show the last meaningful segment

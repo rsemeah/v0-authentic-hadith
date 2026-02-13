@@ -65,6 +65,7 @@ const drawerGroups = [
     items: [
       { icon: User, label: "Profile", href: "/profile" },
       { icon: Settings, label: "Settings", href: "/settings" },
+      { icon: HelpCircle, label: "About", href: "/about" },
     ],
   },
 ]

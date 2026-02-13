@@ -110,7 +110,7 @@ export default function SettingsPage() {
                   {item.id === "notifications" && (
                     <div className="pt-2 border-t border-border">
                       <p className="text-sm text-muted-foreground mt-3">
-                        Push notifications coming soon! We&apos;ll notify you about daily hadiths and reminders.
+                        Notification preferences are managed through your device settings. To receive daily hadith reminders, make sure notifications are enabled for Authentic Hadith in your device&apos;s notification settings.
                       </p>
                     </div>
                   )}
@@ -118,7 +118,7 @@ export default function SettingsPage() {
                   {item.id === "language" && (
                     <div className="pt-2 border-t border-border">
                       <p className="text-sm text-muted-foreground mt-3">
-                        Language selection coming soon. Currently showing English translations with Arabic text.
+                        Authentic Hadith displays hadiths in both Arabic and English. All hadith texts include the original Arabic alongside verified English translations from scholarly sources.
                       </p>
                     </div>
                   )}

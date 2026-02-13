@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle, Star, ChevronDown } from "lucide-react"
+import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle, Star, ChevronDown, Info } from "lucide-react"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
 type ExpandedSection = "appearance" | "notifications" | "language" | "privacy" | "help" | null
@@ -135,6 +135,26 @@ export default function SettingsPage() {
               </div>
             </button>
           </div>
+        </div>
+
+        {/* About */}
+        <div className="mt-8">
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
+            Information
+          </h2>
+          <button
+            type="button"
+            onClick={() => router.push("/about")}
+            className="w-full rounded-xl p-4 border border-border bg-card flex items-center gap-4 active:bg-muted/50 transition-colors text-left"
+          >
+            <div className="w-11 h-11 rounded-lg bg-[#1b5e43]/10 flex items-center justify-center shrink-0">
+              <Info className="w-5 h-5 text-[#1b5e43] dark:text-[#4a9973]" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">About Authentic Hadith</h3>
+              <p className="text-sm text-muted-foreground">Mission, sources, AI policy & more</p>
+            </div>
+          </button>
         </div>
 
         <div className="mt-8 text-center text-sm text-muted-foreground">

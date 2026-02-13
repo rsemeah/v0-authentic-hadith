@@ -57,6 +57,31 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser()
 
   if (user) {
+    // Ensure profile exists for OAuth users
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile) {
+      const { error: insertError } = await supabase.from('profiles').insert({
+        id: user.id,
+        email: user.email,
+        full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
+        avatar_url: user.user_metadata?.avatar_url || null,
+        is_premium: false,
+        role: 'user',
+      })
+      
+      if (insertError) {
+        console.error('Failed to create profile for OAuth user:', insertError)
+        // Continue with onboarding even if profile creation fails
+        // The profile might already exist from a previous attempt
+      }
+    }
+
+    // Check if user has completed onboarding
     const { data: prefs } = await supabase
       .from("user_preferences")
       .select("onboarded")

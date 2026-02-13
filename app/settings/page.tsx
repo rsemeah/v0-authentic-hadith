@@ -116,46 +116,36 @@ export default function SettingsPage() {
           ))}
         </div>
 
-        {/* Premium & Support */}
-        <div className="mt-8">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-            Premium & Support
-          </h2>
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => router.push("/pricing")}
-              className="w-full rounded-xl p-4 border border-border bg-card flex items-center gap-4 active:bg-muted/50 transition-colors text-left"
-            >
-              <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#C5A059] to-[#E8C77D] flex items-center justify-center shrink-0">
-                <Star className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-medium text-foreground">Upgrade to Premium</h3>
-                <p className="text-sm text-muted-foreground">AI explanations, advanced search & more</p>
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* About */}
-        <div className="mt-8">
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-1">
-            Information
-          </h2>
+        {/* Quick Links */}
+        <div className="mt-8 space-y-3">
           <Link
             href="/about"
-            className="w-full rounded-xl p-4 border border-border bg-card flex items-center gap-4 active:bg-muted/50 transition-colors text-left"
+            className="w-full rounded-xl p-4 border border-border bg-card flex items-center gap-4 active:bg-muted/50 transition-colors"
           >
-            <div className="w-11 h-11 rounded-lg bg-[#1b5e43]/10 flex items-center justify-center shrink-0">
-              <Info className="w-5 h-5 text-[#1b5e43] dark:text-[#4a9973]" />
+            <div className="w-11 h-11 rounded-lg bg-[#C5A059]/10 flex items-center justify-center shrink-0">
+              <Info className="w-5 h-5 text-[#C5A059]" />
             </div>
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <h3 className="font-medium text-foreground">About Authentic Hadith</h3>
               <p className="text-sm text-muted-foreground">Mission, sources, AI policy & more</p>
             </div>
             <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
           </Link>
+
+          <button
+            type="button"
+            onClick={() => router.push("/pricing")}
+            className="w-full rounded-xl p-4 border border-border bg-card flex items-center gap-4 active:bg-muted/50 transition-colors text-left"
+          >
+            <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#C5A059] to-[#E8C77D] flex items-center justify-center shrink-0">
+              <Star className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Upgrade to Premium</h3>
+              <p className="text-sm text-muted-foreground">AI explanations, advanced search & more</p>
+            </div>
+            <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+          </button>
         </div>
 
         <div className="mt-8 text-center text-sm text-muted-foreground">

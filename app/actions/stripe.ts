@@ -87,19 +87,20 @@ export async function startCheckoutSession(productId: string) {
     }
 
     if (isIntro) {
-      // Intro offer: apply 50% off first month coupon
-      // Cannot use allow_promotion_codes alongside discounts -- Stripe only allows one
+      // Intro offer: apply coupon -- cannot use allow_promotion_codes with discounts
       sessionParams.discounts = [{ coupon: STRIPE_COUPONS.INTRO_MONTHLY }]
     } else if (product.trialDays) {
       // Regular plans: offer free trial
       subscriptionData.trial_period_days = product.trialDays
+      // Allow promo codes only when we're not applying a discount
+      sessionParams.allow_promotion_codes = true
+    } else {
+      sessionParams.allow_promotion_codes = true
     }
 
     sessionParams.subscription_data = subscriptionData
-  }
-
-  // Only allow promo codes when no discount is already applied (Stripe rejects both together)
-  if (!sessionParams.discounts) {
+  } else {
+    // One-time payments can always have promo codes
     sessionParams.allow_promotion_codes = true
   }
 

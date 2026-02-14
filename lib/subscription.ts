@@ -1,5 +1,4 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server"
-import { checkRevenueCatEntitlement } from "@/lib/revenuecat/server"
 
 export interface UserSubscription {
   isPremium: boolean
@@ -23,18 +22,6 @@ export async function getUserSubscription(): Promise<UserSubscription> {
     const { data: { user } } = await supabase.auth.getUser()
 
     if (!user) return FREE_SUBSCRIPTION
-
-    // Check RevenueCat entitlements first
-    const rcResult = await checkRevenueCatEntitlement(user.id)
-    if (rcResult.isPro) {
-      return {
-        isPremium: true,
-        tier: "premium",
-        plan: rcResult.productIdentifier,
-        status: "active",
-        currentPeriodEnd: rcResult.expiresDate,
-      }
-    }
 
     // Check profile tier first (fast path)
     const { data: profile } = await supabase

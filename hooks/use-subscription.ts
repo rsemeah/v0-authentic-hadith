@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-import { getRevenueCatClient } from "@/lib/revenuecat/client"
-import { ENTITLEMENT_ID } from "@/lib/revenuecat/config"
 
 export interface UserSubscription {
   isPremium: boolean
@@ -35,27 +33,6 @@ export function useSubscription(): UserSubscription {
         return
       }
 
-      // Check RevenueCat first
-      try {
-        const rc = getRevenueCatClient(user.id)
-        const customerInfo = await rc.getCustomerInfo()
-        const entitlement = customerInfo.entitlements.active[ENTITLEMENT_ID]
-
-        if (entitlement?.isActive) {
-          setSub({
-            isPremium: true,
-            plan: entitlement.productIdentifier,
-            status: "active",
-            currentPeriodEnd: entitlement.expirationDate,
-            loading: false,
-          })
-          return
-        }
-      } catch {
-        // RevenueCat check failed, fall back to Supabase
-      }
-
-      // Fallback: check Supabase subscriptions table (for existing Stripe subscriptions)
       const { data } = await supabase
         .from("subscriptions")
         .select("*")

@@ -71,11 +71,11 @@ export default function AboutPage() {
           <h1 className="font-serif text-3xl sm:text-4xl font-semibold gold-text gold-text-heading mb-4">
             Authentic Hadith
           </h1>
-          <p className="text-base sm:text-lg text-foreground/80 leading-relaxed max-w-2xl mx-auto font-sans">
+          <p className="text-base sm:text-lg text-foreground leading-relaxed max-w-2xl mx-auto font-sans">
             A guided knowledge companion rooted in authentic Islamic sources.
           </p>
           <div className="mt-6 border-l-4 border-[#C5A059] pl-4 text-left max-w-xl mx-auto">
-            <p className="text-sm sm:text-base text-muted-foreground leading-relaxed font-sans">
+            <p className="text-sm sm:text-base text-foreground/70 leading-relaxed font-sans">
               Authentic Hadith makes verified prophetic narrations accessible,
               understandable, and thoughtfully presented. Our mission is to help
               Muslims grow in knowledge and character through reliable sources,
@@ -91,14 +91,14 @@ export default function AboutPage() {
         {/* Our Mission */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 flex items-center justify-center shrink-0">
-              <Heart className="w-5 h-5 text-[#1b5e43]" />
+            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 dark:bg-[#4a9973]/15 flex items-center justify-center shrink-0">
+              <Heart className="w-5 h-5 text-[#1b5e43] dark:text-[#6bb895]" />
             </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#4a9973]">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#6bb895]">
               Our Mission
             </h2>
           </div>
-          <p className="text-muted-foreground leading-relaxed mb-5 font-sans">
+          <p className="text-foreground/70 leading-relaxed mb-5 font-sans">
             We combine classical Islamic scholarship with modern technology
             in a way that preserves authenticity, clarity, and adab.
           </p>
@@ -112,7 +112,7 @@ export default function AboutPage() {
             ].map((item) => (
               <div key={item} className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#C5A059] mt-2 shrink-0" />
-                <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans">{item}</p>
+                <p className="text-sm sm:text-base text-foreground/90 leading-relaxed font-sans">{item}</p>
               </div>
             ))}
           </div>
@@ -123,10 +123,10 @@ export default function AboutPage() {
         {/* Sources & Authenticity */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 flex items-center justify-center shrink-0">
-              <BookOpen className="w-5 h-5 text-[#1b5e43]" />
+            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 dark:bg-[#4a9973]/15 flex items-center justify-center shrink-0">
+              <BookOpen className="w-5 h-5 text-[#1b5e43] dark:text-[#6bb895]" />
             </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#4a9973]">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#6bb895]">
               Sources & Authenticity
             </h2>
           </div>
@@ -157,8 +157,8 @@ export default function AboutPage() {
               "Narrator chains (isnad) are preserved where available",
             ].map((item) => (
               <div key={item} className="flex items-start gap-3">
-                <Shield className="w-4 h-4 text-[#1b5e43] dark:text-[#4a9973] mt-0.5 shrink-0" />
-                <p className="text-sm text-foreground/80 leading-relaxed font-sans">{item}</p>
+                <Shield className="w-4 h-4 text-[#1b5e43] dark:text-[#6bb895] mt-0.5 shrink-0" />
+                <p className="text-sm text-foreground/90 leading-relaxed font-sans">{item}</p>
               </div>
             ))}
           </div>
@@ -183,10 +183,10 @@ export default function AboutPage() {
         {/* Responsible AI Use */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 flex items-center justify-center shrink-0">
-              <Bot className="w-5 h-5 text-[#1b5e43]" />
+            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 dark:bg-[#4a9973]/15 flex items-center justify-center shrink-0">
+              <Bot className="w-5 h-5 text-[#1b5e43] dark:text-[#6bb895]" />
             </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#4a9973]">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#6bb895]">
               How We Use AI
             </h2>
           </div>
@@ -206,14 +206,14 @@ export default function AboutPage() {
             {/* What AI Does */}
             <div className="rounded-xl border border-border bg-card p-4">
               <div className="flex items-center gap-2 mb-3">
-                <CheckCircle2 className="w-5 h-5 text-[#1b5e43] dark:text-[#4a9973]" />
+                <CheckCircle2 className="w-5 h-5 text-[#1b5e43] dark:text-[#6bb895]" />
                 <h3 className="text-sm font-semibold text-foreground font-sans">What AI Does</h3>
               </div>
               <div className="space-y-2.5">
                 {aiDoes.map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#1b5e43] dark:bg-[#4a9973] mt-1.5 shrink-0" />
-                    <p className="text-sm text-foreground/80 leading-relaxed font-sans">{item}</p>
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#1b5e43] dark:bg-[#6bb895] mt-1.5 shrink-0" />
+                    <p className="text-sm text-foreground/90 leading-relaxed font-sans">{item}</p>
                   </div>
                 ))}
               </div>
@@ -229,7 +229,7 @@ export default function AboutPage() {
                 {aiDoesNot.map((item) => (
                   <div key={item} className="flex items-start gap-2.5">
                     <div className="w-1.5 h-1.5 rounded-full bg-destructive mt-1.5 shrink-0" />
-                    <p className="text-sm text-foreground/80 leading-relaxed font-sans">{item}</p>
+                    <p className="text-sm text-foreground/90 leading-relaxed font-sans">{item}</p>
                   </div>
                 ))}
               </div>
@@ -251,11 +251,11 @@ export default function AboutPage() {
             <div className="w-10 h-10 rounded-lg bg-[#C5A059]/10 flex items-center justify-center shrink-0">
               <AlertTriangle className="w-5 h-5 text-[#C5A059]" />
             </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#4a9973]">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#6bb895]">
               Handling Sensitive Topics
             </h2>
           </div>
-          <p className="text-muted-foreground leading-relaxed mb-5 font-sans text-sm sm:text-base">
+          <p className="text-foreground/70 leading-relaxed mb-5 font-sans text-sm sm:text-base">
             Islamic knowledge includes topics that require careful context,
             scholarly understanding, and personal guidance.
           </p>
@@ -268,7 +268,7 @@ export default function AboutPage() {
             ].map((item) => (
               <div key={item} className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-[#C5A059] mt-2 shrink-0" />
-                <p className="text-sm sm:text-base text-foreground/80 leading-relaxed font-sans">{item}</p>
+                <p className="text-sm sm:text-base text-foreground/90 leading-relaxed font-sans">{item}</p>
               </div>
             ))}
           </div>
@@ -285,10 +285,10 @@ export default function AboutPage() {
         {/* Transparency & Version Info */}
         <section>
           <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 flex items-center justify-center shrink-0">
-              <Info className="w-5 h-5 text-[#1b5e43]" />
+            <div className="w-10 h-10 rounded-lg bg-[#1b5e43]/10 dark:bg-[#4a9973]/15 flex items-center justify-center shrink-0">
+              <Info className="w-5 h-5 text-[#1b5e43] dark:text-[#6bb895]" />
             </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#4a9973]">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#6bb895]">
               Transparency & Version
             </h2>
           </div>
@@ -379,13 +379,13 @@ export default function AboutPage() {
             <div className="w-10 h-10 rounded-lg bg-[#C5A059]/10 flex items-center justify-center shrink-0">
               <Heart className="w-5 h-5 text-[#C5A059]" />
             </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#4a9973]">
+            <h2 className="font-serif text-xl sm:text-2xl font-semibold text-[#1b5e43] dark:text-[#6bb895]">
               A Note from the Team
             </h2>
           </div>
 
           <div className="rounded-xl gold-border p-5 sm:p-6">
-            <div className="space-y-4 text-sm sm:text-base text-foreground/80 leading-relaxed font-sans">
+            <div className="space-y-4 text-sm sm:text-base text-foreground/90 leading-relaxed font-sans">
               <p>
                 Authentic Hadith was built out of a simple need: to learn about
                 the Prophet&apos;s teachings in a way that felt modern, trustworthy,

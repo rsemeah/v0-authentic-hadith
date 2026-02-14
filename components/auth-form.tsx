@@ -2,12 +2,14 @@
 
 import type React from "react"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Input } from "@/components/ui/input"
 import { Eye, EyeOff, Loader2, Mail, Lock, User } from "lucide-react"
 
 type AuthMode = "signin" | "signup" | "forgot"
+
+const OAUTH_ENABLED = process.env.NEXT_PUBLIC_OAUTH_ENABLED === "true"
 
 export function AuthForm() {
   const [mode, setMode] = useState<AuthMode>("signin")
@@ -19,6 +21,8 @@ export function AuthForm() {
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get("redirect")
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,12 +50,12 @@ export function AuthForm() {
         .single()
 
       if (prefs?.onboarded) {
-        router.push("/home")
+        router.push(redirectTo || "/home")
       } else {
         router.push("/onboarding")
       }
     } else {
-      router.push("/home")
+      router.push(redirectTo || "/home")
     }
     router.refresh()
   }
@@ -319,7 +323,7 @@ export function AuthForm() {
       </form>
 
       {/* Divider */}
-      {mode !== "forgot" && (
+      {mode !== "forgot" && OAUTH_ENABLED && (
         <div className="relative my-8">
           <div className="gold-divider" />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -330,8 +334,8 @@ export function AuthForm() {
         </div>
       )}
 
-      {/* Social Login Buttons */}
-      {mode !== "forgot" && (
+      {/* Social Login Buttons -- only shown when OAuth providers are configured */}
+      {mode !== "forgot" && OAUTH_ENABLED && (
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"

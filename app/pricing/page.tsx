@@ -2,12 +2,13 @@
 
 import React from "react"
 
-import { useState, Suspense } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, Check, Star, Crown, Zap, Infinity, X } from "lucide-react"
+import { ChevronLeft, Check, Star, Crown, Zap, Infinity, X, RotateCcw } from "lucide-react"
 
 import { PRODUCTS } from "@/lib/products"
 import type { Product } from "@/lib/products"
+import { isNativeApp, showNativePaywall, restoreNativePurchases } from "@/lib/native-bridge"
 import dynamic from "next/dynamic"
 
 const Checkout = dynamic(() => import("@/components/checkout"), { ssr: false })
@@ -53,6 +54,29 @@ function PricingContent() {
   const validPlan = PRODUCTS.find((p) => p.id === planFromUrl)
   const [selectedProduct, setSelectedProduct] = useState<string | null>(validPlan ? validPlan.id : null)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [isNative, setIsNative] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(false)
+
+  useEffect(() => {
+    setIsNative(isNativeApp())
+  }, [])
+
+  // In native app, show RevenueCat paywall instead of Stripe
+  const handleNativeSubscribe = async () => {
+    const success = await showNativePaywall()
+    if (success) {
+      router.push("/home")
+    }
+  }
+
+  const handleNativeRestore = async () => {
+    setIsRestoring(true)
+    const restored = await restoreNativePurchases()
+    setIsRestoring(false)
+    if (restored) {
+      router.push("/home")
+    }
+  }
 
   if (selectedProduct) {
     return (
@@ -167,7 +191,7 @@ function PricingContent() {
               )}
 
               <button
-                onClick={() => setSelectedProduct(plan.id)}
+                onClick={() => isNative ? handleNativeSubscribe() : setSelectedProduct(plan.id)}
                 className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${
                   plan.highlighted
                     ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"
@@ -199,6 +223,18 @@ function PricingContent() {
               ))}
             </ul>
           </div>
+
+          {/* Restore Purchases -- required by Apple for IAP apps */}
+          {isNative && (
+            <button
+              onClick={handleNativeRestore}
+              disabled={isRestoring}
+              className="w-full py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-2"
+            >
+              <RotateCcw className={`w-4 h-4 ${isRestoring ? "animate-spin" : ""}`} />
+              {isRestoring ? "Restoring..." : "Restore Purchases"}
+            </button>
+          )}
         </div>
       </main>
 

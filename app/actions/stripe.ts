@@ -75,7 +75,6 @@ export async function startCheckoutSession(productId: string) {
     line_items: [{ price: priceId, quantity: 1 }],
     mode: product.mode,
     return_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    allow_promotion_codes: true,
     metadata: {
       supabase_user_id: user.id,
       product_id: product.id,
@@ -88,14 +87,21 @@ export async function startCheckoutSession(productId: string) {
     }
 
     if (isIntro) {
-      // Intro offer: apply 50% off first month coupon
+      // Intro offer: apply coupon -- cannot use allow_promotion_codes with discounts
       sessionParams.discounts = [{ coupon: STRIPE_COUPONS.INTRO_MONTHLY }]
     } else if (product.trialDays) {
       // Regular plans: offer free trial
       subscriptionData.trial_period_days = product.trialDays
+      // Allow promo codes only when we're not applying a discount
+      sessionParams.allow_promotion_codes = true
+    } else {
+      sessionParams.allow_promotion_codes = true
     }
 
     sessionParams.subscription_data = subscriptionData
+  } else {
+    // One-time payments can always have promo codes
+    sessionParams.allow_promotion_codes = true
   }
 
   const session = await stripe.checkout.sessions.create(

@@ -82,6 +82,8 @@
     "react-markdown": "^9.0.1",
     "react-native": "0.83.1",
     "react-native-gesture-handler": "latest",
+    "react-native-purchases": "9.9.0",
+    "react-native-purchases-ui": "9.9.0",
     "react-native-reanimated": "latest",
     "react-native-safe-area-context": "5.6.2",
     "react-native-screens": "latest",

@@ -1,4 +1,5 @@
-export const REVENUECAT_API_KEY = "test_gngYicqPNakjsEBKvUwfIlFHrUg"
+export const REVENUECAT_API_KEY =
+  process.env.NEXT_PUBLIC_REVENUECAT_API_KEY || "test_gngYicqPNakjsEBKvUwfIlFHrUg"
 
 export const ENTITLEMENT_ID = "RedLantern Studios Pro"
 

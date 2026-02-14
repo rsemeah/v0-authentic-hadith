@@ -123,26 +123,45 @@ export async function POST(request: NextRequest) {
       ? new Date(event.expiration_at_ms).toISOString()
       : null
 
-    // Upsert into subscriptions table
-    const { error: subError } = await supabaseAdmin
+    // Check if this user already has a RevenueCat subscription row
+    const { data: existingSub } = await supabaseAdmin
       .from("subscriptions")
-      .upsert(
-        {
-          user_id: userId,
-          product_id: event.product_id,
-          status,
-          provider: "revenuecat",
-          store: event.store.toLowerCase(),
-          current_period_end: expiresAt,
-          environment: event.environment.toLowerCase(),
-          transaction_id: event.transaction_id || null,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id" }
-      )
+      .select("id")
+      .eq("user_id", userId)
+      .eq("provider", "revenuecat")
+      .limit(1)
+      .single()
+
+    const subscriptionData = {
+      user_id: userId,
+      product_id: event.product_id,
+      status,
+      provider: "revenuecat",
+      store: event.store.toLowerCase(),
+      current_period_end: expiresAt,
+      environment: event.environment.toLowerCase(),
+      transaction_id: event.transaction_id || null,
+      updated_at: new Date().toISOString(),
+    }
+
+    let subError
+    if (existingSub) {
+      // Update existing RevenueCat subscription
+      const result = await supabaseAdmin
+        .from("subscriptions")
+        .update(subscriptionData)
+        .eq("id", existingSub.id)
+      subError = result.error
+    } else {
+      // Insert new RevenueCat subscription
+      const result = await supabaseAdmin
+        .from("subscriptions")
+        .insert({ ...subscriptionData, created_at: new Date().toISOString() })
+      subError = result.error
+    }
 
     if (subError) {
-      console.error("[RevenueCat Webhook] Subscription upsert error:", subError)
+      console.error("[RevenueCat Webhook] Subscription write error:", subError)
     }
 
     // Also update the profile tier for fast lookups

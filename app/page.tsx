@@ -1,7 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
 import { BookOpen, Search, Shield, MessageCircle, Star, Heart, Zap, Crown, Infinity, Check, Share2, Users, Copy } from "lucide-react"
-import { PRODUCTS } from "@/lib/products"
 import { ShareBanner } from "@/components/share-banner"
 
 export default function LandingPage() {
@@ -128,7 +127,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section - Real Products */}
+      {/* Pricing Section */}
       <section id="pricing" className="px-4 md:px-6 py-10 md:py-16 max-w-5xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3 md:mb-4">
@@ -141,92 +140,66 @@ export default function LandingPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto">
-          {PRODUCTS.map((plan) => {
-            const icons: Record<string, typeof Zap> = {
-              "monthly-intro": Zap,
-              "monthly-premium": Star,
-              "annual-premium": Crown,
-              "lifetime-access": Infinity,
-            }
-            const Icon = icons[plan.id] || Star
-
-            return (
-              <div
-                key={plan.id}
-                className={`relative rounded-xl p-6 ${
-                  plan.highlighted
-                    ? "gold-border premium-card ring-2 ring-[#C5A059]/30"
-                    : "premium-card"
-                }`}
-              >
-                {plan.badge && (
-                  <div
-                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold ${
-                      plan.highlighted
-                        ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D]"
-                        : plan.id === "lifetime-access"
-                          ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]"
-                          : "bg-[#6b7280]"
-                    }`}
-                  >
-                    {plan.badge}
-                  </div>
-                )}
-
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg gold-icon-bg flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-[#C5A059]" />
-                  </div>
-                  <h3 className="font-semibold text-foreground">{plan.name}</h3>
-                </div>
-
-                <div className="mb-4">
-                  <span className="text-3xl font-bold text-foreground">
-                    ${(plan.priceInCents / 100).toFixed(2)}
-                  </span>
-                  <span className="text-sm text-muted-foreground ml-1">
-                    {plan.interval === "month"
-                      ? "/month"
-                      : plan.interval === "year"
-                        ? "/year"
-                        : " one-time"}
-                  </span>
-                  {plan.interval === "year" && (
-                    <span className="block text-xs text-[#C5A059] font-medium mt-1">
-                      ${(plan.priceInCents / 100 / 12).toFixed(2)}/mo billed yearly
-                    </span>
-                  )}
-                </div>
-
-                {plan.features && (
-                  <ul className="space-y-2 mb-5">
-                    {plan.features.slice(0, 3).map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-[#1B5E43] shrink-0" />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                <Link
-                  href={`/pricing?plan=${plan.id}`}
-                  className={`block w-full py-3 rounded-xl font-semibold text-sm text-center transition-all ${
-                    plan.highlighted
-                      ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"
-                      : plan.id === "lifetime-access"
-                        ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B] text-white hover:opacity-90"
-                        : "bg-muted border border-border text-foreground hover:border-secondary hover:text-secondary"
-                  }`}
-                >
-                  {plan.mode === "payment" ? "Buy Lifetime Access" : "Subscribe Now"}
-                </Link>
+          {/* Free Tier */}
+          <div className="relative rounded-xl p-6 premium-card">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg gold-icon-bg flex items-center justify-center">
+                <Zap className="w-5 h-5 text-[#C5A059]" />
               </div>
-            )
-          })}
+              <h3 className="font-semibold text-foreground">Free</h3>
+            </div>
+            <div className="mb-4">
+              <span className="text-3xl font-bold text-foreground">$0</span>
+              <span className="text-sm text-muted-foreground ml-1">forever</span>
+            </div>
+            <ul className="space-y-2 mb-5">
+              {["Browse all 8 hadith collections", "Basic search", "Save & bookmark hadiths"].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="w-4 h-4 text-[#1B5E43] shrink-0" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/login"
+              className="block w-full py-3 rounded-xl font-semibold text-sm text-center transition-all bg-muted border border-border text-foreground hover:border-secondary hover:text-secondary"
+            >
+              Get Started
+            </Link>
+          </div>
+
+          {/* Premium Tier */}
+          <div className="relative rounded-xl p-6 gold-border premium-card ring-2 ring-[#C5A059]/30">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold bg-gradient-to-r from-[#C5A059] to-[#E8C77D]">
+              Most Popular
+            </div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-lg gold-icon-bg flex items-center justify-center">
+                <Crown className="w-5 h-5 text-[#C5A059]" />
+              </div>
+              <h3 className="font-semibold text-foreground">Pro</h3>
+            </div>
+            <div className="mb-4">
+              <span className="text-3xl font-bold text-foreground">Pro</span>
+              <span className="text-sm text-muted-foreground ml-1">plans available</span>
+            </div>
+            <ul className="space-y-2 mb-5">
+              {["Unlimited AI explanations", "Advanced search & semantic search", "Learning paths & progress tracking"].map((feature) => (
+                <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Check className="w-4 h-4 text-[#1B5E43] shrink-0" />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href="/pricing"
+              className="block w-full py-3 rounded-xl font-semibold text-sm text-center transition-all bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"
+            >
+              View Plans
+            </Link>
+          </div>
         </div>
 
-        {/* Free tier note */}
         <p className="text-center text-sm text-muted-foreground mt-8">
           Not ready to commit? <Link href="/login" className="gold-text font-medium hover:underline">Start with our free tier</Link> -- browse all collections and basic search included.
         </p>

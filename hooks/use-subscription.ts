@@ -35,7 +35,6 @@ export function useSubscription(): UserSubscription {
         return
       }
 
-      // Check RevenueCat first
       try {
         const rc = getRevenueCatClient(user.id)
         const customerInfo = await rc.getCustomerInfo()
@@ -52,30 +51,10 @@ export function useSubscription(): UserSubscription {
           return
         }
       } catch {
-        // RevenueCat check failed, fall back to Supabase
+        // RevenueCat check failed
       }
 
-      // Fallback: check Supabase subscriptions table (for existing Stripe subscriptions)
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .in("status", ["active", "trialing", "lifetime"])
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single()
-
-      if (data) {
-        setSub({
-          isPremium: true,
-          plan: data.product_id,
-          status: data.status,
-          currentPeriodEnd: data.current_period_end,
-          loading: false,
-        })
-      } else {
-        setSub((prev) => ({ ...prev, loading: false }))
-      }
+      setSub((prev) => ({ ...prev, loading: false }))
     }
 
     check()

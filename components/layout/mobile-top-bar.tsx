@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 const rootPages = ["/home", "/collections", "/today", "/assistant", "/my-hadith"]
 
 // Pages excluded from showing the top bar entirely
-const excludedPaths = ["/", "/login", "/onboarding", "/reset-password", "/checkout/success"]
+const excludedPaths = ["/", "/login", "/onboarding", "/reset-password"]
 
 // Derive a page title from the pathname
 function getPageTitle(pathname: string): string {

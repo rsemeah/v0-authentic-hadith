@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
 
 // Routes that do NOT require authentication
-const publicPaths = ["/", "/login", "/pricing", "/checkout/success", "/reset-password"]
+const publicPaths = ["/", "/login", "/pricing", "/reset-password"]
 
 // Routes that require authentication
 const protectedPrefixes = ["/home", "/dashboard", "/onboarding", "/profile", "/settings", "/saved", "/collections", "/hadith", "/assistant", "/search", "/learn", "/today", "/sunnah", "/stories", "/reflections", "/quiz", "/progress", "/share", "/topics"]

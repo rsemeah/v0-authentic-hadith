@@ -22,10 +22,6 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS
   subscription_expires_at TIMESTAMPTZ;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS
   subscription_cancel_at_period_end BOOLEAN DEFAULT false;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS
-  stripe_customer_id TEXT UNIQUE;
-ALTER TABLE profiles ADD COLUMN IF NOT EXISTS
-  stripe_subscription_id TEXT UNIQUE;
 
 -- Tier quotas configuration
 CREATE TABLE IF NOT EXISTS tier_quotas (
@@ -64,19 +60,9 @@ CREATE TABLE IF NOT EXISTS user_usage (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Stripe events idempotency table (if not exists)
-CREATE TABLE IF NOT EXISTS stripe_events (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  stripe_event_id TEXT UNIQUE NOT NULL,
-  event_type TEXT NOT NULL,
-  payload JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_user_usage_user_id ON user_usage(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_usage_last_reset ON user_usage(last_daily_reset);
-CREATE INDEX IF NOT EXISTS idx_profiles_stripe_customer ON profiles(stripe_customer_id);
 CREATE INDEX IF NOT EXISTS idx_profiles_subscription_tier ON profiles(subscription_tier);
 
 -- RLS policies

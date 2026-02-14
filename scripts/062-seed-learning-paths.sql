@@ -48,7 +48,7 @@ Hadith serve as:
 2. **Legislation** on matters not explicitly in the Quran
 3. **Practical guidance** for daily life
 4. **Spiritual inspiration** and moral lessons',
-'article', 1, false, 10),
+'reading', 1, false, 10),
 
 ((SELECT id FROM learning_modules WHERE slug = 'what-is-hadith'), 'preservation', 'How Hadith Were Preserved',
 '# Preservation of Hadith
@@ -81,7 +81,7 @@ Islamic scholars developed **rigorous methods** to verify hadith:
 4. Verifying biographical details of narrators
 
 This produced one of the most sophisticated verification systems in human history.',
-'article', 2, false, 12),
+'reading', 2, false, 12),
 
 ((SELECT id FROM learning_modules WHERE slug = 'what-is-hadith'), 'role-in-islam', 'The Role of Hadith in Islam',
 '# The Role of Hadith in Islam
@@ -105,7 +105,7 @@ After the Quran, hadith are the second most important source of Islamic law and 
 The Prophet (PBUH) said: "I have been given the Quran and something similar to it along with it." (Abu Dawud)
 
 Aisha (RA) described him: "His character was the Quran." (Sahih Muslim)',
-'article', 3, true, 10)
+'reading', 3, true, 10)
 ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, content_markdown = EXCLUDED.content_markdown;
 
 -- Lessons for "Structure of a Hadith"
@@ -140,7 +140,7 @@ Scholars examined each narrator for:
 | **Elevated (''Ali)** | Fewer narrators between you and the Prophet |
 | **Mursal** | A Tabi''i quotes the Prophet directly (missing a companion) |
 | **Mu''allaq** | Beginning of chain is missing |',
-'article', 1, false, 12),
+'reading', 1, false, 12),
 
 ((SELECT id FROM learning_modules WHERE slug = 'hadith-structure'), 'matn-text', 'The Matn (Text)',
 '# The Matn: Text of the Hadith
@@ -161,7 +161,7 @@ Even with a strong chain, scholars also checked the text for:
 - Contradiction with other authentic hadith
 - Contradiction with reason or established facts
 - Grammatical irregularities unusual for prophetic speech',
-'article', 2, true, 10)
+'reading', 2, true, 10)
 ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, content_markdown = EXCLUDED.content_markdown;
 
 -- Lessons for "Major Collections"
@@ -188,7 +188,7 @@ INSERT INTO learning_lessons (module_id, slug, title, content_markdown, content_
 ## "Agreed Upon" (Muttafaq Alayh)
 
 When a hadith appears in **both** Bukhari and Muslim, it is called "agreed upon" and is among the most reliable hadith in existence.',
-'article', 1, false, 15),
+'reading', 1, false, 15),
 
 ((SELECT id FROM learning_modules WHERE slug = 'major-collections'), 'four-sunan', 'The Four Sunan Collections',
 '# The Four Sunan
@@ -213,7 +213,7 @@ When a hadith appears in **both** Bukhari and Muslim, it is called "agreed upon"
 | Hasan | حسن | Good/Fair |
 | Da''if | ضعيف | Weak |
 | Mawdu'' | موضوع | Fabricated |',
-'article', 2, true, 12)
+'reading', 2, true, 12)
 ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, content_markdown = EXCLUDED.content_markdown;
 
 -- Lesson for "Reading Hadith"
@@ -244,7 +244,7 @@ INSERT INTO learning_lessons (module_id, slug, title, content_markdown, content_
 2. **Ignoring the grading**
 3. **Cherry-picking**
 4. **Ignoring scholarly commentary**',
-'article', 1, true, 12)
+'reading', 1, true, 12)
 ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, content_markdown = EXCLUDED.content_markdown;
 
 -- ============================================
@@ -287,7 +287,7 @@ After Fajr prayer, stay seated and recite:
 - Ayat al-Kursi
 - The three Quls (three times each)
 - SubhanAllah (33x), Alhamdulillah (33x), Allahu Akbar (34x)',
-'article', 1, false, 10)
+'reading', 1, false, 10)
 ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, content_markdown = EXCLUDED.content_markdown;
 
 -- ============================================
@@ -328,7 +328,7 @@ Invented narrations. Completely rejected.
 ## Sub-categories
 - **Sahih li-dhatihi**: Authentic on its own merit
 - **Sahih li-ghayrihi**: Raised to Sahih through supporting narrations',
-'article', 1, true, 15)
+'reading', 1, true, 15)
 ON CONFLICT (slug) DO UPDATE SET title = EXCLUDED.title, content_markdown = EXCLUDED.content_markdown;
 
 -- ============================================

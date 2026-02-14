@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useState } from "react"
+import { useRouter } from "next/navigation"
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { startCheckoutSession } from "@/app/actions/stripe"
@@ -10,6 +11,7 @@ const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : 
 
 export default function Checkout({ productId }: { productId: string }) {
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   const fetchClientSecret = useCallback(async () => {
     try {
@@ -20,11 +22,15 @@ export default function Checkout({ productId }: { productId: string }) {
       return clientSecret
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to start checkout"
-      console.error("[v0] Checkout error:", message)
+      // If user isn't logged in, redirect to login with a return URL
+      if (message.includes("logged in")) {
+        router.push(`/login?redirect=/pricing?plan=${productId}`)
+        throw err
+      }
       setError(message)
       throw err
     }
-  }, [productId])
+  }, [productId, router])
 
   if (!stripePromise) {
     return (

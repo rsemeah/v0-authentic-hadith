@@ -113,6 +113,9 @@ importers:
       '@react-navigation/native':
         specifier: latest
         version: 7.1.28(react-native@0.83.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
+      '@revenuecat/purchases-js':
+        specifier: ^1.26.0
+        version: 1.26.0
       '@stripe/react-stripe-js':
         specifier: 5.6.0
         version: 5.6.0(@stripe/stripe-js@8.7.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -178,7 +181,7 @@ importers:
         version: 8.0.11(expo@54.0.33)(react-native@0.83.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       expo-router:
         specifier: 6.0.23
-        version: 6.0.23(fb7i2bptqssbsi7xzkxn55nham)
+        version: 6.0.23(ebce6d269efd36c1e02541f5aa55fee8)
       expo-splash-screen:
         specifier: 31.0.13
         version: 31.0.13(expo@54.0.33)
@@ -2343,6 +2346,9 @@ packages:
 
   '@remirror/core-constants@3.0.0':
     resolution: {integrity: sha512-42aWfPrimMfDKDi4YegyS7x+/0tlzaqwPQCULLanv3DMIlu96KTJR0fM5isWX2UViOqlGnX6YFgqWepcX+XMNg==}
+
+  '@revenuecat/purchases-js@1.26.0':
+    resolution: {integrity: sha512-VgccqyZ2Gq6iMRzrBRpozTGr5YC/kvQMYUEVbaczlmQxumO+P99p5LjGZFiL3932LtwDMbOeB8jIW26dVYTa/Q==}
 
   '@sinclair/typebox@0.27.10':
     resolution: {integrity: sha512-MTBk/3jGLNB2tVxv6uLlFh1iu64iYOQ2PbdOSK3NW8JZsmlaOh2q6sdtKowBhfw8QFLmYNzTW4/oK4uATIi6ZA==}
@@ -7062,7 +7068,7 @@ snapshots:
       wrap-ansi: 7.0.0
       ws: 8.19.0
     optionalDependencies:
-      expo-router: 6.0.23(fb7i2bptqssbsi7xzkxn55nham)
+      expo-router: 6.0.23(ebce6d269efd36c1e02541f5aa55fee8)
       react-native: 0.83.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0)
     transitivePeerDependencies:
       - bufferutil
@@ -8796,6 +8802,8 @@ snapshots:
 
   '@remirror/core-constants@3.0.0': {}
 
+  '@revenuecat/purchases-js@1.26.0': {}
+
   '@sinclair/typebox@0.27.10': {}
 
   '@sinclair/typebox@0.34.48': {}
@@ -10231,7 +10239,7 @@ snapshots:
       react: 19.2.0
       react-native: 0.83.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0)
 
-  expo-router@6.0.23(fb7i2bptqssbsi7xzkxn55nham):
+  expo-router@6.0.23(ebce6d269efd36c1e02541f5aa55fee8):
     dependencies:
       '@expo/metro-runtime': 6.1.2(expo@54.0.33)(react-dom@19.2.0(react@19.2.0))(react-native@0.83.1(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       '@expo/schema-utils': 0.1.8

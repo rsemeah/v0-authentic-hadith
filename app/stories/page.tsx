@@ -15,9 +15,10 @@ import {
   Star,
   Heart,
   Users,
+  Loader2,
+  Sparkles,
 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-
 import { ShareBanner } from "@/components/share-banner"
 import { cn } from "@/lib/utils"
 
@@ -27,6 +28,8 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   star: Star,
   heart: Heart,
   users: Users,
+  sparkles: Sparkles,
+  book: BookOpen,
 }
 
 interface SahabiCard {
@@ -35,9 +38,7 @@ interface SahabiCard {
   name_en: string
   name_ar: string
   title_en: string
-  title_ar: string | null
   icon: string
-  color_theme: string
   theme_primary: string
   theme_secondary: string | null
   notable_for: string[]
@@ -46,35 +47,52 @@ interface SahabiCard {
   display_order: number
 }
 
+interface ProphetCard {
+  id: string
+  slug: string
+  name_en: string
+  name_ar: string
+  title_en: string
+  era: string
+  quran_mentions: number
+  total_parts: number
+  estimated_read_time_minutes: number | null
+  theme_primary: string
+  icon: string
+  display_order: number
+}
+
 interface ProgressMap {
-  [sahabiId: string]: {
-    current_part: number
+  [id: string]: {
     parts_completed: number[]
     is_completed: boolean
     is_bookmarked: boolean
   }
 }
 
+type ActiveTab = "companions" | "prophets"
+
 export default function StoriesPage() {
   const router = useRouter()
   const supabase = getSupabaseBrowserClient()
+  const [tab, setTab] = useState<ActiveTab>("companions")
   const [companions, setCompanions] = useState<SahabiCard[]>([])
-  const [progress, setProgress] = useState<ProgressMap>({})
+  const [prophets, setProphets] = useState<ProphetCard[]>([])
+  const [companionProgress, setCompanionProgress] = useState<ProgressMap>({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const { data: sahabaData } = await supabase
-        .from("sahaba")
-        .select("*")
-        .order("display_order", { ascending: true })
+      const [sahabaRes, prophetsRes] = await Promise.all([
+        supabase.from("sahaba").select("*").order("display_order"),
+        supabase.from("prophets").select("*").eq("is_published", true).order("display_order"),
+      ])
 
-      if (sahabaData) setCompanions(sahabaData)
+      setCompanions(sahabaRes.data || [])
+      setProphets(prophetsRes.data || [])
 
-      // Fetch user progress if logged in
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
+      // Fetch user progress
+      const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         const { data: progressData } = await supabase
           .from("sahaba_reading_progress")
@@ -85,13 +103,12 @@ export default function StoriesPage() {
           const map: ProgressMap = {}
           for (const p of progressData) {
             map[p.sahabi_id] = {
-              current_part: p.current_part,
               parts_completed: p.parts_completed || [],
               is_completed: p.is_completed,
               is_bookmarked: p.is_bookmarked,
             }
           }
-          setProgress(map)
+          setCompanionProgress(map)
         }
       }
 
@@ -100,12 +117,13 @@ export default function StoriesPage() {
     load()
   }, [supabase])
 
-  // Separate into: continue reading, not started, completed
-  const continueReading = companions.filter(
-    (c) => progress[c.id] && !progress[c.id].is_completed && (progress[c.id].parts_completed?.length || 0) > 0,
-  )
-  const notStarted = companions.filter((c) => !progress[c.id] || (progress[c.id].parts_completed?.length || 0) === 0)
-  const completed = companions.filter((c) => progress[c.id]?.is_completed)
+  if (loading) {
+    return (
+      <div className="min-h-screen marble-bg flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#C5A059]" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
@@ -120,108 +138,198 @@ export default function StoriesPage() {
             <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
           <div>
-            <h1 className="text-lg font-semibold text-foreground">Stories of the Companions</h1>
+            <h1 className="text-lg font-semibold text-foreground">Stories</h1>
             <p className="text-xs text-muted-foreground">
-              {companions.length} companions, {companions.reduce((sum, c) => sum + c.total_parts, 0)} parts
+              {companions.length} companions, {prophets.length} prophets
             </p>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-1 border-b border-transparent">
+            <button
+              onClick={() => setTab("companions")}
+              className={cn(
+                "flex-1 py-2.5 text-sm font-medium border-b-2 transition-colors",
+                tab === "companions"
+                  ? "border-[#C5A059] text-[#C5A059]"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Companions ({companions.length})
+            </button>
+            <button
+              onClick={() => setTab("prophets")}
+              className={cn(
+                "flex-1 py-2.5 text-sm font-medium border-b-2 transition-colors",
+                tab === "prophets"
+                  ? "border-[#1B5E43] text-[#1B5E43]"
+                  : "border-transparent text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Prophets ({prophets.length})
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Intro */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 pb-4">
-        <p className="text-sm text-muted-foreground leading-relaxed">
-          The Companions (Sahaba) were the people who lived alongside the Prophet Muhammad (peace be upon
-          him). Read their full stories -- multi-part narratives with authentic references from the Quran and
-          Hadith.
-        </p>
-      </section>
-
       <main className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-6">
-        {loading ? (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="rounded-xl border border-border p-4 animate-pulse">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-muted" />
-                  <div className="flex-1">
-                    <div className="h-4 w-32 bg-muted rounded mb-2" />
-                    <div className="h-3 w-24 bg-muted rounded mb-2" />
-                    <div className="h-2 w-48 bg-muted rounded" />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        {tab === "companions" ? (
+          <CompanionsTab
+            companions={companions}
+            progress={companionProgress}
+            onSelect={(slug) => router.push(`/stories/${slug}`)}
+          />
         ) : (
-          <>
-            {/* Continue Reading */}
-            {continueReading.length > 0 && (
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-[#1B5E43] mb-3 flex items-center gap-2">
-                  <BookOpen className="w-3.5 h-3.5" />
-                  Continue Reading
-                </h2>
-                <div className="flex flex-col gap-3">
-                  {continueReading.map((c) => (
-                    <CompanionCard
-                      key={c.id}
-                      companion={c}
-                      progress={progress[c.id]}
-                      onClick={() => router.push(`/stories/${c.slug}`)}
-                      featured
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* All Stories / Not Started */}
-            <section>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                {continueReading.length > 0 ? "Not Yet Started" : "All Companions"}
-              </h2>
-              <div className="flex flex-col gap-3">
-                {(continueReading.length > 0 ? notStarted : companions).map((c) => (
-                  <CompanionCard
-                    key={c.id}
-                    companion={c}
-                    progress={progress[c.id]}
-                    onClick={() => router.push(`/stories/${c.slug}`)}
-                  />
-                ))}
-              </div>
-            </section>
-
-            {/* Completed */}
-            {completed.length > 0 && (
-              <section>
-                <h2 className="text-xs font-bold uppercase tracking-widest text-[#C5A059] mb-3 flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Completed
-                </h2>
-                <div className="flex flex-col gap-3">
-                  {completed.map((c) => (
-                    <CompanionCard
-                      key={c.id}
-                      companion={c}
-                      progress={progress[c.id]}
-                      onClick={() => router.push(`/stories/${c.slug}`)}
-                      isComplete
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-          </>
+          <ProphetsTab
+            prophets={prophets}
+            onSelect={(slug) => router.push(`/stories/prophets/${slug}`)}
+          />
         )}
       </main>
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pb-24 md:pb-8">
         <ShareBanner variant="compact" />
       </div>
-
     </div>
+  )
+}
+
+function CompanionsTab({
+  companions,
+  progress,
+  onSelect,
+}: {
+  companions: SahabiCard[]
+  progress: ProgressMap
+  onSelect: (slug: string) => void
+}) {
+  const continueReading = companions.filter(
+    (c) => progress[c.id] && !progress[c.id].is_completed && (progress[c.id].parts_completed?.length || 0) > 0,
+  )
+  const notStarted = companions.filter((c) => !progress[c.id] || (progress[c.id].parts_completed?.length || 0) === 0)
+  const completed = companions.filter((c) => progress[c.id]?.is_completed)
+
+  return (
+    <>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        The Companions (Sahaba) were the people who lived alongside the Prophet Muhammad (peace be upon
+        him). Read their full stories with authentic references.
+      </p>
+
+      {continueReading.length > 0 && (
+        <section>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[#1B5E43] mb-3 flex items-center gap-2">
+            <BookOpen className="w-3.5 h-3.5" />
+            Continue Reading
+          </h2>
+          <div className="flex flex-col gap-3">
+            {continueReading.map((c) => (
+              <CompanionCard key={c.id} companion={c} progress={progress[c.id]} onClick={() => onSelect(c.slug)} featured />
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+          {continueReading.length > 0 ? "Not Yet Started" : "All Companions"}
+        </h2>
+        <div className="flex flex-col gap-3">
+          {(continueReading.length > 0 ? notStarted : companions).map((c) => (
+            <CompanionCard key={c.id} companion={c} progress={progress[c.id]} onClick={() => onSelect(c.slug)} />
+          ))}
+        </div>
+      </section>
+
+      {completed.length > 0 && (
+        <section>
+          <h2 className="text-xs font-bold uppercase tracking-widest text-[#C5A059] mb-3 flex items-center gap-2">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Completed
+          </h2>
+          <div className="flex flex-col gap-3">
+            {completed.map((c) => (
+              <CompanionCard key={c.id} companion={c} progress={progress[c.id]} onClick={() => onSelect(c.slug)} isComplete />
+            ))}
+          </div>
+        </section>
+      )}
+    </>
+  )
+}
+
+function ProphetsTab({
+  prophets,
+  onSelect,
+}: {
+  prophets: ProphetCard[]
+  onSelect: (slug: string) => void
+}) {
+  return (
+    <>
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        The 25 prophets mentioned in the Quran, from Adam (peace be upon him) to Muhammad (peace be upon him).
+        Multi-part narratives with Quranic references and historical context.
+      </p>
+
+      <div className="flex flex-col gap-3">
+        {prophets.map((prophet, idx) => {
+          const Icon = ICON_MAP[prophet.icon] || Star
+          return (
+            <button
+              key={prophet.id}
+              onClick={() => onSelect(prophet.slug)}
+              className="w-full rounded-xl border border-border text-left transition-all hover:shadow-md hover:border-[#1B5E43]/30 premium-card overflow-hidden"
+            >
+              <div className="p-4 flex items-center gap-4">
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                  style={{ backgroundColor: `${prophet.theme_primary}15` }}
+                >
+                  <span className="text-lg font-bold" style={{ color: prophet.theme_primary }}>
+                    {idx + 1}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-sm font-semibold text-foreground truncate">{prophet.name_en}</h3>
+                    {prophet.name_ar && (
+                      <span className="text-xs text-muted-foreground/60" dir="rtl">{prophet.name_ar}</span>
+                    )}
+                  </div>
+                  <p className="text-xs font-medium" style={{ color: prophet.theme_primary }}>
+                    {prophet.title_en}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1.5">
+                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <BookOpen className="w-3 h-3" />
+                      {prophet.total_parts} parts
+                    </span>
+                    {prophet.estimated_read_time_minutes && (
+                      <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {prophet.estimated_read_time_minutes} min
+                      </span>
+                    )}
+                    {prophet.quran_mentions > 0 && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {prophet.quran_mentions} Quran mentions
+                      </span>
+                    )}
+                    <span className="text-[10px] text-muted-foreground px-2 py-0.5 rounded-full bg-muted">
+                      {prophet.era}
+                    </span>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </div>
+            </button>
+          )
+        })}
+      </div>
+    </>
   )
 }
 
@@ -251,7 +359,6 @@ function CompanionCard({
         isComplete && "border-[#1B5E43]/20 opacity-80",
       )}
     >
-      {/* Progress bar at top */}
       {partsCompleted > 0 && !isComplete && (
         <div className="h-1 bg-muted">
           <div
@@ -263,17 +370,13 @@ function CompanionCard({
           />
         </div>
       )}
-
       <div className="p-4 flex items-center gap-4">
-        {/* Icon */}
         <div
           className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0"
           style={{ backgroundColor: `${companion.theme_primary}15` }}
         >
           <Icon className="w-6 h-6" style={{ color: companion.theme_primary }} />
         </div>
-
-        {/* Details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-foreground truncate">{companion.name_en}</h3>
@@ -295,15 +398,11 @@ function CompanionCard({
               </span>
             )}
             {partsCompleted > 0 && !isComplete && (
-              <span
-                className="text-[10px] font-medium flex items-center gap-1"
-                style={{ color: companion.theme_primary }}
-              >
+              <span className="text-[10px] font-medium" style={{ color: companion.theme_primary }}>
                 {partsCompleted}/{companion.total_parts} read
               </span>
             )}
           </div>
-          {/* Notable tags */}
           {companion.notable_for && companion.notable_for.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-2">
               {companion.notable_for.slice(0, 2).map((tag, i) => (
@@ -314,19 +413,8 @@ function CompanionCard({
             </div>
           )}
         </div>
-
-        {/* Arrow */}
         <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
       </div>
-
-      {/* Arabic name */}
-      {companion.name_ar && (
-        <div className="px-4 pb-3 pt-0">
-          <p className="text-sm text-muted-foreground/40 text-right font-serif" dir="rtl">
-            {companion.name_ar}
-          </p>
-        </div>
-      )}
     </button>
   )
 }

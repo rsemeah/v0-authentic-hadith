@@ -20,11 +20,12 @@ import { cn } from "@/lib/utils"
 interface QuizQuestion {
   id: string
   question: string
-  type: "narrator" | "collection" | "grade" | "completion"
+  type: "narrator" | "collection" | "grade" | "completion" | "ai"
   options: string[]
   correctIndex: number
   hadithRef: string
   arabicHint?: string
+  explanation?: string
 }
 
 interface QuizAttempt {
@@ -35,6 +36,15 @@ interface QuizAttempt {
   created_at: string
 }
 
+interface LearningPath {
+  id: string
+  title: string
+  slug: string
+  color: string
+  level: string
+}
+
+type QuizMode = "general" | "ai_learning"
 type Stage = "setup" | "quiz" | "results"
 
 export default function QuizPage() {
@@ -51,22 +61,32 @@ export default function QuizPage() {
   const [pastAttempts, setPastAttempts] = useState<QuizAttempt[]>([])
   const [startTime, setStartTime] = useState(0)
   const [elapsed, setElapsed] = useState(0)
+  const [quizMode, setQuizMode] = useState<QuizMode>("general")
+  const [learningPaths, setLearningPaths] = useState<LearningPath[]>([])
+  const [selectedPathId, setSelectedPathId] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchPast = async () => {
+    const fetchInit = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser()
       if (!user) return
-      const { data } = await supabase
-        .from("quiz_attempts")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(10)
-      if (data) setPastAttempts(data)
+      const [attemptsRes, pathsRes] = await Promise.all([
+        supabase
+          .from("quiz_attempts")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(10),
+        supabase
+          .from("learning_paths")
+          .select("id, title, slug, color, level")
+          .order("sort_order"),
+      ])
+      if (attemptsRes.data) setPastAttempts(attemptsRes.data)
+      if (pathsRes.data) setLearningPaths(pathsRes.data)
     }
-    fetchPast()
+    fetchInit()
   }, [supabase])
 
   // Timer

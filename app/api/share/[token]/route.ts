@@ -1,21 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase/config'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-if (!supabaseUrl || !serviceRoleKey) {
-  throw new Error('Missing required Supabase environment variables')
+function getSupabase() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  return createClient(SUPABASE_URL, serviceRoleKey || SUPABASE_ANON_KEY)
 }
-
-// Using service role key for server-side operations
-const supabase = createClient(supabaseUrl, serviceRoleKey)
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   try {
+    const supabase = getSupabase()
     const { token } = await params
     
     // Get viewer IP from request headers

@@ -1,6 +1,7 @@
 import React from "react"
 import { createClient } from "@supabase/supabase-js"
 import type { Metadata } from "next"
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
 
 const COLLECTION_NAMES: Record<string, string> = {
   "sahih-bukhari": "Sahih al-Bukhari",
@@ -34,8 +35,8 @@ export async function generateMetadata({
   const { id } = await params
 
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
   )
 
   const { data: hadith } = await supabase

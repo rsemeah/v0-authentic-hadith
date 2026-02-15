@@ -1,6 +1,7 @@
 import React from "react"
 import type { Metadata } from "next"
 import { createClient } from "@supabase/supabase-js"
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
 
 export async function generateMetadata({
   params,
@@ -10,8 +11,8 @@ export async function generateMetadata({
   const { slug } = await params
 
   const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
   )
 
   const { data: sahabi } = await supabase

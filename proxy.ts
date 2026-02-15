@@ -1,3 +1,4 @@
+// v0 proxy - uses @supabase/supabase-js only
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"

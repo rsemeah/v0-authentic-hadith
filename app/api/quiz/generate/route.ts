@@ -6,12 +6,12 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
 const quizQuestionSchema = z.object({
   questions: z.array(
     z.object({
-      question: z.string().describe("The quiz question text"),
-      options: z.array(z.string()).describe("Four answer choices"),
-      correctIndex: z.number().describe("Index of the correct answer (0-3)"),
-      explanation: z.string().describe("Brief explanation of why the answer is correct, referencing the hadith"),
-      difficulty: z.string().describe("easy, medium, or hard"),
-      relatedHadithRef: z.string().nullable().describe("Reference to the hadith this question is based on"),
+      question: z.string(),
+      options: z.array(z.string()),
+      correctIndex: z.number(),
+      explanation: z.string(),
+      difficulty: z.string(),
+      relatedHadithRef: z.string().nullable(),
     })
   ),
 })

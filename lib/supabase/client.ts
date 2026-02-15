@@ -1,3 +1,4 @@
+// v0 supabase client - uses @supabase/supabase-js only
 import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config"
 

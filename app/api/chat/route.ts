@@ -1,4 +1,4 @@
-import { streamText, tool, convertToModelMessages, consumeStream, UIMessage } from "ai"
+import { streamText, tool, convertToModelMessages, UIMessage } from "ai"
 import { createGroq } from "@ai-sdk/groq"
 import { z } from "zod"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
@@ -130,11 +130,9 @@ export async function POST(req: Request) {
 
     return result.toUIMessageStreamResponse({
       originalMessages: messages,
-      onFinish: async ({ isAborted }) => {
-        if (isAborted) return
+      onFinish: async () => {
         await incrementAIUsage(user.id)
       },
-      consumeSseStream: consumeStream,
     })
   } catch (error) {
     console.error("[HadithChat] Chat API error:", error)

@@ -1,7 +1,6 @@
 import { generateText, Output } from "ai"
 import { z } from "zod"
-import { createClient } from "@supabase/supabase-js"
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
+import { createClient } from "@/lib/supabase/server"
 
 const quizQuestionSchema = z.object({
   questions: z.array(
@@ -21,7 +20,7 @@ export async function POST(req: Request) {
     const body = await req.json()
     const { pathId, moduleId, lessonId, count = 5, mode = "learning_path" } = body
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    const supabase = await createClient()
 
     let hadithContext: Array<{
       english_translation: string

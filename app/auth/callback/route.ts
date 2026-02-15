@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server"
-import { createClient } from "@supabase/supabase-js"
-import { cookies } from "next/headers"
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
+import { createClient } from "@/lib/supabase/server"
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -9,10 +7,8 @@ export async function GET(request: Request) {
   const token_hash = searchParams.get("token_hash")
   const type = searchParams.get("type")
 
-  const cookieStore = await cookies()
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  const supabase = await createClient()
 
-  // Handle OAuth code exchange
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
@@ -20,7 +16,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Handle email confirmation (token_hash + type)
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({
       type: type as "signup" | "email",
@@ -31,42 +26,32 @@ export async function GET(request: Request) {
     }
   }
 
-  // If neither code nor token_hash, something went wrong
   if (!code && !token_hash) {
     return NextResponse.redirect(`${origin}/?error=auth`)
   }
 
-  // Check if user already has a profile + preferences (returning user)
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (user) {
-    // Ensure profile exists for OAuth users
     const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
       .single()
 
     if (!profile) {
-      const { error: insertError } = await supabase.from('profiles').insert({
+      await supabase.from("profiles").insert({
         id: user.id,
         email: user.email,
         full_name: user.user_metadata?.full_name || user.user_metadata?.name || null,
         avatar_url: user.user_metadata?.avatar_url || null,
         is_premium: false,
-        role: 'user',
+        role: "user",
       })
-      
-      if (insertError) {
-        console.error('Failed to create profile for OAuth user:', insertError)
-        // Continue with onboarding even if profile creation fails
-        // The profile might already exist from a previous attempt
-      }
     }
 
-    // Check if user has completed onboarding
     const { data: prefs } = await supabase
       .from("user_preferences")
       .select("onboarded")
@@ -74,7 +59,6 @@ export async function GET(request: Request) {
       .single()
 
     if (prefs?.onboarded) {
-      // Returning user -- set onboarded cookie and go to home
       const response = NextResponse.redirect(`${origin}/home`)
       response.cookies.set("qbos_onboarded", "1", {
         path: "/",
@@ -85,6 +69,5 @@ export async function GET(request: Request) {
     }
   }
 
-  // New user or not yet onboarded -- send to onboarding
   return NextResponse.redirect(`${origin}/onboarding`)
 }

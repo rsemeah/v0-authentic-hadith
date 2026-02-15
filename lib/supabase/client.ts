@@ -1,14 +1,11 @@
-// v0 supabase client - uses @supabase/supabase-js only
-import { createClient as createSupabaseClient } from "@supabase/supabase-js"
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config"
-
-let client: ReturnType<typeof createSupabaseClient> | null = null
+import { createBrowserClient } from '@supabase/ssr'
 
 export function createClient() {
-  if (client) return client
-  client = createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-  return client
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
 }
 
-// Alias for backwards compatibility
+// Backward-compatible alias used throughout the codebase
 export const getSupabaseBrowserClient = createClient

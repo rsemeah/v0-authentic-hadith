@@ -14,9 +14,6 @@ importers:
       '@ai-sdk/react':
         specifier: ^1.0.0
         version: 1.2.12(react@19.2.0)(zod@3.25.76)
-      '@expo/dom-webview':
-        specifier: latest
-        version: 0.2.8(expo@54.0.33)(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       '@expo/metro-runtime':
         specifier: latest
         version: 6.1.2(expo@54.0.33)(react-dom@19.2.0(react@19.2.0))(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
@@ -107,18 +104,12 @@ importers:
       '@react-navigation/drawer':
         specifier: latest
         version: 7.8.1(@react-navigation/native@7.1.28(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native-gesture-handler@2.30.0(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native-reanimated@4.2.1(react-native-worklets@0.7.3(@babel/core@7.29.0)(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native-safe-area-context@5.6.2(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native-screens@4.23.0(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
-      '@react-navigation/native':
-        specifier: latest
-        version: 7.1.28(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       '@stripe/react-stripe-js':
         specifier: 5.6.0
         version: 5.6.0(@stripe/stripe-js@8.7.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@stripe/stripe-js':
         specifier: 8.7.0
         version: 8.7.0
-      '@supabase/ssr':
-        specifier: 0.8.0
-        version: 0.8.0(@supabase/supabase-js@2.95.3)
       '@supabase/supabase-js':
         specifier: latest
         version: 2.95.3
@@ -140,9 +131,6 @@ importers:
       '@tiptap/starter-kit':
         specifier: ^2.10.3
         version: 2.27.2
-      '@vercel/analytics':
-        specifier: 1.3.1
-        version: 1.3.1(next@16.0.10(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)
       ai:
         specifier: ^4.0.0
         version: 4.3.19(react@19.2.0)(zod@3.25.76)
@@ -185,9 +173,6 @@ importers:
       input-otp:
         specifier: 1.4.1
         version: 1.4.1(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      jest:
-        specifier: latest
-        version: 30.2.0(@types/node@22.19.11)
       lucide-react:
         specifier: ^0.454.0
         version: 0.454.0(react@19.2.0)
@@ -239,18 +224,12 @@ importers:
       react-native-webview:
         specifier: 13.16.0
         version: 13.16.0(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
-      react-native-worklets:
-        specifier: latest
-        version: 0.7.3(@babel/core@7.29.0)(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       react-resizable-panels:
         specifier: ^2.1.7
         version: 2.1.9(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       react-server-dom-webpack:
         specifier: latest
         version: 19.2.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0)(webpack@5.105.2)
-      react-test-renderer:
-        specifier: latest
-        version: 19.2.4(react@19.2.0)
       recharts:
         specifier: 2.15.4
         version: 2.15.4(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -278,9 +257,6 @@ importers:
       vaul:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      webpack:
-        specifier: latest
-        version: 5.105.2
       zod:
         specifier: 3.25.76
         version: 3.25.76
@@ -2391,11 +2367,6 @@ packages:
     resolution: {integrity: sha512-D7EAtfU3w6BEUxDACjowWNJo/ZRo7sDIuhuOGKHIm9FHieGeoJV5R6GKTLtga/5l/6fDr2u+WcW/m8I9SYmaIw==}
     engines: {node: '>=20.0.0'}
 
-  '@supabase/ssr@0.8.0':
-    resolution: {integrity: sha512-/PKk8kNFSs8QvvJ2vOww1mF5/c5W8y42duYtXvkOSe+yZKRgTTZywYG2l41pjhNomqESZCpZtXuWmYjFRMV+dw==}
-    peerDependencies:
-      '@supabase/supabase-js': ^2.76.1
-
   '@supabase/storage-js@2.95.3':
     resolution: {integrity: sha512-4GxkJiXI3HHWjxpC3sDx1BVrV87O0hfX+wvJdqGv67KeCu+g44SPnII8y0LL/Wr677jB7tpjAxKdtVWf+xhc9A==}
     engines: {node: '>=20.0.0'}
@@ -2890,17 +2861,6 @@ packages:
     resolution: {integrity: sha512-TQMCz2pFJMfpNxmSfX1VSfTjwUIFx/mL+p1bnfM1xjjdla7Z+KnGMW/EhFbpckp3LyWAH4PgOsMwOMnIN+MBFg==}
     peerDependencies:
       '@urql/core': ^5.0.0
-
-  '@vercel/analytics@1.3.1':
-    resolution: {integrity: sha512-xhSlYgAuJ6Q4WQGkzYTLmXwhYl39sWjoMA3nHxfkvG+WdBT25c563a7QhwwKivEOZtPJXifYHR1m2ihoisbWyA==}
-    peerDependencies:
-      next: '>= 13'
-      react: ^18 || ^19
-    peerDependenciesMeta:
-      next:
-        optional: true
-      react:
-        optional: true
 
   '@webassemblyjs/ast@1.14.1':
     resolution: {integrity: sha512-nuBEDgQfm1ccRp/8bCQrx1frohyufl4JlbMMZ4P1wpeOfDhF6FQkxZJ1b/e+PLwr6X1Nhw6OLme5usuBWYBvuQ==}
@@ -3403,10 +3363,6 @@ packages:
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
-
-  cookie@1.1.1:
-    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
-    engines: {node: '>=18'}
 
   core-js-compat@3.48.0:
     resolution: {integrity: sha512-OM4cAF3D6VtH/WkLtWvyNC56EZVXsZdU3iqaMG2B4WvYrlqU831pc4UtG5yp0sE9z8Y02wVN7PjW5Zf9Gt0f1Q==}
@@ -6996,7 +6952,8 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@bcoe/v8-coverage@0.2.3': {}
+  '@bcoe/v8-coverage@0.2.3':
+    optional: true
 
   '@date-fns/tz@1.2.0': {}
 
@@ -7157,6 +7114,7 @@ snapshots:
       expo: 54.0.33(@babel/core@7.29.0)(@expo/dom-webview@0.2.8)(@expo/metro-runtime@6.1.2)(expo-router@6.0.23)(react-native-webview@13.16.0(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       react: 19.2.0
       react-native: 0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0)
+    optional: true
 
   '@expo/env@2.0.8':
     dependencies:
@@ -7451,6 +7409,7 @@ snapshots:
       strip-ansi-cjs: strip-ansi@6.0.1
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
+    optional: true
 
   '@isaacs/cliui@9.0.0': {}
 
@@ -7478,6 +7437,7 @@ snapshots:
       jest-message-util: 30.2.0
       jest-util: 30.2.0
       slash: 3.0.0
+    optional: true
 
   '@jest/core@30.2.0':
     dependencies:
@@ -7514,6 +7474,7 @@ snapshots:
       - esbuild-register
       - supports-color
       - ts-node
+    optional: true
 
   '@jest/create-cache-key-function@29.7.0':
     dependencies:
@@ -7534,10 +7495,12 @@ snapshots:
       '@jest/types': 30.2.0
       '@types/node': 22.19.11
       jest-mock: 30.2.0
+    optional: true
 
   '@jest/expect-utils@30.2.0':
     dependencies:
       '@jest/get-type': 30.1.0
+    optional: true
 
   '@jest/expect@30.2.0':
     dependencies:
@@ -7545,6 +7508,7 @@ snapshots:
       jest-snapshot: 30.2.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@jest/fake-timers@29.7.0':
     dependencies:
@@ -7563,6 +7527,7 @@ snapshots:
       jest-message-util: 30.2.0
       jest-mock: 30.2.0
       jest-util: 30.2.0
+    optional: true
 
   '@jest/get-type@30.1.0': {}
 
@@ -7574,11 +7539,13 @@ snapshots:
       jest-mock: 30.2.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@jest/pattern@30.0.1':
     dependencies:
       '@types/node': 22.19.11
       jest-regex-util: 30.0.1
+    optional: true
 
   '@jest/reporters@30.2.0':
     dependencies:
@@ -7607,6 +7574,7 @@ snapshots:
       v8-to-istanbul: 9.3.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@jest/schemas@29.6.3':
     dependencies:
@@ -7622,12 +7590,14 @@ snapshots:
       chalk: 4.1.2
       graceful-fs: 4.2.11
       natural-compare: 1.4.0
+    optional: true
 
   '@jest/source-map@30.0.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       callsites: 3.1.0
       graceful-fs: 4.2.11
+    optional: true
 
   '@jest/test-result@30.2.0':
     dependencies:
@@ -7635,6 +7605,7 @@ snapshots:
       '@jest/types': 30.2.0
       '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.3
+    optional: true
 
   '@jest/test-sequencer@30.2.0':
     dependencies:
@@ -7642,6 +7613,7 @@ snapshots:
       graceful-fs: 4.2.11
       jest-haste-map: 30.2.0
       slash: 3.0.0
+    optional: true
 
   '@jest/transform@29.7.0':
     dependencies:
@@ -7682,6 +7654,7 @@ snapshots:
       write-file-atomic: 5.0.1
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   '@jest/types@29.6.3':
     dependencies:
@@ -7701,6 +7674,7 @@ snapshots:
       '@types/node': 22.19.11
       '@types/yargs': 17.0.35
       chalk: 4.1.2
+    optional: true
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -7764,7 +7738,8 @@ snapshots:
   '@pkgjs/parseargs@0.11.0':
     optional: true
 
-  '@pkgr/core@0.2.9': {}
+  '@pkgr/core@0.2.9':
+    optional: true
 
   '@popperjs/core@2.11.8': {}
 
@@ -8839,6 +8814,7 @@ snapshots:
   '@sinonjs/fake-timers@13.0.5':
     dependencies:
       '@sinonjs/commons': 3.0.1
+    optional: true
 
   '@stripe/react-stripe-js@5.6.0(@stripe/stripe-js@8.7.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
@@ -8870,11 +8846,6 @@ snapshots:
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
-
-  '@supabase/ssr@0.8.0(@supabase/supabase-js@2.95.3)':
-    dependencies:
-      '@supabase/supabase-js': 2.95.3
-      cookie: 1.1.1
 
   '@supabase/storage-js@2.95.3':
     dependencies:
@@ -9377,13 +9348,6 @@ snapshots:
       '@urql/core': 5.2.0
       wonka: 6.3.5
 
-  '@vercel/analytics@1.3.1(next@16.0.10(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react@19.2.0)':
-    dependencies:
-      server-only: 0.0.1
-    optionalDependencies:
-      next: 16.0.10(@babel/core@7.29.0)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      react: 19.2.0
-
   '@webassemblyjs/ast@1.14.1':
     dependencies:
       '@webassemblyjs/helper-numbers': 1.13.2
@@ -9525,7 +9489,8 @@ snapshots:
 
   ansi-regex@5.0.1: {}
 
-  ansi-regex@6.2.2: {}
+  ansi-regex@6.2.2:
+    optional: true
 
   ansi-styles@3.2.1:
     dependencies:
@@ -9537,7 +9502,8 @@ snapshots:
 
   ansi-styles@5.2.0: {}
 
-  ansi-styles@6.2.3: {}
+  ansi-styles@6.2.3:
+    optional: true
 
   any-promise@1.3.0: {}
 
@@ -9596,6 +9562,7 @@ snapshots:
       slash: 3.0.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   babel-plugin-istanbul@6.1.1:
     dependencies:
@@ -9616,6 +9583,7 @@ snapshots:
       test-exclude: 6.0.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   babel-plugin-jest-hoist@29.6.3:
     dependencies:
@@ -9627,6 +9595,7 @@ snapshots:
   babel-plugin-jest-hoist@30.2.0:
     dependencies:
       '@types/babel__core': 7.20.5
+    optional: true
 
   babel-plugin-polyfill-corejs2@0.4.15(@babel/core@7.29.0):
     dependencies:
@@ -9734,6 +9703,7 @@ snapshots:
       '@babel/core': 7.29.0
       babel-plugin-jest-hoist: 30.2.0
       babel-preset-current-node-syntax: 1.2.0(@babel/core@7.29.0)
+    optional: true
 
   bail@2.0.2: {}
 
@@ -9803,7 +9773,8 @@ snapshots:
 
   bytes@3.1.2: {}
 
-  callsites@3.1.0: {}
+  callsites@3.1.0:
+    optional: true
 
   camelcase@5.3.1: {}
 
@@ -9826,7 +9797,8 @@ snapshots:
 
   chalk@5.6.2: {}
 
-  char-regex@1.0.2: {}
+  char-regex@1.0.2:
+    optional: true
 
   character-entities-html4@2.1.0: {}
 
@@ -9864,9 +9836,11 @@ snapshots:
 
   ci-info@3.9.0: {}
 
-  ci-info@4.4.0: {}
+  ci-info@4.4.0:
+    optional: true
 
-  cjs-module-lexer@2.2.0: {}
+  cjs-module-lexer@2.2.0:
+    optional: true
 
   class-variance-authority@0.7.1:
     dependencies:
@@ -9902,9 +9876,11 @@ snapshots:
       - '@types/react'
       - '@types/react-dom'
 
-  co@4.6.0: {}
+  co@4.6.0:
+    optional: true
 
-  collect-v8-coverage@1.0.3: {}
+  collect-v8-coverage@1.0.3:
+    optional: true
 
   color-convert@1.9.3:
     dependencies:
@@ -9966,8 +9942,6 @@ snapshots:
       - supports-color
 
   convert-source-map@2.0.0: {}
-
-  cookie@1.1.1: {}
 
   core-js-compat@3.48.0:
     dependencies:
@@ -10057,7 +10031,8 @@ snapshots:
 
   decode-uri-component@0.2.2: {}
 
-  dedent@1.7.1: {}
+  dedent@1.7.1:
+    optional: true
 
   deep-extend@0.6.0: {}
 
@@ -10077,7 +10052,8 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  detect-newline@3.1.0: {}
+  detect-newline@3.1.0:
+    optional: true
 
   detect-node-es@1.1.0: {}
 
@@ -10098,7 +10074,8 @@ snapshots:
 
   dotenv@16.4.7: {}
 
-  eastasianwidth@0.2.0: {}
+  eastasianwidth@0.2.0:
+    optional: true
 
   ee-first@1.1.1: {}
 
@@ -10116,11 +10093,13 @@ snapshots:
 
   embla-carousel@8.5.1: {}
 
-  emittery@0.13.1: {}
+  emittery@0.13.1:
+    optional: true
 
   emoji-regex@8.0.0: {}
 
-  emoji-regex@9.2.2: {}
+  emoji-regex@9.2.2:
+    optional: true
 
   encodeurl@1.0.2: {}
 
@@ -10138,6 +10117,7 @@ snapshots:
   error-ex@1.3.4:
     dependencies:
       is-arrayish: 0.2.1
+    optional: true
 
   error-stack-parser@2.1.4:
     dependencies:
@@ -10195,8 +10175,10 @@ snapshots:
       onetime: 5.1.2
       signal-exit: 3.0.7
       strip-final-newline: 2.0.0
+    optional: true
 
-  exit-x@0.2.2: {}
+  exit-x@0.2.2:
+    optional: true
 
   expect@30.2.0:
     dependencies:
@@ -10206,6 +10188,7 @@ snapshots:
       jest-message-util: 30.2.0
       jest-mock: 30.2.0
       jest-util: 30.2.0
+    optional: true
 
   expo-asset@12.0.12(expo@54.0.33)(react-native@0.84.0(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.2.0))(react@19.2.0):
     dependencies:
@@ -10432,6 +10415,7 @@ snapshots:
     dependencies:
       cross-spawn: 7.0.6
       signal-exit: 4.1.0
+    optional: true
 
   fraction.js@5.3.4: {}
 
@@ -10454,7 +10438,8 @@ snapshots:
 
   get-package-type@0.1.0: {}
 
-  get-stream@6.0.1: {}
+  get-stream@6.0.1:
+    optional: true
 
   getenv@2.0.0: {}
 
@@ -10468,6 +10453,7 @@ snapshots:
       minipass: 7.1.2
       package-json-from-dist: 1.0.1
       path-scurry: 1.11.1
+    optional: true
 
   glob@13.0.3:
     dependencies:
@@ -10544,7 +10530,8 @@ snapshots:
     dependencies:
       lru-cache: 10.4.3
 
-  html-escaper@2.0.2: {}
+  html-escaper@2.0.2:
+    optional: true
 
   html-url-attributes@3.0.1: {}
 
@@ -10563,7 +10550,8 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  human-signals@2.1.0: {}
+  human-signals@2.1.0:
+    optional: true
 
   hyphenate-style-name@1.1.0: {}
 
@@ -10581,6 +10569,7 @@ snapshots:
     dependencies:
       pkg-dir: 4.2.0
       resolve-cwd: 3.0.0
+    optional: true
 
   imurmurhash@0.1.4: {}
 
@@ -10619,7 +10608,8 @@ snapshots:
       is-alphabetical: 2.0.1
       is-decimal: 2.0.1
 
-  is-arrayish@0.2.1: {}
+  is-arrayish@0.2.1:
+    optional: true
 
   is-arrayish@0.3.4: {}
 
@@ -10633,7 +10623,8 @@ snapshots:
 
   is-fullwidth-code-point@3.0.0: {}
 
-  is-generator-fn@2.1.0: {}
+  is-generator-fn@2.1.0:
+    optional: true
 
   is-hexadecimal@2.0.1: {}
 
@@ -10641,7 +10632,8 @@ snapshots:
 
   is-plain-obj@4.1.0: {}
 
-  is-stream@2.0.1: {}
+  is-stream@2.0.1:
+    optional: true
 
   is-wsl@2.2.0:
     dependencies:
@@ -10670,12 +10662,14 @@ snapshots:
       semver: 7.7.4
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   istanbul-lib-report@3.0.1:
     dependencies:
       istanbul-lib-coverage: 3.2.2
       make-dir: 4.0.0
       supports-color: 7.2.0
+    optional: true
 
   istanbul-lib-source-maps@5.0.6:
     dependencies:
@@ -10684,17 +10678,20 @@ snapshots:
       istanbul-lib-coverage: 3.2.2
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   istanbul-reports@3.2.0:
     dependencies:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
+    optional: true
 
   jackspeak@3.4.3:
     dependencies:
       '@isaacs/cliui': 8.0.2
     optionalDependencies:
       '@pkgjs/parseargs': 0.11.0
+    optional: true
 
   jackspeak@4.2.3:
     dependencies:
@@ -10705,6 +10702,7 @@ snapshots:
       execa: 5.1.1
       jest-util: 30.2.0
       p-limit: 3.1.0
+    optional: true
 
   jest-circus@30.2.0:
     dependencies:
@@ -10731,6 +10729,7 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
+    optional: true
 
   jest-cli@30.2.0(@types/node@22.19.11):
     dependencies:
@@ -10750,6 +10749,7 @@ snapshots:
       - esbuild-register
       - supports-color
       - ts-node
+    optional: true
 
   jest-config@30.2.0(@types/node@22.19.11):
     dependencies:
@@ -10782,6 +10782,7 @@ snapshots:
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color
+    optional: true
 
   jest-diff@30.2.0:
     dependencies:
@@ -10793,6 +10794,7 @@ snapshots:
   jest-docblock@30.2.0:
     dependencies:
       detect-newline: 3.1.0
+    optional: true
 
   jest-each@30.2.0:
     dependencies:
@@ -10801,6 +10803,7 @@ snapshots:
       chalk: 4.1.2
       jest-util: 30.2.0
       pretty-format: 30.2.0
+    optional: true
 
   jest-environment-node@29.7.0:
     dependencies:
@@ -10820,6 +10823,7 @@ snapshots:
       jest-mock: 30.2.0
       jest-util: 30.2.0
       jest-validate: 30.2.0
+    optional: true
 
   jest-get-type@29.6.3: {}
 
@@ -10853,11 +10857,13 @@ snapshots:
       walker: 1.0.8
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   jest-leak-detector@30.2.0:
     dependencies:
       '@jest/get-type': 30.1.0
       pretty-format: 30.2.0
+    optional: true
 
   jest-matcher-utils@30.2.0:
     dependencies:
@@ -10889,6 +10895,7 @@ snapshots:
       pretty-format: 30.2.0
       slash: 3.0.0
       stack-utils: 2.0.6
+    optional: true
 
   jest-mock@29.7.0:
     dependencies:
@@ -10901,14 +10908,17 @@ snapshots:
       '@jest/types': 30.2.0
       '@types/node': 22.19.11
       jest-util: 30.2.0
+    optional: true
 
   jest-pnp-resolver@1.2.3(jest-resolve@30.2.0):
     optionalDependencies:
       jest-resolve: 30.2.0
+    optional: true
 
   jest-regex-util@29.6.3: {}
 
-  jest-regex-util@30.0.1: {}
+  jest-regex-util@30.0.1:
+    optional: true
 
   jest-resolve-dependencies@30.2.0:
     dependencies:
@@ -10916,6 +10926,7 @@ snapshots:
       jest-snapshot: 30.2.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   jest-resolve@30.2.0:
     dependencies:
@@ -10927,6 +10938,7 @@ snapshots:
       jest-validate: 30.2.0
       slash: 3.0.0
       unrs-resolver: 1.11.1
+    optional: true
 
   jest-runner@30.2.0:
     dependencies:
@@ -10954,6 +10966,7 @@ snapshots:
       source-map-support: 0.5.13
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   jest-runtime@30.2.0:
     dependencies:
@@ -10981,6 +10994,7 @@ snapshots:
       strip-bom: 4.0.0
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   jest-snapshot@30.2.0:
     dependencies:
@@ -11007,6 +11021,7 @@ snapshots:
       synckit: 0.11.12
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   jest-util@29.7.0:
     dependencies:
@@ -11025,6 +11040,7 @@ snapshots:
       ci-info: 4.4.0
       graceful-fs: 4.2.11
       picomatch: 4.0.3
+    optional: true
 
   jest-validate@29.7.0:
     dependencies:
@@ -11043,6 +11059,7 @@ snapshots:
       chalk: 4.1.2
       leven: 3.1.0
       pretty-format: 30.2.0
+    optional: true
 
   jest-watcher@30.2.0:
     dependencies:
@@ -11054,6 +11071,7 @@ snapshots:
       emittery: 0.13.1
       jest-util: 30.2.0
       string-length: 4.0.2
+    optional: true
 
   jest-worker@27.5.1:
     dependencies:
@@ -11075,6 +11093,7 @@ snapshots:
       jest-util: 30.2.0
       merge-stream: 2.0.0
       supports-color: 8.1.1
+    optional: true
 
   jest@30.2.0(@types/node@22.19.11):
     dependencies:
@@ -11088,6 +11107,7 @@ snapshots:
       - esbuild-register
       - supports-color
       - ts-node
+    optional: true
 
   jimp-compact@0.16.1: {}
 
@@ -11280,6 +11300,7 @@ snapshots:
   make-dir@4.0.0:
     dependencies:
       semver: 7.7.4
+    optional: true
 
   makeerror@1.0.12:
     dependencies:
@@ -11842,7 +11863,8 @@ snapshots:
 
   mimic-fn@1.2.0: {}
 
-  mimic-fn@2.1.0: {}
+  mimic-fn@2.1.0:
+    optional: true
 
   min-indent@1.0.1: {}
 
@@ -11880,9 +11902,11 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  napi-postinstall@0.3.4: {}
+  napi-postinstall@0.3.4:
+    optional: true
 
-  natural-compare@1.4.0: {}
+  natural-compare@1.4.0:
+    optional: true
 
   negotiator@0.6.3: {}
 
@@ -11944,6 +11968,7 @@ snapshots:
   npm-run-path@4.0.1:
     dependencies:
       path-key: 3.1.1
+    optional: true
 
   nullthrows@1.1.1: {}
 
@@ -11974,6 +11999,7 @@ snapshots:
   onetime@5.1.2:
     dependencies:
       mimic-fn: 2.1.0
+    optional: true
 
   open@7.4.2:
     dependencies:
@@ -12011,7 +12037,8 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  package-json-from-dist@1.0.1: {}
+  package-json-from-dist@1.0.1:
+    optional: true
 
   parse-entities@4.0.2:
     dependencies:
@@ -12029,6 +12056,7 @@ snapshots:
       error-ex: 1.3.4
       json-parse-even-better-errors: 2.3.1
       lines-and-columns: 1.2.4
+    optional: true
 
   parse-png@2.1.0:
     dependencies:
@@ -12048,6 +12076,7 @@ snapshots:
     dependencies:
       lru-cache: 10.4.3
       minipass: 7.1.2
+    optional: true
 
   path-scurry@2.0.1:
     dependencies:
@@ -12102,6 +12131,7 @@ snapshots:
   pkg-dir@4.2.0:
     dependencies:
       find-up: 4.1.0
+    optional: true
 
   plist@3.1.0:
     dependencies:
@@ -12287,7 +12317,8 @@ snapshots:
 
   punycode@2.3.1: {}
 
-  pure-rand@7.0.1: {}
+  pure-rand@7.0.1:
+    optional: true
 
   qrcode-terminal@0.11.0: {}
 
@@ -12678,6 +12709,7 @@ snapshots:
   resolve-cwd@3.0.0:
     dependencies:
       resolve-from: 5.0.0
+    optional: true
 
   resolve-from@5.0.0: {}
 
@@ -12818,7 +12850,8 @@ snapshots:
 
   signal-exit@3.0.7: {}
 
-  signal-exit@4.1.0: {}
+  signal-exit@4.1.0:
+    optional: true
 
   simple-plist@1.3.1:
     dependencies:
@@ -12847,6 +12880,7 @@ snapshots:
     dependencies:
       buffer-from: 1.1.2
       source-map: 0.6.1
+    optional: true
 
   source-map-support@0.5.21:
     dependencies:
@@ -12887,6 +12921,7 @@ snapshots:
     dependencies:
       char-regex: 1.0.2
       strip-ansi: 6.0.1
+    optional: true
 
   string-width@4.2.3:
     dependencies:
@@ -12899,6 +12934,7 @@ snapshots:
       eastasianwidth: 0.2.0
       emoji-regex: 9.2.2
       strip-ansi: 7.1.2
+    optional: true
 
   stringify-entities@4.0.4:
     dependencies:
@@ -12916,10 +12952,13 @@ snapshots:
   strip-ansi@7.1.2:
     dependencies:
       ansi-regex: 6.2.2
+    optional: true
 
-  strip-bom@4.0.0: {}
+  strip-bom@4.0.0:
+    optional: true
 
-  strip-final-newline@2.0.0: {}
+  strip-final-newline@2.0.0:
+    optional: true
 
   strip-indent@3.0.0:
     dependencies:
@@ -12927,7 +12966,8 @@ snapshots:
 
   strip-json-comments@2.0.1: {}
 
-  strip-json-comments@3.1.1: {}
+  strip-json-comments@3.1.1:
+    optional: true
 
   stripe@20.3.1(@types/node@22.19.11):
     optionalDependencies:
@@ -12990,6 +13030,7 @@ snapshots:
   synckit@0.11.12:
     dependencies:
       '@pkgr/core': 0.2.9
+    optional: true
 
   tailwind-merge@3.4.0: {}
 
@@ -13170,6 +13211,7 @@ snapshots:
       '@unrs/resolver-binding-win32-arm64-msvc': 1.11.1
       '@unrs/resolver-binding-win32-ia32-msvc': 1.11.1
       '@unrs/resolver-binding-win32-x64-msvc': 1.11.1
+    optional: true
 
   update-browserslist-db@1.2.3(browserslist@4.28.1):
     dependencies:
@@ -13209,6 +13251,7 @@ snapshots:
       '@jridgewell/trace-mapping': 0.3.31
       '@types/istanbul-lib-coverage': 2.0.6
       convert-source-map: 2.0.0
+    optional: true
 
   validate-npm-package-name@5.0.1: {}
 
@@ -13337,6 +13380,7 @@ snapshots:
       ansi-styles: 6.2.3
       string-width: 5.1.2
       strip-ansi: 7.1.2
+    optional: true
 
   wrappy@1.0.2: {}
 
@@ -13349,6 +13393,7 @@ snapshots:
     dependencies:
       imurmurhash: 0.1.4
       signal-exit: 4.1.0
+    optional: true
 
   ws@6.2.3:
     dependencies:

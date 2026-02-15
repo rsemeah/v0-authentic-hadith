@@ -212,6 +212,58 @@ export default function QuizPage() {
     setLoading(false)
   }, [supabase, quizCount])
 
+  const generateAIQuiz = useCallback(async () => {
+    if (!selectedPathId) return
+    setLoading(true)
+    try {
+      const res = await fetch("/api/quiz/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          pathId: selectedPathId,
+          count: quizCount,
+          mode: "learning_path",
+        }),
+      })
+
+      if (!res.ok) {
+        console.error("AI quiz generation failed:", res.status)
+        setLoading(false)
+        return
+      }
+
+      const data = await res.json()
+      if (!data.questions || data.questions.length === 0) {
+        setLoading(false)
+        return
+      }
+
+      const aiQuestions: QuizQuestion[] = data.questions.map(
+        (q: { question: string; options: string[]; correctIndex: number; explanation?: string; relatedHadithRef?: string }, i: number) => ({
+          id: `ai-${i}`,
+          question: q.question,
+          type: "ai" as const,
+          options: q.options,
+          correctIndex: q.correctIndex,
+          hadithRef: q.relatedHadithRef || "",
+          explanation: q.explanation,
+        })
+      )
+
+      setQuestions(aiQuestions)
+      setCurrentIndex(0)
+      setSelected(null)
+      setRevealed(false)
+      setScore(0)
+      setStartTime(Date.now())
+      setElapsed(0)
+      setStage("quiz")
+    } catch (err) {
+      console.error("AI quiz error:", err)
+    }
+    setLoading(false)
+  }, [selectedPathId, quizCount])
+
   const handleSelect = (index: number) => {
     if (revealed) return
     setSelected(index)
@@ -244,7 +296,7 @@ export default function QuizPage() {
       if (user) {
         await supabase.from("quiz_attempts").insert({
           user_id: user.id,
-          quiz_type: "general",
+          quiz_type: quizMode === "ai_learning" ? "ai_learning" : "general",
           total_questions: questions.length,
           correct_answers: finalScore,
           score_percent: scorePct,
@@ -321,6 +373,71 @@ export default function QuizPage() {
               </p>
             </div>
 
+            {/* Quiz Mode Selector */}
+            <div className="premium-card gold-border rounded-xl p-6">
+              <h3 className="font-semibold text-foreground mb-4">Quiz Mode</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setQuizMode("general")}
+                  className={cn(
+                    "p-4 rounded-xl border-2 transition-all text-left",
+                    quizMode === "general"
+                      ? "border-[#C5A059] bg-[#C5A059]/5"
+                      : "border-border hover:border-[#C5A059]/50",
+                  )}
+                >
+                  <BookOpen className="w-5 h-5 text-[#C5A059] mb-2" />
+                  <p className="text-sm font-semibold text-foreground">General Quiz</p>
+                  <p className="text-xs text-muted-foreground mt-1">Random hadith questions</p>
+                </button>
+                <button
+                  onClick={() => setQuizMode("ai_learning")}
+                  className={cn(
+                    "p-4 rounded-xl border-2 transition-all text-left",
+                    quizMode === "ai_learning"
+                      ? "border-[#C5A059] bg-[#C5A059]/5"
+                      : "border-border hover:border-[#C5A059]/50",
+                  )}
+                >
+                  <Sparkles className="w-5 h-5 text-[#C5A059] mb-2" />
+                  <p className="text-sm font-semibold text-foreground">AI-Powered</p>
+                  <p className="text-xs text-muted-foreground mt-1">From your learning paths</p>
+                </button>
+              </div>
+            </div>
+
+            {/* Learning Path Selector (AI mode) */}
+            {quizMode === "ai_learning" && learningPaths.length > 0 && (
+              <div className="premium-card gold-border rounded-xl p-6">
+                <h3 className="font-semibold text-foreground mb-4">Select Learning Path</h3>
+                <div className="space-y-2">
+                  {learningPaths.map((path) => (
+                    <button
+                      key={path.id}
+                      onClick={() => setSelectedPathId(path.id)}
+                      className={cn(
+                        "w-full p-3 rounded-lg border-2 transition-all flex items-center gap-3 text-left",
+                        selectedPathId === path.id
+                          ? "border-[#C5A059] bg-[#C5A059]/5"
+                          : "border-border hover:border-[#C5A059]/50",
+                      )}
+                    >
+                      <div
+                        className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+                        style={{ backgroundColor: path.color || "#1B5E43" }}
+                      >
+                        <BookOpen className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-foreground">{path.title}</p>
+                        <p className="text-xs text-muted-foreground capitalize">{path.level}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Question Count Selector */}
             <div className="premium-card gold-border rounded-xl p-6">
               <h3 className="font-semibold text-foreground mb-4">Number of Questions</h3>
@@ -344,16 +461,19 @@ export default function QuizPage() {
 
             {/* Start Button */}
             <button
-              onClick={generateQuiz}
-              disabled={loading}
+              onClick={quizMode === "ai_learning" ? generateAIQuiz : generateQuiz}
+              disabled={loading || (quizMode === "ai_learning" && !selectedPathId)}
               className="w-full py-4 rounded-xl gold-button text-lg flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
-                <div className="w-5 h-5 border-2 border-[#2c2416] border-t-transparent rounded-full animate-spin" />
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-[#2c2416] border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm">{quizMode === "ai_learning" ? "AI is generating questions..." : "Loading..."}</span>
+                </div>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  Start Quiz
+                  {quizMode === "ai_learning" ? "Generate AI Quiz" : "Start Quiz"}
                 </>
               )}
             </button>
@@ -414,7 +534,7 @@ export default function QuizPage() {
             {/* Question Type Badge */}
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 rounded-full text-xs font-medium bg-[#C5A059]/10 text-[#C5A059] capitalize">
-                {currentQ.type === "completion" ? "Complete the Hadith" : currentQ.type}
+                {currentQ.type === "completion" ? "Complete the Hadith" : currentQ.type === "ai" ? "AI Generated" : currentQ.type}
               </span>
               {currentQ.hadithRef && (
                 <span className="text-xs text-muted-foreground">{currentQ.hadithRef}</span>
@@ -475,6 +595,14 @@ export default function QuizPage() {
                 )
               })}
             </div>
+
+            {/* AI Explanation */}
+            {revealed && currentQ.explanation && (
+              <div className="rounded-xl bg-[#1B5E43]/5 border border-[#1B5E43]/20 p-4">
+                <p className="text-xs font-semibold text-[#1B5E43] uppercase mb-1">Explanation</p>
+                <p className="text-sm text-foreground leading-relaxed">{currentQ.explanation}</p>
+              </div>
+            )}
 
             {/* Action Button */}
             <div className="flex gap-3">

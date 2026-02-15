@@ -1,6 +1,5 @@
 import { generateText, Output } from "ai"
 import { z } from "zod"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { createClient } from "@supabase/supabase-js"
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
 

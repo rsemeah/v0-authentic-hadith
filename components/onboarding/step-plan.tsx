@@ -1,6 +1,6 @@
 "use client"
 
-import { Crown, Check, Star, Zap, Sparkles } from "lucide-react"
+import { Crown, Check, Star, Sparkles } from "lucide-react"
 import { PRODUCTS, type Product } from "@/lib/products"
 import { cn } from "@/lib/utils"
 
@@ -17,7 +17,6 @@ function formatPrice(cents: number, interval?: string) {
 }
 
 const TIER_ICONS: Record<string, typeof Crown> = {
-  "monthly-intro": Zap,
   "monthly-premium": Star,
   "annual-premium": Crown,
   "lifetime-access": Sparkles,
@@ -146,7 +145,7 @@ export function StepPlan({ selectedPlanId, onSelect }: StepPlanProps) {
 
       {/* Fine print */}
       <p className="text-[11px] text-muted-foreground/60 text-center leading-relaxed">
-        Premium plans are managed through Stripe. You can cancel anytime from your profile settings.
+        You can cancel anytime from your profile settings or device subscription manager.
         No charge until your free trial ends.
       </p>
     </div>

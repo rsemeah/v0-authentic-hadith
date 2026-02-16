@@ -6,6 +6,7 @@ import { Bot, ChevronLeft, Send, Sparkles, Loader2, Lock, Crown } from "lucide-r
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { useSubscription } from "@/hooks/use-subscription"
+import { isNativeApp, showNativePaywall } from "@/lib/native-bridge"
 
 const promptTemplates = [
   { label: "Explain the hadith about intentions", icon: "📖" },
@@ -64,7 +65,14 @@ function AssistantContent() {
           </p>
           <div className="space-y-3">
             <button
-              onClick={() => router.push("/pricing")}
+              onClick={async () => {
+                if (isNativeApp()) {
+                  const success = await showNativePaywall()
+                  if (success) window.location.reload()
+                } else {
+                  router.push("/pricing")
+                }
+              }}
               className="w-full gold-button py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
             >
               <Crown className="w-4 h-4" />

@@ -187,21 +187,33 @@ export default function OnboardingPage() {
       // Set onboarded cookie
       document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
 
-      // If user selected a paid plan, redirect to checkout
+      // If user selected a paid plan, handle checkout
       if (data.selectedPlanId) {
-        try {
-          const res = await fetch("/api/checkout/create-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ productId: data.selectedPlanId }),
-          })
-          const result = await res.json()
-          if (result.url) {
-            window.location.href = result.url
+        const { isNativeApp, showNativePaywall } = await import("@/lib/native-bridge")
+        if (isNativeApp()) {
+          // In native app, show RevenueCat paywall
+          const success = await showNativePaywall()
+          if (success) {
+            setShowSuccess(true)
             return
           }
-        } catch {
-          // Checkout failed -- continue to home, user can subscribe later
+          // If cancelled, still show success and go to home
+        } else {
+          // On web, redirect to Stripe checkout
+          try {
+            const res = await fetch("/api/checkout/create-session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productId: data.selectedPlanId }),
+            })
+            const result = await res.json()
+            if (result.url) {
+              window.location.href = result.url
+              return
+            }
+          } catch {
+            // Checkout failed -- continue to home, user can subscribe later
+          }
         }
       }
 

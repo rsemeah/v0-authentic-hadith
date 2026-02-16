@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Authentic Hadith — Unified Platform Architecture</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0f0d;--bg2:#0f1a15;--bg3:#132a21;
+    --emerald:#1b5e43;--emerald-light:#2d8a63;--emerald-glow:#1b5e4366;
+    --gold:#c5a059;--gold-light:#d4b872;--gold-dim:#c5a05933;
+    --blue:#2563eb;--blue-light:#60a5fa;--blue-bg:#1e3a5f22;
+    --yellow:#eab308;--yellow-light:#fde047;--yellow-bg:#92400e22;
+    --green:#16a34a;--green-light:#4ade80;--green-bg:#14532d22;
+    --teal:#0d9488;--teal-light:#2dd4bf;--teal-bg:#134e4a22;
+    --purple:#9333ea;--purple-light:#c084fc;--purple-bg:#581c8722;
+    --text:#e8e6e1;--text2:#a8a49c;--text3:#6b6860;
+    --radius:12px;--radius-lg:18px;
+  }
+  html{font-size:14px;scroll-behavior:smooth}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:var(--bg);color:var(--text);
+    min-height:100vh;overflow-x:hidden;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% 0%,#1b5e4318 0%,transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%,#c5a05910 0%,transparent 50%);
+  }
+
+  /* Header */
+  .header{
+    text-align:center;padding:2.5rem 1rem 1.5rem;
+    position:relative;z-index:10;
+  }
+  .header::after{
+    content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+    width:200px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+  .header h1{
+    font-size:2rem;font-weight:700;letter-spacing:-.02em;
+    background:linear-gradient(135deg,var(--gold-light),var(--gold),var(--emerald-light));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  .header .subtitle{
+    color:var(--text2);font-size:.95rem;margin-top:.4rem;font-weight:300;
+    letter-spacing:.05em;
+  }
+  .header .badge{
+    display:inline-block;margin-top:.7rem;padding:.25rem .9rem;
+    border:1px solid var(--gold-dim);border-radius:20px;
+    font-size:.7rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;
+    background:var(--gold-dim);
+  }
+
+  /* Stats bar */
+  .stats-bar{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 1.2rem;
+    padding:.8rem 1rem;margin:0 auto;max-width:900px;
+  }
+  .stat{
+    display:flex;align-items:center;gap:.35rem;
+    font-size:.72rem;color:var(--text3);
+  }
+  .stat .num{color:var(--gold);font-weight:700;font-size:.85rem;font-variant-numeric:tabular-nums}
+
+  /* Main container */
+  .arch-container{
+    max-width:1300px;margin:1rem auto;padding:0 1rem 3rem;
+    display:flex;flex-direction:column;gap:1.5rem;
+    position:relative;
+  }
+
+  /* Zone */
+  .zone{
+    border-radius:var(--radius-lg);padding:1.2rem;
+    position:relative;overflow:hidden;
+    border:1px solid transparent;
+    transition:border-color .3s;
+  }
+  .zone:hover{border-color:rgba(255,255,255,.06)}
+  .zone-label{
+    display:inline-flex;align-items:center;gap:.45rem;
+    font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    margin-bottom:1rem;padding:.25rem .7rem;border-radius:6px;
+  }
+  .zone-label .dot{width:8px;height:8px;border-radius:50%}
+
+  /* Zone colors */
+  .zone-client{background:var(--blue-bg);border-color:#2563eb20}
+  .zone-client .zone-label{color:var(--blue-light);background:#2563eb15}
+  .zone-client .zone-label .dot{background:var(--blue)}
+
+  .zone-gateway{background:var(--yellow-bg);border-color:#eab30820}
+  .zone-gateway .zone-label{color:var(--yellow-light);background:#eab30815}
+  .zone-gateway .zone-label .dot{background:var(--yellow)}
+
+  .zone-backend{background:var(--green-bg);border-color:#16a34a20}
+  .zone-backend .zone-label{color:var(--green-light);background:#16a34a15}
+  .zone-backend .zone-label .dot{background:var(--green)}
+
+  .zone-data{background:var(--teal-bg);border-color:#0d948820}
+  .zone-data .zone-label{color:var(--teal-light);background:#0d948815}
+  .zone-data .zone-label .dot{background:var(--teal)}
+
+  .zone-external{background:var(--purple-bg);border-color:#9333ea20}
+  .zone-external .zone-label{color:var(--purple-light);background:#9333ea15}
+  .zone-external .zone-label .dot{background:var(--purple)}
+
+  /* Cards */
+  .card{
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);
+    border-radius:var(--radius);padding:1rem;
+    transition:all .3s;cursor:pointer;position:relative;
+  }
+  .card:hover{
+    background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);
+    transform:translateY(-1px);
+  }
+  .card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:.5rem;
+  }
+  .card-title{
+    font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:.4rem;
+  }
+  .card-title .icon{font-size:1rem;opacity:.7}
+  .card-toggle{
+    font-size:.65rem;color:var(--text3);padding:.15rem .5rem;
+    border:1px solid rgba(255,255,255,.08);border-radius:4px;
+    background:transparent;cursor:pointer;transition:all .2s;
+    font-family:inherit;
+  }
+  .card-toggle:hover{border-color:rgba(255,255,255,.2);color:var(--text2)}
+  .card-brief{font-size:.75rem;color:var(--text2);line-height:1.5}
+  .card-detail{
+    max-height:0;overflow:hidden;transition:max-height .4s ease,opacity .3s;
+    opacity:0;
+  }
+  .card.expanded .card-detail{max-height:800px;opacity:1}
+  .card-detail-inner{
+    margin-top:.7rem;padding-top:.7rem;
+    border-top:1px solid rgba(255,255,255,.06);
+  }
+  .detail-list{list-style:none;display:flex;flex-direction:column;gap:.3rem}
+  .detail-list li{
+    font-size:.72rem;color:var(--text2);padding-left:.9rem;position:relative;line-height:1.5;
+  }
+  .detail-list li::before{
+    content:'';position:absolute;left:0;top:.45em;
+    width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.35;
+  }
+  .tag{
+    display:inline-block;padding:.1rem .45rem;margin:.1rem;
+    border-radius:4px;font-size:.62rem;font-weight:500;
+    background:rgba(255,255,255,.06);color:var(--text2);
+  }
+
+  /* Client side-by-side */
+  .client-grid{
+    display:grid;grid-template-columns:1fr 1fr;gap:1rem;
+  }
+  @media(max-width:768px){.client-grid{grid-template-columns:1fr}}
+
+  /* Gateway grid */
+  .gateway-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media(max-width:768px){.gateway-grid{grid-template-columns:1fr}}
+
+  /* Backend grid */
+  .backend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem}
+
+  /* Data grid */
+  .data-grid{display:grid;grid-template-columns:2fr 1fr;gap:1rem}
+  @media(max-width:768px){.data-grid{grid-template-columns:1fr}}
+
+  /* External grid */
+  .external-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.6rem}
+
+  .ext-item{
+    display:flex;align-items:center;gap:.5rem;
+    padding:.6rem .8rem;border-radius:8px;
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);
+    transition:all .3s;cursor:default;
+  }
+  .ext-item:hover{background:rgba(255,255,255,.06)}
+  .ext-icon{font-size:1.1rem}
+  .ext-name{font-size:.75rem;font-weight:600}
+  .ext-desc{font-size:.6rem;color:var(--text3)}
+
+  /* Connector arrows between zones */
+  .connector{
+    display:flex;align-items:center;justify-content:center;
+    height:2.5rem;position:relative;
+  }
+  .connector-line{
+    width:2px;height:100%;position:relative;
+    background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(255,255,255,.05));
+  }
+  .connector-line::after{
+    content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:2px;height:100%;
+    background:linear-gradient(180deg,var(--gold),transparent);
+    animation:flowDown 2s ease-in-out infinite;
+  }
+  @keyframes flowDown{
+    0%{opacity:0;clip-path:inset(0 0 100% 0)}
+    50%{opacity:1;clip-path:inset(0 0 0 0)}
+    100%{opacity:0;clip-path:inset(100% 0 0 0)}
+  }
+  .connector-label{
+    position:absolute;
+    background:var(--bg);padding:.1rem .5rem;border-radius:4px;
+    font-size:.6rem;color:var(--text3);letter-spacing:.05em;
+    border:1px solid rgba(255,255,255,.06);
+    white-space:nowrap;
+  }
+
+  /* Flow diagram section */
+  .flows-section{margin-top:1rem}
+  .flows-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  @media(max-width:768px){.flows-grid{grid-template-columns:1fr}}
+
+  .flow-card{
+    background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.06);
+    border-radius:var(--radius);padding:1rem;position:relative;overflow:hidden;
+    cursor:pointer;transition:all .3s;
+  }
+  .flow-card:hover{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1)}
+  .flow-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    animation:shimmer 3s ease-in-out infinite;
+  }
+  @keyframes shimmer{
+    0%,100%{opacity:.3}50%{opacity:1}
+  }
+  .flow-num{
+    font-size:.6rem;font-weight:700;color:var(--gold);
+    background:var(--gold-dim);padding:.15rem .4rem;border-radius:4px;
+    margin-right:.4rem;
+  }
+  .flow-title{font-size:.82rem;font-weight:600;margin-bottom:.6rem;display:flex;align-items:center}
+  .flow-steps{display:flex;flex-direction:column;gap:.3rem}
+  .flow-step{
+    display:flex;align-items:center;gap:.4rem;
+    font-size:.68rem;color:var(--text2);
+  }
+  .flow-arrow{color:var(--gold);font-size:.7rem;flex-shrink:0;animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
+  .flow-platform{
+    font-size:.55rem;font-weight:600;padding:.1rem .35rem;border-radius:3px;
+    flex-shrink:0;
+  }
+  .fp-web{background:#2563eb22;color:var(--blue-light)}
+  .fp-mobile{background:#16a34a22;color:var(--green-light)}
+  .fp-both{background:#c5a05922;color:var(--gold)}
+
+  /* Shared badge */
+  .shared-badge{
+    display:inline-flex;align-items:center;gap:.3rem;
+    padding:.15rem .5rem;border-radius:4px;
+    background:linear-gradient(135deg,#2563eb15,#16a34a15);
+    border:1px solid rgba(255,255,255,.06);
+    font-size:.6rem;color:var(--text2);font-weight:500;
+  }
+
+  /* Animated SVG overlay for flow lines */
+  .flow-svg{
+    position:absolute;top:0;left:0;width:100%;height:100%;
+    pointer-events:none;z-index:0;
+  }
+
+  /* Glow effects */
+  .glow-emerald{box-shadow:0 0 30px var(--emerald-glow)}
+  .glow-gold{box-shadow:0 0 20px var(--gold-dim)}
+
+  /* Animation for data flow dots */
+  .data-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--gold);
+    position:absolute;
+    animation:dataPulse 1.5s ease-in-out infinite;
+    box-shadow:0 0 8px var(--gold);
+  }
+  @keyframes dataPulse{0%,100%{opacity:0;transform:scale(.5)}50%{opacity:1;transform:scale(1)}}
+
+  /* Tier comparison mini-table */
+  .tier-table{
+    width:100%;border-collapse:collapse;margin-top:.5rem;
+  }
+  .tier-table th,.tier-table td{
+    padding:.25rem .4rem;font-size:.62rem;text-align:center;
+    border:1px solid rgba(255,255,255,.06);
+  }
+  .tier-table th{
+    background:rgba(255,255,255,.04);color:var(--gold);font-weight:600;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+  .tier-table td{color:var(--text2)}
+  .tier-free{color:#94a3b8!important}
+  .tier-premium{color:var(--blue-light)!important}
+  .tier-lifetime{color:var(--gold-light)!important}
+
+  /* Canvas for animated particles */
+  #particles-canvas{
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    pointer-events:none;z-index:0;opacity:.3;
+  }
+
+  /* Responsive */
+  @media(max-width:600px){
+    html{font-size:12px}
+    .header h1{font-size:1.6rem}
+    .arch-container{padding:0 .5rem 2rem}
+    .zone{padding:.8rem}
+  }
+
+  /* Legend */
+  .legend{
+    display:flex;flex-wrap:wrap;justify-content:center;gap:.6rem 1.2rem;
+    padding:.6rem 1rem;margin:0 auto;
+  }
+  .legend-item{display:flex;align-items:center;gap:.3rem;font-size:.65rem;color:var(--text3)}
+  .legend-dot{width:10px;height:10px;border-radius:3px}
+  .ld-blue{background:var(--blue)}
+  .ld-yellow{background:var(--yellow)}
+  .ld-green{background:var(--green)}
+  .ld-teal{background:var(--teal)}
+  .ld-purple{background:var(--purple)}
+
+  /* Shared indicator line */
+  .shared-line{
+    display:flex;align-items:center;justify-content:center;gap:.5rem;
+    padding:.4rem 0;
+  }
+  .shared-line-segment{
+    flex:1;height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);
+  }
+  .shared-line-text{
+    font-size:.6rem;color:var(--text3);white-space:nowrap;
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+</style>
+</head>
+<body>
+<canvas id="particles-canvas"></canvas>
+
+<header class="header">
+  <h1>Authentic Hadith</h1>
+  <div class="subtitle">Unified Platform Architecture &mdash; Web + Mobile + Backend</div>
+  <div class="badge">Production Architecture v1.0</div>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot ld-blue"></div>Client Tier</div>
+  <div class="legend-item"><div class="legend-dot ld-yellow"></div>API Gateway</div>
+  <div class="legend-item"><div class="legend-dot ld-green"></div>Backend Services</div>
+  <div class="legend-item"><div class="legend-dot ld-teal"></div>Data Layer</div>
+  <div class="legend-item"><div class="legend-dot ld-purple"></div>External Services</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat"><span class="num">31,839</span> hadiths</div>
+  <div class="stat"><span class="num">8</span> collections</div>
+  <div class="stat"><span class="num">30+</span> tables</div>
+  <div class="stat"><span class="num">59</span> screens/pages</div>
+  <div class="stat"><span class="num">74</span> components</div>
+  <div class="stat"><span class="num">22</span> API routes</div>
+  <div class="stat"><span class="num">3</span> tiers</div>
+  <div class="stat"><span class="num">4</span> learning paths</div>
+</div>
+
+<div class="arch-container">
+
+  <!-- ==================== CLIENT TIER ==================== -->
+  <div class="zone zone-client">
+    <div class="zone-label"><div class="dot"></div>Client Tier</div>
+    <div class="client-grid">
+
+      <!-- Web Client -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#127760;</span> Web Client</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">
+          Next.js 15 App Router on Vercel &mdash; 40 pages, 47 components, 20 lib modules<br>
+          <span class="tag">SSR + CSR</span><span class="tag">Cookie Auth</span><span class="tag">Stripe</span><span class="tag">Vercel Analytics</span>
+        </div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li>Next.js 15 with App Router (server + client components)</li>
+            <li>40 pages covering search, collections, AI chat, learning paths, profile, admin</li>
+            <li>47 React components in modular directory structure</li>
+            <li>20 lib modules (supabase, stripe, gamification, enrichment)</li>
+            <li>Server-Side Rendering for SEO + Client-Side for interactivity</li>
+            <li>Cookie-based Supabase auth sessions (httpOnly, secure)</li>
+            <li>Stripe Checkout for web payment flows</li>
+            <li>Vercel Analytics + Speed Insights integration</li>
+            <li>Fully responsive Tailwind CSS design system</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <!-- Mobile Client -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#128241;</span> Mobile Client</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">
+          Expo SDK 54 / React Native 0.81.5 &mdash; 19 screens, 27 components, 7 hooks<br>
+          <span class="tag">iOS + Android</span><span class="tag">Offline-First</span><span class="tag">RevenueCat</span><span class="tag">SecureStore</span>
+        </div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li>Expo SDK 54 with React Native 0.81.5 (New Architecture)</li>
+            <li>19 screens via Expo Router (file-based routing)</li>
+            <li>27 components + 7 custom hooks</li>
+            <li>iOS (App Store) and Android (Play Store) distribution</li>
+            <li>Offline-first with SQLite cache (top 100 hadiths pre-cached)</li>
+            <li>RevenueCat for in-app purchases (StoreKit 2 / Play Billing)</li>
+            <li>expo-secure-store for auth tokens + theme preference</li>
+            <li>Native: haptic feedback, Apple Sign-In, share sheet</li>
+            <li>EAS Build + Submit pipeline for app store deployment</li>
+          </ul>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="connector">
+    <div class="connector-line"></div>
+    <div class="connector-label">REST API &middot; HTTPS</div>
+  </div>
+
+  <!-- ==================== API GATEWAY ==================== -->
+  <div class="zone zone-gateway">
+    <div class="zone-label"><div class="dot"></div>API / Gateway Layer &mdash; Vercel Serverless</div>
+    <div class="gateway-grid">
+
+      <!-- Shared API Routes -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#9889;</span> Shared API Routes</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">
+          22 endpoints on Vercel Serverless &mdash; used by both web and mobile clients<br>
+          <span class="shared-badge">&#128256; Shared Backend</span>
+        </div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li><strong>/api/chat</strong> &mdash; AI assistant (both clients)</li>
+            <li><strong>/api/daily-hadith</strong> &mdash; Daily hadith selection</li>
+            <li><strong>/api/search</strong> &mdash; Full-text hadith search</li>
+            <li><strong>/api/my-hadith/*</strong> &mdash; Bookmarks and folders</li>
+            <li><strong>/api/gamification/*</strong> &mdash; XP and achievements</li>
+            <li><strong>/api/subscription</strong> &mdash; Subscription status check</li>
+            <li><strong>/api/enrich</strong> &mdash; AI enrichment pipeline</li>
+            <li><strong>/api/delete-account</strong> &mdash; GDPR account deletion</li>
+            <li><strong>/api/checkout/create-session</strong> &mdash; Stripe checkout (web only)</li>
+            <li><strong>/api/webhooks/stripe</strong> &mdash; Stripe webhook handler</li>
+            <li><strong>/api/auth/*</strong> &mdash; Auth callbacks and helpers</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <!-- Auth Methods -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#128274;</span> Authentication</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">
+          Unified Supabase Auth &mdash; platform-specific session strategies<br>
+          <span class="tag">Email/Password</span><span class="tag">Google OAuth</span><span class="tag">Apple Sign-In</span>
+        </div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li><strong>Web:</strong> Email/Password, Google OAuth, Apple OAuth</li>
+            <li>Web sessions: httpOnly cookie-based (Supabase SSR helpers)</li>
+            <li><strong>Mobile:</strong> Email/Password, Apple Sign-In (native)</li>
+            <li>Mobile sessions: Bearer tokens stored in expo-secure-store</li>
+            <li>Both platforms use Supabase Auth as identity provider</li>
+            <li>Unified user profile in profiles table (same user ID)</li>
+            <li>RLS policies enforce per-user data isolation</li>
+          </ul>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="connector">
+    <div class="connector-line"></div>
+    <div class="connector-label">Service Orchestration</div>
+  </div>
+
+  <!-- ==================== BACKEND SERVICES ==================== -->
+  <div class="zone zone-backend">
+    <div class="zone-label"><div class="dot"></div>Backend Services</div>
+    <div class="backend-grid">
+
+      <!-- AI Engine -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#129302;</span> AI Engine</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">Groq &middot; Llama 3.3 70B Versatile<br><span class="tag">Chat</span><span class="tag">Tool-Use</span><span class="tag">Enrichment</span></div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li>Provider: Groq (ultra-fast inference)</li>
+            <li>Model: Llama 3.3 70B Versatile</li>
+            <li>Chat with tool-use (searches hadith database in real-time)</li>
+            <li>Auto-enrichment: summary, category, tags with confidence scores</li>
+            <li>Quota enforcement per subscription tier</li>
+            <li>Streaming responses for low-latency UX</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <!-- Subscription Engine -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#128176;</span> Subscription Engine</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">Stripe (Web) + RevenueCat (Mobile) &rarr; unified tier<br><span class="tag">Free</span><span class="tag">Premium</span><span class="tag">Lifetime</span></div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li><strong>Web:</strong> Stripe Checkout, webhooks, customer portal</li>
+            <li><strong>Mobile:</strong> RevenueCat (StoreKit 2 for iOS, Play Billing for Android)</li>
+            <li>Both sync to <code>profiles.subscription_tier</code> in Supabase</li>
+            <li>Same tier logic used by API routes regardless of payment source</li>
+          </ul>
+          <table class="tier-table">
+            <tr><th>Tier</th><th>AI/day</th><th>Saves</th><th>Price</th></tr>
+            <tr class="tier-free"><td>Free</td><td>0</td><td>10</td><td>$0</td></tr>
+            <tr class="tier-premium"><td>Premium</td><td>50</td><td>500</td><td>$6.99/mo</td></tr>
+            <tr class="tier-lifetime"><td>Lifetime</td><td>&infin;</td><td>&infin;</td><td>$49.99</td></tr>
+          </table>
+        </div></div>
+      </div>
+
+      <!-- Gamification Engine -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#127942;</span> Gamification Engine</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">XP, levels, achievements, streaks<br><span class="tag">Activity Tracking</span><span class="tag">Achievements</span></div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li>Activity types: read, share, bookmark, note, story</li>
+            <li>Achievement system with criteria matching engine</li>
+            <li>XP / Level calculator (progressive thresholds)</li>
+            <li>Streak tracking for daily engagement retention</li>
+            <li>Cross-platform: same gamification state on web + mobile</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <!-- Learning Engine -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#128218;</span> Learning Engine</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">4 learning paths &middot; module/lesson hierarchy<br><span class="tag">Progress</span><span class="tag">Quizzes</span><span class="tag">Reflections</span></div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li>4 learning paths with module/lesson hierarchy</li>
+            <li>Progress tracking: per-lesson 0-100%</li>
+            <li>Content types: hadith, article, quiz, reflection</li>
+            <li>Completion awards XP and unlocks achievements</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <!-- Enrichment Pipeline -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#9881;</span> Enrichment Pipeline</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">AI-generated metadata &middot; confidence scoring<br><span class="tag">Summary</span><span class="tag">Categories</span><span class="tag">Tags</span></div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li>AI-generated: summary_line, category_slug, tag_slugs</li>
+            <li>Confidence scoring (0&ndash;1 float)</li>
+            <li>Admin review interface for low-confidence items</li>
+            <li>Auto-publish for high-confidence Sahih Bukhari/Muslim</li>
+            <li>Batch processing with progress tracking</li>
+          </ul>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="connector">
+    <div class="connector-line"></div>
+    <div class="connector-label">SQL &middot; RPC &middot; Realtime</div>
+  </div>
+
+  <!-- ==================== DATA LAYER ==================== -->
+  <div class="zone zone-data">
+    <div class="zone-label"><div class="dot"></div>Data Layer</div>
+    <div class="data-grid">
+
+      <!-- Supabase PostgreSQL -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#128451;</span> Supabase PostgreSQL</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">
+          31,839 hadiths &middot; 8 collections &middot; 30+ tables<br>
+          <span class="shared-badge">&#128256; Shared by Web + Mobile</span>
+        </div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li>31,839 hadiths across 8 canonical collections</li>
+            <li>30+ tables: core (hadiths, collections, narrators), user (profiles, saved_hadiths, folders, notes), subscription, learning (paths, modules, lessons, progress), engagement (activities, achievements, streaks), enrichment (summaries, categories, tags)</li>
+            <li>Row-Level Security (RLS) on all user-facing tables</li>
+            <li>RPC: check_user_quota(), increment_ai_usage(), delete_user_account()</li>
+            <li>Full-text search indexes on hadith text (English + Arabic)</li>
+            <li>Automatic timestamps + soft-delete patterns</li>
+          </ul>
+        </div></div>
+      </div>
+
+      <!-- Mobile Local Storage -->
+      <div class="card" onclick="toggleCard(this)">
+        <div class="card-head">
+          <div class="card-title"><span class="icon">&#128225;</span> Mobile Local Storage</div>
+          <button class="card-toggle">details</button>
+        </div>
+        <div class="card-brief">
+          SQLite cache + SecureStore<br>
+          <span class="tag">Offline-First</span><span class="tag">Sync</span>
+        </div>
+        <div class="card-detail"><div class="card-detail-inner">
+          <ul class="detail-list">
+            <li><strong>SQLite tables:</strong> cached_hadiths, cached_folders, cached_saved_hadiths</li>
+            <li><strong>SecureStore:</strong> auth tokens, theme preference</li>
+            <li>Top 100 popular hadiths cached on launch</li>
+            <li>Offline mode: read-only access to cached content</li>
+            <li>Background sync when connectivity restored</li>
+          </ul>
+        </div></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Connector -->
+  <div class="connector">
+    <div class="connector-line"></div>
+    <div class="connector-label">Cloud Services</div>
+  </div>
+
+  <!-- ==================== EXTERNAL SERVICES ==================== -->
+  <div class="zone zone-external">
+    <div class="zone-label"><div class="dot"></div>External Services</div>
+    <div class="external-grid">
+      <div class="ext-item"><div class="ext-icon">&#9889;</div><div><div class="ext-name">Supabase</div><div class="ext-desc">DB, Auth, Realtime, Storage</div></div></div>
+      <div class="ext-item"><div class="ext-icon">&#128179;</div><div><div class="ext-name">Stripe</div><div class="ext-desc">Web payments (4 products)</div></div></div>
+      <div class="ext-item"><div class="ext-icon">&#128230;</div><div><div class="ext-name">RevenueCat</div><div class="ext-desc">Mobile IAP (3 products)</div></div></div>
+      <div class="ext-item"><div class="ext-icon">&#129302;</div><div><div class="ext-name">Groq</div><div class="ext-desc">Llama 3.3 70B LLM</div></div></div>
+      <div class="ext-item"><div class="ext-icon">&#9650;</div><div><div class="ext-name">Vercel</div><div class="ext-desc">Hosting, CDN, Serverless</div></div></div>
+      <div class="ext-item"><div class="ext-icon">&#63743;</div><div><div class="ext-name">Apple</div><div class="ext-desc">App Store, Sign-In, StoreKit</div></div></div>
+      <div class="ext-item"><div class="ext-icon">&#9679;</div><div><div class="ext-name">Google</div><div class="ext-desc">Play Store, OAuth</div></div></div>
+      <div class="ext-item"><div class="ext-icon">&#128640;</div><div><div class="ext-name">EAS</div><div class="ext-desc">Build + Submit pipeline</div></div></div>
+    </div>
+  </div>
+
+  <!-- ==================== ANIMATED FLOWS ==================== -->
+  <div class="flows-section">
+    <div class="shared-line">
+      <div class="shared-line-segment"></div>
+      <div class="shared-line-text">Key Data Flows</div>
+      <div class="shared-line-segment"></div>
+    </div>
+
+    <div class="flows-grid" style="margin-top:.8rem">
+
+      <!-- Flow 1: Cross-Platform Auth -->
+      <div class="flow-card">
+        <div class="flow-title"><span class="flow-num">1</span> Cross-Platform Auth</div>
+        <div class="flow-steps">
+          <div class="flow-step"><span class="flow-platform fp-web">WEB</span> Browser <span class="flow-arrow">&rarr;</span> Google/Apple OAuth <span class="flow-arrow">&rarr;</span> Supabase Auth <span class="flow-arrow">&rarr;</span> Cookie <span class="flow-arrow">&rarr;</span> App</div>
+          <div class="flow-step"><span class="flow-platform fp-mobile">MOB</span> App <span class="flow-arrow">&rarr;</span> Apple Sign-In <span class="flow-arrow">&rarr;</span> Supabase Auth <span class="flow-arrow">&rarr;</span> SecureStore <span class="flow-arrow">&rarr;</span> App</div>
+        </div>
+      </div>
+
+      <!-- Flow 2: Subscription Sync -->
+      <div class="flow-card">
+        <div class="flow-title"><span class="flow-num">2</span> Subscription Sync</div>
+        <div class="flow-steps">
+          <div class="flow-step"><span class="flow-platform fp-web">WEB</span> Stripe Checkout <span class="flow-arrow">&rarr;</span> Webhook <span class="flow-arrow">&rarr;</span> profiles.subscription_tier = 'premium'</div>
+          <div class="flow-step"><span class="flow-platform fp-mobile">MOB</span> RevenueCat <span class="flow-arrow">&rarr;</span> syncSubscription() <span class="flow-arrow">&rarr;</span> profiles.subscription_tier = 'premium'</div>
+          <div class="flow-step"><span class="flow-platform fp-both">BOTH</span> Same tier check works for both clients</div>
+        </div>
+      </div>
+
+      <!-- Flow 3: AI Chat -->
+      <div class="flow-card">
+        <div class="flow-title"><span class="flow-num">3</span> AI Chat (Shared)</div>
+        <div class="flow-steps">
+          <div class="flow-step"><span class="flow-platform fp-both">BOTH</span> Client <span class="flow-arrow">&rarr;</span> POST /api/chat <span class="flow-arrow">&rarr;</span> Groq LLM</div>
+          <div class="flow-step" style="padding-left:3.2rem"><span class="flow-arrow">&rarr;</span> Tool-use search <span class="flow-arrow">&rarr;</span> Supabase query <span class="flow-arrow">&rarr;</span> Streaming response</div>
+          <div class="flow-step" style="padding-left:3.2rem;color:var(--text3);font-style:italic">Quota enforced per subscription tier before LLM call</div>
+        </div>
+      </div>
+
+      <!-- Flow 4: Offline Resilience -->
+      <div class="flow-card">
+        <div class="flow-title"><span class="flow-num">4</span> Offline Resilience (Mobile)</div>
+        <div class="flow-steps">
+          <div class="flow-step"><span class="flow-platform fp-mobile">ONLINE</span> Supabase <span class="flow-arrow">&rarr;</span> SQLite cache (top 100 hadiths + user data)</div>
+          <div class="flow-step"><span class="flow-platform fp-mobile">OFFLINE</span> SQLite <span class="flow-arrow">&rarr;</span> UI (read-only mode, graceful degradation)</div>
+          <div class="flow-step" style="padding-left:3.2rem;color:var(--text3);font-style:italic">Background sync restores full functionality when online</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Toggle card expansion
+function toggleCard(card) {
+  card.classList.toggle('expanded');
+  const btn = card.querySelector('.card-toggle');
+  if (btn) btn.textContent = card.classList.contains('expanded') ? 'collapse' : 'details';
+}
+
+// Particle background
+(function() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles = [];
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class Particle {
+    constructor() { this.reset(); }
+    reset() {
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.vx = (Math.random() - 0.5) * 0.2;
+      this.vy = (Math.random() - 0.5) * 0.2;
+      this.r = Math.random() * 1.5 + 0.5;
+      this.alpha = Math.random() * 0.3 + 0.05;
+      // Alternate between emerald and gold
+      this.color = Math.random() > 0.5 ? '27,94,67' : '197,160,89';
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      if (this.x < 0 || this.x > w || this.y < 0 || this.y > h) this.reset();
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${this.color},${this.alpha})`;
+      ctx.fill();
+    }
+  }
+
+  const count = Math.min(80, Math.floor(w * h / 15000));
+  for (let i = 0; i < count; i++) particles.push(new Particle());
+
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
+    particles.forEach(p => { p.update(); p.draw(); });
+
+    // Draw faint lines between nearby particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(197,160,89,${0.04 * (1 - dist / 120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>

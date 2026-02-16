@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Authentic Hadith — Web Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Geist+Mono&family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --emerald: #1b5e43;
+    --emerald-light: #2d8a65;
+    --emerald-dark: #0f3d2b;
+    --gold: #c5a059;
+    --gold-light: #d4b87a;
+    --gold-dark: #a8863e;
+    --bg-primary: #0a0f0d;
+    --bg-secondary: #111a16;
+    --bg-card: #141e19;
+    --bg-card-hover: #1a2a23;
+    --text-primary: #e8ede9;
+    --text-secondary: #8fa898;
+    --text-muted: #5c7a66;
+    --zone-public: #2563eb;
+    --zone-public-bg: rgba(37,99,235,0.06);
+    --zone-public-border: rgba(37,99,235,0.25);
+    --zone-dmz: #d4a017;
+    --zone-dmz-bg: rgba(212,160,23,0.06);
+    --zone-dmz-border: rgba(212,160,23,0.25);
+    --zone-private: #16a34a;
+    --zone-private-bg: rgba(22,163,74,0.06);
+    --zone-private-border: rgba(22,163,74,0.25);
+    --zone-external: #9333ea;
+    --zone-external-bg: rgba(147,51,234,0.06);
+    --zone-external-border: rgba(147,51,234,0.25);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 48px rgba(0,0,0,0.5);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, rgba(27,94,67,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(197,160,89,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 20% 50%, rgba(27,94,67,0.04) 0%, transparent 40%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Grid overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(27,94,67,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(27,94,67,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    padding: 48px 24px 40px;
+    position: relative;
+  }
+
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(27,94,67,0.15);
+    border: 1px solid rgba(27,94,67,0.3);
+    border-radius: 999px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--emerald-light);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .header-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--emerald-light);
+    border-radius: 50%;
+    animation: pulse-dot 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(28px, 4vw, 48px);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 40%, var(--gold-dark) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+
+  .header h2 {
+    font-size: clamp(14px, 2vw, 18px);
+    font-weight: 400;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── Stats Bar ── */
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 32px auto 40px;
+    max-width: 900px;
+  }
+
+  .stat-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid rgba(197,160,89,0.12);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+
+  .stat-chip:hover {
+    border-color: rgba(197,160,89,0.35);
+    background: var(--bg-card-hover);
+    transform: translateY(-1px);
+  }
+
+  .stat-chip .num {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .stat-chip .label {
+    color: var(--text-secondary);
+  }
+
+  /* ── Flow Selector ── */
+  .flow-section {
+    margin-bottom: 36px;
+  }
+
+  .flow-section h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    color: var(--gold);
+    text-align: center;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+
+  .flow-tabs {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .flow-tab {
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 999px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .flow-tab:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+  }
+
+  .flow-tab.active {
+    background: rgba(27,94,67,0.2);
+    border-color: var(--emerald);
+    color: var(--emerald-light);
+  }
+
+  .flow-display {
+    max-width: 1000px;
+    margin: 16px auto 0;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 16px 12px;
+    background: var(--bg-card);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.4s ease;
+  }
+
+  .flow-display.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .flow-node {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    position: relative;
+  }
+
+  .flow-node.blue { background: rgba(37,99,235,0.12); color: #60a5fa; border: 1px solid rgba(37,99,235,0.2); }
+  .flow-node.yellow { background: rgba(212,160,23,0.12); color: #facc15; border: 1px solid rgba(212,160,23,0.2); }
+  .flow-node.green { background: rgba(22,163,74,0.12); color: #4ade80; border: 1px solid rgba(22,163,74,0.2); }
+  .flow-node.purple { background: rgba(147,51,234,0.12); color: #c084fc; border: 1px solid rgba(147,51,234,0.2); }
+
+  .flow-arrow {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 4px;
+    color: var(--text-muted);
+    font-size: 14px;
+    position: relative;
+  }
+
+  .flow-arrow svg {
+    width: 28px;
+    height: 12px;
+  }
+
+  .flow-arrow svg line {
+    stroke: var(--emerald-light);
+    stroke-width: 1.5;
+    stroke-dasharray: 4 3;
+    animation: dash-flow 1s linear infinite;
+  }
+
+  .flow-arrow svg polygon {
+    fill: var(--emerald-light);
+  }
+
+  @keyframes dash-flow {
+    to { stroke-dashoffset: -7; }
+  }
+
+  /* ── Architecture Grid ── */
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  @media (max-width: 900px) {
+    .arch-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ── Zone Card ── */
+  .zone {
+    border-radius: var(--radius);
+    border: 1px solid;
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.4s ease;
+    cursor: pointer;
+    position: relative;
+  }
+
+  .zone::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+
+  .zone:hover::before { opacity: 1; }
+  .zone:hover { transform: translateY(-2px); }
+
+  .zone.public { background: var(--zone-public-bg); border-color: var(--zone-public-border); }
+  .zone.public::before { background: var(--zone-public); }
+  .zone.dmz { background: var(--zone-dmz-bg); border-color: var(--zone-dmz-border); }
+  .zone.dmz::before { background: var(--zone-dmz); }
+  .zone.private { background: var(--zone-private-bg); border-color: var(--zone-private-border); }
+  .zone.private::before { background: var(--zone-private); }
+  .zone.external { background: var(--zone-external-bg); border-color: var(--zone-external-border); }
+  .zone.external::before { background: var(--zone-external); }
+
+  .zone.dmz {
+    grid-column: 1 / -1;
+  }
+
+  .zone-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px 14px;
+  }
+
+  .zone-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .zone-icon {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .public .zone-icon { background: rgba(37,99,235,0.15); }
+  .dmz .zone-icon { background: rgba(212,160,23,0.15); }
+  .private .zone-icon { background: rgba(22,163,74,0.15); }
+  .external .zone-icon { background: rgba(147,51,234,0.15); }
+
+  .zone-title {
+    font-family: 'Cinzel', serif;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .public .zone-title { color: #93bbfd; }
+  .dmz .zone-title { color: #facc15; }
+  .private .zone-title { color: #86efac; }
+  .external .zone-title { color: #d8b4fe; }
+
+  .zone-subtitle {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .zone-toggle {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.03);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  .zone.expanded .zone-toggle {
+    transform: rotate(180deg);
+    background: rgba(255,255,255,0.06);
+  }
+
+  .zone-summary {
+    padding: 0 22px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .summary-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .summary-tag:hover {
+    background: rgba(255,255,255,0.07);
+    color: var(--text-primary);
+  }
+
+  .summary-tag .tag-count {
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  .public .summary-tag .tag-count { color: #60a5fa; }
+  .dmz .summary-tag .tag-count { color: #facc15; }
+  .private .summary-tag .tag-count { color: #4ade80; }
+  .external .summary-tag .tag-count { color: #c084fc; }
+
+  /* ── Zone Details (expandable) ── */
+  .zone-details {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    border-top: 1px solid transparent;
+  }
+
+  .zone.expanded .zone-details {
+    max-height: 2400px;
+    border-top-color: rgba(255,255,255,0.04);
+  }
+
+  .zone-details-inner {
+    padding: 18px 22px 22px;
+  }
+
+  .detail-group {
+    margin-bottom: 18px;
+  }
+
+  .detail-group:last-child { margin-bottom: 0; }
+
+  .detail-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+
+  .detail-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .detail-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11.5px;
+    font-family: 'Geist Mono', 'SF Mono', monospace;
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .detail-item:hover {
+    background: rgba(0,0,0,0.4);
+    color: var(--text-primary);
+    border-color: rgba(255,255,255,0.08);
+  }
+
+  .detail-item .item-meta {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .public .detail-item:hover { border-color: rgba(37,99,235,0.3); }
+  .dmz .detail-item:hover { border-color: rgba(212,160,23,0.3); }
+  .private .detail-item:hover { border-color: rgba(22,163,74,0.3); }
+  .external .detail-item:hover { border-color: rgba(147,51,234,0.3); }
+
+  /* DMZ sub-grid */
+  .dmz-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .dmz-section {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(212,160,23,0.08);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+  }
+
+  .dmz-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #facc15;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dmz-section-title .sec-icon {
+    font-size: 14px;
+  }
+
+  /* ── Subscription Sidebar ── */
+  .bottom-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 36px;
+  }
+
+  @media (max-width: 900px) {
+    .bottom-row { grid-template-columns: 1fr; }
+  }
+
+  .tier-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(197,160,89,0.1);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tier-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-dark), var(--gold), var(--gold-dark));
+  }
+
+  .tier-card h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--gold);
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+
+  .tiers-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .tier {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    text-align: center;
+    transition: all 0.3s;
+  }
+
+  .tier:hover {
+    border-color: rgba(197,160,89,0.2);
+    transform: translateY(-2px);
+  }
+
+  .tier-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .tier-price {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .tier-price .period {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+  }
+
+  .tier-features {
+    list-style: none;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+
+  .tier-features li::before {
+    content: '~';
+    margin-right: 5px;
+    color: var(--text-muted);
+  }
+
+  .tier.featured {
+    border-color: rgba(197,160,89,0.25);
+    background: rgba(197,160,89,0.05);
+  }
+
+  .tier.featured .tier-name {
+    color: var(--gold);
+  }
+
+  /* ── Tech Stack Card ── */
+  .tech-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(27,94,67,0.15);
+    border-radius: var(--radius);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tech-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--emerald-dark), var(--emerald-light), var(--emerald-dark));
+  }
+
+  .tech-card h3 {
+    font-family: 'Cinzel', serif;
+    font-size: 15px;
+    color: var(--emerald-light);
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+
+  .tech-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .tech-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.03);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+  }
+
+  .tech-item:hover {
+    border-color: rgba(27,94,67,0.2);
+    background: rgba(0,0,0,0.3);
+  }
+
+  .tech-item-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    background: rgba(27,94,67,0.12);
+    flex-shrink: 0;
+  }
+
+  .tech-item-text {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.3;
+  }
+
+  .tech-item-desc {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+
+  /* ── Tooltip ── */
+  .tooltip {
+    position: fixed;
+    background: #1a2a23;
+    border: 1px solid rgba(197,160,89,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-primary);
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.2s, transform 0.2s;
+    max-width: 280px;
+    box-shadow: var(--shadow-lg);
+    line-height: 1.5;
+  }
+
+  .tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tooltip .tt-label {
+    font-weight: 600;
+    color: var(--gold);
+    font-size: 11px;
+    margin-bottom: 4px;
+  }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .legend-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    position: relative;
+  }
+
+  .legend-dot::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid;
+    opacity: 0.3;
+  }
+
+  .legend-dot.blue { background: var(--zone-public); }
+  .legend-dot.blue::after { border-color: var(--zone-public); }
+  .legend-dot.yellow { background: var(--zone-dmz); }
+  .legend-dot.yellow::after { border-color: var(--zone-dmz); }
+  .legend-dot.green { background: var(--zone-private); }
+  .legend-dot.green::after { border-color: var(--zone-private); }
+  .legend-dot.purple { background: var(--zone-external); }
+  .legend-dot.purple::after { border-color: var(--zone-external); }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: var(--text-muted);
+    border-top: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .footer a {
+    color: var(--gold-dark);
+    text-decoration: none;
+  }
+
+  /* ── Entrance Animations ── */
+  .zone, .tier-card, .tech-card {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  .zone.visible, .tier-card.visible, .tech-card.visible {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  /* ── Canvas for animated lines ── */
+  #flow-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    .container { padding: 12px; }
+    .header { padding: 32px 16px 28px; }
+    .tiers-grid { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: 1fr; }
+    .arch-grid { gap: 14px; }
+    .dmz-grid { grid-template-columns: 1fr; }
+    .flow-display { flex-wrap: wrap; gap: 4px; padding: 12px 8px; }
+    .flow-node { font-size: 10px; padding: 4px 10px; }
+  }
+
+  /* ── Animated background particles ── */
+  .particle {
+    position: fixed;
+    width: 2px; height: 2px;
+    background: var(--emerald-light);
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="flow-canvas"></canvas>
+<div id="tooltip" class="tooltip"></div>
+
+<div class="container">
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-badge">System Architecture</div>
+    <h1>Authentic Hadith</h1>
+    <h2>Web Application Architecture</h2>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-bar">
+    <div class="stat-chip"><span class="num">40</span><span class="label">Pages</span></div>
+    <div class="stat-chip"><span class="num">22</span><span class="label">API Routes</span></div>
+    <div class="stat-chip"><span class="num">47</span><span class="label">Components</span></div>
+    <div class="stat-chip"><span class="num">20</span><span class="label">Lib Modules</span></div>
+    <div class="stat-chip"><span class="num">30+</span><span class="label">DB Tables</span></div>
+    <div class="stat-chip"><span class="num">31,839</span><span class="label">Hadiths</span></div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot blue"></span>Public Zone</div>
+    <div class="legend-item"><span class="legend-dot yellow"></span>DMZ — Application</div>
+    <div class="legend-item"><span class="legend-dot green"></span>Private Zone</div>
+    <div class="legend-item"><span class="legend-dot purple"></span>External Services</div>
+  </div>
+
+  <!-- Data Flow Visualizer -->
+  <div class="flow-section">
+    <h3>Live Data Flows</h3>
+    <div class="flow-tabs">
+      <button class="flow-tab active" data-flow="ai">AI Query</button>
+      <button class="flow-tab" data-flow="checkout">Checkout</button>
+      <button class="flow-tab" data-flow="daily">Daily Hadith</button>
+      <button class="flow-tab" data-flow="auth">Authentication</button>
+    </div>
+    <div class="flow-display visible" id="flow-display"></div>
+  </div>
+
+  <!-- Architecture Zones -->
+  <div class="arch-grid">
+
+    <!-- Public Zone -->
+    <div class="zone public" id="zone-public" data-tooltip="Client-facing entry points — users and CDN edge network">
+      <div class="zone-header">
+        <div class="zone-header-left">
+          <div class="zone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div>
+            <div class="zone-title">Client Layer</div>
+            <div class="zone-subtitle">Public Zone</div>
+          </div>
+        </div>
+        <div class="zone-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="zone-summary">
+        <span class="summary-tag">Desktop + Mobile Web</span>
+        <span class="summary-tag">Vercel Edge CDN</span>
+        <span class="summary-tag">SSL/TLS</span>
+      </div>
+      <div class="zone-details">
+        <div class="zone-details-inner">
+          <div class="detail-group">
+            <div class="detail-group-title">Entry Points</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Progressive Web App — responsive design for all viewports">User Browsers <span class="item-meta">(PWA-ready)</span></span>
+              <span class="detail-item" data-tooltip="Globally distributed edge network with automatic SSL termination">Vercel Edge CDN <span class="item-meta">(Global)</span></span>
+              <span class="detail-item" data-tooltip="Automatic HTTPS with Let's Encrypt certificates">SSL Termination</span>
+              <span class="detail-item" data-tooltip="Static assets cached at edge, ISR for dynamic content">Edge Caching</span>
+              <span class="detail-item" data-tooltip="Gzip/Brotli compression for all responses">Compression</span>
+              <span class="detail-item" data-tooltip="Automatic DDoS protection via Vercel's infrastructure">DDoS Protection</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- External Services -->
+    <div class="zone external" id="zone-external" data-tooltip="Third-party services — payments, AI, analytics, fonts">
+      <div class="zone-header">
+        <div class="zone-header-left">
+          <div class="zone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+          </div>
+          <div>
+            <div class="zone-title">External Services</div>
+            <div class="zone-subtitle">Third-Party APIs</div>
+          </div>
+        </div>
+        <div class="zone-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="zone-summary">
+        <span class="summary-tag"><span class="tag-count">4</span> Services</span>
+        <span class="summary-tag">Stripe</span>
+        <span class="summary-tag">Groq AI</span>
+        <span class="summary-tag">Analytics</span>
+      </div>
+      <div class="zone-details">
+        <div class="zone-details-inner">
+          <div class="detail-group">
+            <div class="detail-group-title">Payment Processing</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Stripe Checkout for secure payment processing">Stripe Checkout</span>
+              <span class="detail-item" data-tooltip="Monthly introductory plan — $4.99/month">Intro $4.99/mo</span>
+              <span class="detail-item" data-tooltip="Monthly premium plan — $9.99/month">Premium $9.99/mo</span>
+              <span class="detail-item" data-tooltip="Annual premium plan — $49.99/year (save 58%)">Annual $49.99/yr</span>
+              <span class="detail-item" data-tooltip="One-time lifetime access payment">Lifetime</span>
+              <span class="detail-item" data-tooltip="Stripe webhook for real-time subscription status updates">Webhooks</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">AI &amp; Intelligence</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Groq cloud for ultra-fast LLM inference">Groq Cloud</span>
+              <span class="detail-item" data-tooltip="Meta's Llama 3.3 70B parameter model for chat and enrichment">Llama 3.3 70B</span>
+              <span class="detail-item" data-tooltip="AI-powered hadith chat assistant">Chat API</span>
+              <span class="detail-item" data-tooltip="Automated hadith enrichment and tagging">Enrichment Pipeline</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">Analytics &amp; Assets</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Vercel Analytics for real-time usage tracking">Vercel Analytics</span>
+              <span class="detail-item" data-tooltip="Cinzel (headings), Geist + Geist Mono (body/code)">Google Fonts <span class="item-meta">(Cinzel, Geist)</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DMZ — Application Layer (full width) -->
+    <div class="zone dmz" id="zone-dmz" data-tooltip="Next.js 15 App Router — 40 pages, 22 API routes, 47 components, 20 lib modules">
+      <div class="zone-header">
+        <div class="zone-header-left">
+          <div class="zone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <div>
+            <div class="zone-title">Application Layer</div>
+            <div class="zone-subtitle">DMZ &mdash; Next.js 15 App Router on Vercel</div>
+          </div>
+        </div>
+        <div class="zone-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="zone-summary">
+        <span class="summary-tag"><span class="tag-count">40</span> Pages</span>
+        <span class="summary-tag"><span class="tag-count">22</span> API Routes</span>
+        <span class="summary-tag"><span class="tag-count">47</span> Components</span>
+        <span class="summary-tag"><span class="tag-count">20</span> Lib Modules</span>
+        <span class="summary-tag">App Router</span>
+        <span class="summary-tag">Server Components</span>
+      </div>
+      <div class="zone-details">
+        <div class="zone-details-inner">
+          <div class="dmz-grid">
+
+            <!-- Pages -->
+            <div class="dmz-section">
+              <div class="dmz-section-title"><span class="sec-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </span>40 Pages</div>
+              <div class="detail-items">
+                <span class="detail-item" data-tooltip="Landing page with featured hadiths and daily highlight">/</span>
+                <span class="detail-item" data-tooltip="Main home dashboard for authenticated users">/home</span>
+                <span class="detail-item" data-tooltip="Daily curated hadith with reflection prompt">/today</span>
+                <span class="detail-item" data-tooltip="Full-text search across 31,839 hadiths">/search</span>
+                <span class="detail-item" data-tooltip="AI-powered hadith chat assistant">/assistant</span>
+                <span class="detail-item" data-tooltip="Browse 8 hadith collections by slug">/collections/[slug]</span>
+                <span class="detail-item" data-tooltip="Navigate books within a collection">/collections/.../books/[bookId]</span>
+                <span class="detail-item" data-tooltip="Chapter-level hadith browsing">/collections/.../chapters/[chapterId]</span>
+                <span class="detail-item" data-tooltip="Individual hadith detail page with enrichment">/hadith/[id]</span>
+                <span class="detail-item" data-tooltip="Personal bookmarks, folders, and saved hadiths">/my-hadith</span>
+                <span class="detail-item" data-tooltip="Structured learning paths and lessons">/learn</span>
+                <span class="detail-item" data-tooltip="Interactive hadith knowledge quizzes">/quiz</span>
+                <span class="detail-item" data-tooltip="Learning progress and streak tracking">/progress</span>
+                <span class="detail-item" data-tooltip="Topic-based hadith groupings">/topics/[slug]</span>
+                <span class="detail-item" data-tooltip="Narrative hadith stories">/stories/[slug]</span>
+                <span class="detail-item" data-tooltip="Daily Sunnah practices">/sunnah</span>
+                <span class="detail-item" data-tooltip="Personal reflections journal">/reflections</span>
+                <span class="detail-item" data-tooltip="User profile management">/profile</span>
+                <span class="detail-item" data-tooltip="App settings and preferences">/settings</span>
+                <span class="detail-item" data-tooltip="Gamification achievements gallery">/achievements</span>
+                <span class="detail-item" data-tooltip="Subscription plans and pricing">/pricing</span>
+                <span class="detail-item" data-tooltip="Post-payment success page">/checkout/success</span>
+                <span class="detail-item" data-tooltip="Authentication login page">/login</span>
+                <span class="detail-item" data-tooltip="New user onboarding wizard">/onboarding</span>
+                <span class="detail-item" data-tooltip="Admin: hadith enrichment dashboard">/admin/enrichment</span>
+                <span class="detail-item" data-tooltip="Admin: database seeding tool">/admin/seed</span>
+                <span class="detail-item" data-tooltip="About page">/about</span>
+                <span class="detail-item" data-tooltip="Privacy policy">/privacy</span>
+                <span class="detail-item" data-tooltip="Terms of service">/terms</span>
+                <span class="detail-item" data-tooltip="Shared hadith public page">/share</span>
+                <span class="detail-item" data-tooltip="User analytics dashboard">/dashboard</span>
+                <span class="detail-item" data-tooltip="Saved items page">/saved</span>
+                <span class="detail-item" data-tooltip="Password reset flow">/reset-password</span>
+              </div>
+            </div>
+
+            <!-- API Routes -->
+            <div class="dmz-section">
+              <div class="dmz-section-title"><span class="sec-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+              </span>22 API Routes</div>
+              <div class="detail-group">
+                <div class="detail-group-title">Content</div>
+                <div class="detail-items">
+                  <span class="detail-item" data-tooltip="Returns daily hadith using date-based hash algorithm">/api/daily-hadith</span>
+                  <span class="detail-item" data-tooltip="Full-text search with filters and pagination">/api/search</span>
+                  <span class="detail-item" data-tooltip="AI chat endpoint — Groq Llama 3.3 70B with search tool">/api/chat</span>
+                </div>
+              </div>
+              <div class="detail-group">
+                <div class="detail-group-title">User Data</div>
+                <div class="detail-items">
+                  <span class="detail-item" data-tooltip="CRUD operations for user bookmarks">/api/my-hadith/bookmarks</span>
+                  <span class="detail-item" data-tooltip="Folder management for organizing saved hadiths">/api/my-hadith/folders</span>
+                  <span class="detail-item" data-tooltip="User reading and engagement statistics">/api/my-hadith/stats</span>
+                </div>
+              </div>
+              <div class="detail-group">
+                <div class="detail-group-title">Gamification</div>
+                <div class="detail-items">
+                  <span class="detail-item" data-tooltip="Track user activities for XP and streaks">/api/gamification/track</span>
+                  <span class="detail-item" data-tooltip="Check and award achievements">/api/gamification/achievements</span>
+                </div>
+              </div>
+              <div class="detail-group">
+                <div class="detail-group-title">Monetization</div>
+                <div class="detail-items">
+                  <span class="detail-item" data-tooltip="Create Stripe Checkout session">/api/checkout/create-session</span>
+                  <span class="detail-item" data-tooltip="Subscription status and management">/api/subscription</span>
+                  <span class="detail-item" data-tooltip="Stripe webhook handler for payment events">/api/webhooks/stripe</span>
+                </div>
+              </div>
+              <div class="detail-group">
+                <div class="detail-group-title">Admin &amp; Auth</div>
+                <div class="detail-items">
+                  <span class="detail-item" data-tooltip="AI-powered hadith enrichment">/api/enrich</span>
+                  <span class="detail-item" data-tooltip="Review enriched content">/api/enrich/review</span>
+                  <span class="detail-item" data-tooltip="Database seeding endpoints">/api/seed*</span>
+                  <span class="detail-item" data-tooltip="Sign out and clear session">/api/auth/signout</span>
+                  <span class="detail-item" data-tooltip="OAuth callback handler">/api/auth/callback</span>
+                  <span class="detail-item" data-tooltip="GDPR-compliant account deletion">/api/delete-account</span>
+                  <span class="detail-item" data-tooltip="Generate shareable hadith links">/api/share/[token]</span>
+                  <span class="detail-item" data-tooltip="Groq API connectivity test">/api/test-groq</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Components -->
+            <div class="dmz-section">
+              <div class="dmz-section-title"><span class="sec-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              </span>47 Components</div>
+              <div class="detail-items">
+                <span class="detail-item" data-tooltip="Header, Footer, Sidebar, Navigation, ThemeProvider">layout/ <span class="item-meta">(5)</span></span>
+                <span class="detail-item" data-tooltip="Hero, DailyHadith, FeaturedCollections, QuickActions">home/ <span class="item-meta">(6)</span></span>
+                <span class="detail-item" data-tooltip="CollectionGrid, BookList, ChapterView, HadithList">collections/ <span class="item-meta">(5)</span></span>
+                <span class="detail-item" data-tooltip="BookmarkList, FolderManager, SaveButton, Stats">my-hadith/ <span class="item-meta">(6)</span></span>
+                <span class="detail-item" data-tooltip="AchievementCard, StreakTracker, LevelBar, XPNotification">gamification/ <span class="item-meta">(5)</span></span>
+                <span class="detail-item" data-tooltip="WelcomeStep, PreferencesStep, TopicSelector">onboarding/ <span class="item-meta">(4)</span></span>
+                <span class="detail-item" data-tooltip="LoginForm, OAuthButtons, AuthGuard">auth/ <span class="item-meta">(3)</span></span>
+                <span class="detail-item" data-tooltip="HadithCard, HadithDetail, ShareModal, EnrichmentBadge">hadith/ <span class="item-meta">(5)</span></span>
+                <span class="detail-item" data-tooltip="Button, Input, Modal, Toast, Skeleton, Badge, Card">ui/ <span class="item-meta">(8)</span></span>
+                <span class="detail-item" data-tooltip="PricingCard, UpgradePrompt, FeatureGate, UsageBar">premium/ <span class="item-meta">(5)</span></span>
+              </div>
+            </div>
+
+            <!-- Lib Modules -->
+            <div class="dmz-section">
+              <div class="dmz-section-title"><span class="sec-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </span>20 Lib Modules</div>
+              <div class="detail-items">
+                <span class="detail-item" data-tooltip="Server, Client, Admin, and Config Supabase instances">supabase/* <span class="item-meta">(4)</span></span>
+                <span class="detail-item" data-tooltip="Subscription status checking and management">subscription</span>
+                <span class="detail-item" data-tooltip="Stripe SDK initialization and helpers">stripe</span>
+                <span class="detail-item" data-tooltip="Product definitions for 4 subscription tiers">products</span>
+                <span class="detail-item" data-tooltip="Quota enforcement for AI queries and saved hadiths">quotas/check</span>
+                <span class="detail-item" data-tooltip="Track activity, achievement engine, level calculator, learning tracking">gamification/* <span class="item-meta">(4)</span></span>
+                <span class="detail-item" data-tooltip="Learning path progress computation">learningProgress</span>
+                <span class="detail-item" data-tooltip="Dynamic path resolution with progress state">getPathWithProgress</span>
+                <span class="detail-item" data-tooltip="Hadith text processing and formatting utilities">hadith-utils</span>
+                <span class="detail-item" data-tooltip="CDN URL mapping for hadith assets">hadith-cdn-mapping</span>
+                <span class="detail-item" data-tooltip="Client-side my-hadith API wrapper">api/my-hadith</span>
+                <span class="detail-item" data-tooltip="Database seeding helper functions">seed-helpers</span>
+                <span class="detail-item" data-tooltip="Real-time seed progress tracking">seed-progress</span>
+                <span class="detail-item" data-tooltip="General utility functions">utils</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Private Zone -->
+    <div class="zone private" id="zone-private" data-tooltip="Supabase PostgreSQL — 30+ tables, Auth with Email/Google/Apple OAuth">
+      <div class="zone-header">
+        <div class="zone-header-left">
+          <div class="zone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <div>
+            <div class="zone-title">Database Layer</div>
+            <div class="zone-subtitle">Private Zone</div>
+          </div>
+        </div>
+        <div class="zone-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="zone-summary">
+        <span class="summary-tag">Supabase PostgreSQL</span>
+        <span class="summary-tag"><span class="tag-count">30+</span> Tables</span>
+        <span class="summary-tag"><span class="tag-count">31,839</span> Records</span>
+        <span class="summary-tag">Auth</span>
+      </div>
+      <div class="zone-details">
+        <div class="zone-details-inner">
+          <div class="detail-group">
+            <div class="detail-group-title">Core Tables</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="31,839 hadith records across 8 collections">hadiths <span class="item-meta">(31,839)</span></span>
+              <span class="detail-item" data-tooltip="8 major hadith collections (Bukhari, Muslim, etc.)">collections <span class="item-meta">(8)</span></span>
+              <span class="detail-item" data-tooltip="Chapter divisions within collections">chapters</span>
+              <span class="detail-item" data-tooltip="Thematic topic categorizations">topics</span>
+              <span class="detail-item" data-tooltip="Many-to-many: hadith-topic relationships">hadith_topics</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">User Tables</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="User profile data and subscription tier">profiles</span>
+              <span class="detail-item" data-tooltip="Theme, language, notification preferences">user_preferences</span>
+              <span class="detail-item" data-tooltip="App configuration settings">user_settings</span>
+              <span class="detail-item" data-tooltip="Bookmarked hadith references">user_bookmarks</span>
+              <span class="detail-item" data-tooltip="Custom folders for organizing saved hadiths">user_folders</span>
+              <span class="detail-item" data-tooltip="Saved collection preferences">saved_collections</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">Subscription Tables</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Active subscription records linked to Stripe">subscriptions</span>
+              <span class="detail-item" data-tooltip="Track API usage against tier quotas">user_usage</span>
+              <span class="detail-item" data-tooltip="Quota definitions per tier">tier_quotas</span>
+              <span class="detail-item" data-tooltip="Stripe event log for audit trail">stripe_events</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">Learning Tables</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Structured learning path definitions">learning_paths</span>
+              <span class="detail-item" data-tooltip="Individual lessons within paths">learning_path_lessons</span>
+              <span class="detail-item" data-tooltip="User progress through learning paths">user_learning_path_progress</span>
+              <span class="detail-item" data-tooltip="Per-lesson completion tracking">user_lesson_progress</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">Engagement Tables</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Aggregate user statistics">user_stats</span>
+              <span class="detail-item" data-tooltip="Earned achievements per user">user_achievements</span>
+              <span class="detail-item" data-tooltip="Achievement definitions and criteria">achievements</span>
+              <span class="detail-item" data-tooltip="Daily streak tracking">user_streaks</span>
+              <span class="detail-item" data-tooltip="Achievement notification queue">user_achievement_notifications</span>
+              <span class="detail-item" data-tooltip="Track reading of Sahaba biographies">sahaba_reading_progress</span>
+              <span class="detail-item" data-tooltip="Per-hadith reading history">hadith_reading_history</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">Enrichment &amp; Admin</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="AI-generated hadith enrichment data">hadith_enrichment</span>
+              <span class="detail-item" data-tooltip="24 tags for hadith classification">hadith_tags <span class="item-meta">(24)</span></span>
+              <span class="detail-item" data-tooltip="7 top-level categories">categories <span class="item-meta">(7)</span></span>
+              <span class="detail-item" data-tooltip="24 classification tags">tags <span class="item-meta">(24)</span></span>
+              <span class="detail-item" data-tooltip="GDPR-compliant archived user data">archived_user_data</span>
+            </div>
+          </div>
+          <div class="detail-group">
+            <div class="detail-group-title">Authentication</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Built-in Supabase authentication service">Supabase Auth</span>
+              <span class="detail-item" data-tooltip="Email and password authentication">Email/Password</span>
+              <span class="detail-item" data-tooltip="Google OAuth 2.0 social login">Google OAuth</span>
+              <span class="detail-item" data-tooltip="Apple Sign In for iOS users">Apple OAuth</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placeholder for grid alignment — subscription tiers are below -->
+    <div class="zone external" id="zone-services" data-tooltip="Deployment platform and infrastructure services">
+      <div class="zone-header">
+        <div class="zone-header-left">
+          <div class="zone-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <div>
+            <div class="zone-title">Infrastructure</div>
+            <div class="zone-subtitle">Deployment Platform</div>
+          </div>
+        </div>
+        <div class="zone-toggle">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <div class="zone-summary">
+        <span class="summary-tag">Vercel</span>
+        <span class="summary-tag">Serverless</span>
+        <span class="summary-tag">Edge Runtime</span>
+      </div>
+      <div class="zone-details">
+        <div class="zone-details-inner">
+          <div class="detail-group">
+            <div class="detail-group-title">Vercel Platform</div>
+            <div class="detail-items">
+              <span class="detail-item" data-tooltip="Next.js 15 with App Router">Next.js 15</span>
+              <span class="detail-item" data-tooltip="React Server Components for zero-JS pages">Server Components</span>
+              <span class="detail-item" data-tooltip="Incremental Static Regeneration">ISR</span>
+              <span class="detail-item" data-tooltip="Serverless functions for API routes">Serverless Functions</span>
+              <span class="detail-item" data-tooltip="Edge middleware for auth and redirects">Edge Middleware</span>
+              <span class="detail-item" data-tooltip="Automatic preview deployments per PR">Preview Deploys</span>
+              <span class="detail-item" data-tooltip="Environment variable management">Env Management</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Row: Tiers + Tech -->
+  <div class="bottom-row">
+    <div class="tier-card" id="tier-card">
+      <h3>Subscription Tiers</h3>
+      <div class="tiers-grid">
+        <div class="tier">
+          <div class="tier-name">Free</div>
+          <div class="tier-price">$0</div>
+          <ul class="tier-features">
+            <li>0 AI queries</li>
+            <li>10 saved hadiths</li>
+            <li>Basic search</li>
+            <li>Daily hadith</li>
+          </ul>
+        </div>
+        <div class="tier featured">
+          <div class="tier-name">Premium</div>
+          <div class="tier-price">$9.99<span class="period">/mo</span></div>
+          <ul class="tier-features">
+            <li>50/day AI queries</li>
+            <li>500/month AI total</li>
+            <li>500 saved hadiths</li>
+            <li>Advanced search</li>
+          </ul>
+        </div>
+        <div class="tier">
+          <div class="tier-name">Lifetime</div>
+          <div class="tier-price">One-time</div>
+          <ul class="tier-features">
+            <li>Unlimited AI</li>
+            <li>Unlimited saves</li>
+            <li>All features</li>
+            <li>Priority support</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="tech-card" id="tech-card">
+      <h3>Technology Stack</h3>
+      <div class="tech-grid">
+        <div class="tech-item">
+          <div class="tech-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+          </div>
+          <div>
+            <div class="tech-item-text">Next.js 15</div>
+            <div class="tech-item-desc">App Router + RSC</div>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </div>
+          <div>
+            <div class="tech-item-text">React 19</div>
+            <div class="tech-item-desc">Server Components</div>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2"><path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z"/></svg>
+          </div>
+          <div>
+            <div class="tech-item-text">Supabase</div>
+            <div class="tech-item-desc">PostgreSQL + Auth</div>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          </div>
+          <div>
+            <div class="tech-item-text">Stripe</div>
+            <div class="tech-item-desc">Payments + Billing</div>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg>
+          </div>
+          <div>
+            <div class="tech-item-text">Groq + Llama</div>
+            <div class="tech-item-desc">AI Chat + Enrichment</div>
+          </div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </div>
+          <div>
+            <div class="tech-item-text">TypeScript</div>
+            <div class="tech-item-desc">Full type safety</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    Authentic Hadith &mdash; Web Architecture Diagram &middot; Next.js 15 &middot; Vercel &middot; Supabase &middot; Stripe &middot; Groq
+  </footer>
+
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ── Flow Data ──
+  const flows = {
+    ai: [
+      { label: 'Browser', color: 'blue' },
+      { label: 'Vercel Edge', color: 'blue' },
+      { label: '/api/chat', color: 'yellow' },
+      { label: 'Groq LLM', color: 'purple' },
+      { label: 'Search Tool', color: 'yellow' },
+      { label: 'Supabase', color: 'green' },
+      { label: 'Response', color: 'blue' }
+    ],
+    checkout: [
+      { label: 'Browser', color: 'blue' },
+      { label: '/api/checkout/create-session', color: 'yellow' },
+      { label: 'Stripe', color: 'purple' },
+      { label: 'Webhook', color: 'purple' },
+      { label: '/api/webhooks/stripe', color: 'yellow' },
+      { label: 'Supabase profiles', color: 'green' }
+    ],
+    daily: [
+      { label: 'Browser', color: 'blue' },
+      { label: '/api/daily-hadith', color: 'yellow' },
+      { label: 'Supabase hadiths', color: 'green' },
+      { label: 'Date Hash', color: 'green' },
+      { label: 'Response', color: 'blue' }
+    ],
+    auth: [
+      { label: 'Browser', color: 'blue' },
+      { label: 'Supabase Auth', color: 'green' },
+      { label: 'OAuth Provider', color: 'purple' },
+      { label: 'Callback', color: 'yellow' },
+      { label: 'Profile Creation', color: 'green' }
+    ]
+  };
+
+  const arrowSVG = '<svg viewBox="0 0 28 12"><line x1="0" y1="6" x2="22" y2="6"/><polygon points="20,2 28,6 20,10"/></svg>';
+
+  function renderFlow(key) {
+    const display = document.getElementById('flow-display');
+    const nodes = flows[key];
+    display.classList.remove('visible');
+
+    setTimeout(() => {
+      let html = '';
+      nodes.forEach((node, i) => {
+        html += `<span class="flow-node ${node.color}">${node.label}</span>`;
+        if (i < nodes.length - 1) {
+          html += `<span class="flow-arrow">${arrowSVG}</span>`;
+        }
+      });
+      display.innerHTML = html;
+      requestAnimationFrame(() => display.classList.add('visible'));
+    }, 200);
+  }
+
+  // Flow tab clicks
+  document.querySelectorAll('.flow-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.flow-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      renderFlow(tab.dataset.flow);
+    });
+  });
+
+  // Initial flow
+  renderFlow('ai');
+
+  // ── Zone expand/collapse ──
+  document.querySelectorAll('.zone').forEach(zone => {
+    zone.addEventListener('click', (e) => {
+      // Don't toggle if clicking a detail item (tooltip target)
+      if (e.target.closest('.detail-item')) return;
+      zone.classList.toggle('expanded');
+    });
+  });
+
+  // ── Tooltip System ──
+  const tooltip = document.getElementById('tooltip');
+  let tooltipTimeout;
+
+  function showTooltip(el, e) {
+    const text = el.dataset.tooltip;
+    if (!text) return;
+
+    clearTimeout(tooltipTimeout);
+
+    const label = el.textContent.trim().split('\n')[0].trim();
+    tooltip.innerHTML = `<div class="tt-label">${label}</div>${text}`;
+    tooltip.classList.add('visible');
+
+    const rect = tooltip.getBoundingClientRect();
+    let x = e.clientX + 14;
+    let y = e.clientY - 10;
+
+    if (x + rect.width > window.innerWidth - 16) x = e.clientX - rect.width - 14;
+    if (y + rect.height > window.innerHeight - 16) y = e.clientY - rect.height - 10;
+    if (y < 8) y = 8;
+
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  }
+
+  function hideTooltip() {
+    tooltipTimeout = setTimeout(() => {
+      tooltip.classList.remove('visible');
+    }, 100);
+  }
+
+  document.addEventListener('mouseover', (e) => {
+    const target = e.target.closest('[data-tooltip]');
+    if (target) showTooltip(target, e);
+  });
+
+  document.addEventListener('mousemove', (e) => {
+    const target = e.target.closest('[data-tooltip]');
+    if (target && tooltip.classList.contains('visible')) {
+      const rect = tooltip.getBoundingClientRect();
+      let x = e.clientX + 14;
+      let y = e.clientY - 10;
+      if (x + rect.width > window.innerWidth - 16) x = e.clientX - rect.width - 14;
+      if (y + rect.height > window.innerHeight - 16) y = e.clientY - rect.height - 10;
+      if (y < 8) y = 8;
+      tooltip.style.left = x + 'px';
+      tooltip.style.top = y + 'px';
+    }
+  });
+
+  document.addEventListener('mouseout', (e) => {
+    const target = e.target.closest('[data-tooltip]');
+    if (target) hideTooltip();
+  });
+
+  // ── Intersection Observer for entrance animations ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.zone, .tier-card, .tech-card').forEach(el => observer.observe(el));
+
+  // ── Canvas animated particles ──
+  const canvas = document.getElementById('flow-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animId;
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.radius = Math.random() * 1.2 + 0.3;
+      this.opacity = Math.random() * 0.15 + 0.03;
+      this.life = Math.random() * 400 + 200;
+      this.maxLife = this.life;
+    }
+    update() {
+      this.x += this.vx;
+      this.y += this.vy;
+      this.life--;
+      if (this.life <= 0 || this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+        this.reset();
+      }
+    }
+    draw() {
+      const fadeRatio = Math.min(this.life / this.maxLife, (this.maxLife - this.life) / 60);
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(45, 138, 101, ${this.opacity * Math.max(0, fadeRatio)})`;
+      ctx.fill();
+    }
+  }
+
+  // Create particles
+  const particleCount = Math.min(50, Math.floor(window.innerWidth / 30));
+  for (let i = 0; i < particleCount; i++) {
+    particles.push(new Particle());
+  }
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+
+    // Draw subtle connection lines between nearby particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(27, 94, 67, ${0.04 * (1 - dist / 120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    animId = requestAnimationFrame(animateParticles);
+  }
+
+  animateParticles();
+
+  // Pause animation when tab not visible
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(animId);
+    } else {
+      animateParticles();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

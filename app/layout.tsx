@@ -27,6 +27,9 @@ export const metadata: Metadata = {
   description:
     "Access verified hadith collections, guided learning paths, daily sunnah practices, stories of the prophets and companions, and AI-powered study tools -- all from authenticated sources.",
   generator: "v0.app",
+  verification: {
+    google: "pu6PCNjJGNwTlF-CoQmeSTi_sDeWH5vwBexQ-cUA6B4",
+  },
   icons: {
     icon: [
       {

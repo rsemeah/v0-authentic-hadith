@@ -10,7 +10,7 @@ export async function GET() {
     const { text } = await generateText({
       model: groq("llama-3.3-70b-versatile"),
       prompt: "Who is Prophet Mohammed? Please provide a brief, respectful summary in 2-3 sentences.",
-      maxTokens: 256,
+      maxOutputTokens: 256,
     })
 
     return Response.json({

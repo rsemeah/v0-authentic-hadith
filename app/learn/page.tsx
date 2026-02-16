@@ -1,248 +1,186 @@
 "use client"
 
-import React from "react"
-
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   ChevronLeft,
   ChevronRight,
-  GraduationCap,
   BookOpen,
   Star,
+  GraduationCap,
   Trophy,
+  Sparkles,
+  Users,
   Lock,
   CheckCircle2,
   Clock,
+  Loader2,
 } from "lucide-react"
-
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useSubscription } from "@/hooks/use-subscription"
 import { PremiumGate } from "@/components/premium-gate"
 import { cn } from "@/lib/utils"
 
+const ICON_MAP: Record<string, React.ElementType> = {
+  BookOpen,
+  Star,
+  GraduationCap,
+  Trophy,
+  Sparkles,
+  Users,
+}
+
+const COLOR_MAP: Record<string, { color: string; bg: string; border: string }> = {
+  emerald: { color: "text-[#1B5E43]", bg: "bg-[#1B5E43]/10", border: "border-[#1B5E43]/30" },
+  amber: { color: "text-[#C5A059]", bg: "bg-[#C5A059]/10", border: "border-[#C5A059]/30" },
+  blue: { color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-200" },
+  purple: { color: "text-[#7c3aed]", bg: "bg-[#7c3aed]/10", border: "border-[#7c3aed]/30" },
+  rose: { color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-200" },
+  slate: { color: "text-slate-600", bg: "bg-slate-100", border: "border-slate-200" },
+}
+
 interface LearningPath {
   id: string
+  slug: string
   title: string
   subtitle: string
   description: string
-  icon: React.ElementType
-  color: string
-  bgColor: string
-  borderColor: string
+  icon_name: string
   level: string
-  modules: Module[]
-  isPremium: boolean
+  sort_order: number
+  is_premium: boolean
+  total_modules: number
+  total_lessons: number
+  estimated_hours: number
+  color: string
 }
 
-interface Module {
+interface LearningModule {
   id: string
+  path_id: string
+  slug: string
   title: string
   description: string
-  lessons: Lesson[]
-  collectionSlug?: string
+  sort_order: number
 }
 
-interface Lesson {
+interface LearningLesson {
   id: string
+  module_id: string
+  slug: string
   title: string
-  hadithCount: number
-  collectionSlug: string
-  bookNumber?: number
+  description: string
+  collection_slug: string
+  book_number: number | null
+  sort_order: number
+  estimated_minutes: number
+  has_quiz: boolean
+  content_markdown: string | null
 }
 
-const LEARNING_PATHS: LearningPath[] = [
-  {
-    id: "foundations",
-    title: "Foundations of Hadith",
-    subtitle: "Start Here",
-    description:
-      "Begin your journey with the most essential and widely-known hadiths. These foundational narrations cover the pillars of Islam, daily worship, and core beliefs.",
-    icon: BookOpen,
-    color: "text-[#1B5E43]",
-    bgColor: "bg-[#1B5E43]/10",
-    borderColor: "border-[#1B5E43]/30",
-    level: "Beginner",
-    isPremium: false,
-    modules: [
-      {
-        id: "pillars",
-        title: "The Pillars of Islam",
-        description: "Hadiths about the five pillars: Shahada, Salah, Zakat, Fasting, and Hajj",
-        collectionSlug: "sahih-bukhari",
-        lessons: [
-          { id: "faith", title: "Book of Revelation", hadithCount: 7, collectionSlug: "sahih-bukhari", bookNumber: 1 },
-          { id: "belief", title: "Book of Belief", hadithCount: 51, collectionSlug: "sahih-bukhari", bookNumber: 2 },
-          { id: "knowledge", title: "Book of Knowledge", hadithCount: 76, collectionSlug: "sahih-bukhari", bookNumber: 3 },
-        ],
-      },
-      {
-        id: "purification",
-        title: "Purification & Prayer",
-        description: "Learn the prophetic guidance on cleanliness and establishing prayer",
-        lessons: [
-          { id: "wudu", title: "The Book on Purification", hadithCount: 148, collectionSlug: "jami-tirmidhi", bookNumber: 1 },
-          { id: "salah", title: "The Book on Salat", hadithCount: 423, collectionSlug: "jami-tirmidhi", bookNumber: 2 },
-          { id: "friday", title: "The Book on Friday Prayer", hadithCount: 83, collectionSlug: "jami-tirmidhi", bookNumber: 4 },
-        ],
-      },
-      {
-        id: "character",
-        title: "Prophetic Character",
-        description: "Explore the Prophet's exemplary conduct and manners",
-        lessons: [
-          { id: "manners", title: "Book of Good Manners", hadithCount: 56, collectionSlug: "sahih-bukhari", bookNumber: 78 },
-          { id: "kindness", title: "Book of Companions", hadithCount: 34, collectionSlug: "sahih-bukhari", bookNumber: 62 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "daily-practice",
-    title: "Daily Practice",
-    subtitle: "Practical Guidance",
-    description:
-      "Hadiths that guide your everyday life, from morning supplications to eating etiquette, sleeping habits, and interactions with others.",
-    icon: Star,
-    color: "text-[#C5A059]",
-    bgColor: "bg-[#C5A059]/10",
-    borderColor: "border-[#C5A059]/30",
-    level: "Beginner-Intermediate",
-    isPremium: false,
-    modules: [
-      {
-        id: "food-drink",
-        title: "Food, Drink & Hospitality",
-        description: "Prophetic etiquettes of eating, drinking, and hosting guests",
-        lessons: [
-          { id: "food", title: "Book of Foods", hadithCount: 70, collectionSlug: "sahih-bukhari", bookNumber: 70 },
-          { id: "drinks", title: "Book of Drinks", hadithCount: 45, collectionSlug: "sahih-bukhari", bookNumber: 74 },
-          { id: "meals-t", title: "Chapters on Food", hadithCount: 60, collectionSlug: "jami-tirmidhi", bookNumber: 26 },
-        ],
-      },
-      {
-        id: "duas",
-        title: "Supplications & Remembrance",
-        description: "Daily duas and adhkar from the Sunnah",
-        lessons: [
-          { id: "duas-t", title: "Chapters on Supplications", hadithCount: 131, collectionSlug: "jami-tirmidhi", bookNumber: 49 },
-          { id: "invocations", title: "Book of Invocations", hadithCount: 68, collectionSlug: "sahih-bukhari", bookNumber: 80 },
-        ],
-      },
-      {
-        id: "dealings",
-        title: "Business & Social Ethics",
-        description: "Islamic principles of trade, transactions, and social conduct",
-        lessons: [
-          { id: "sales", title: "Book of Sales", hadithCount: 195, collectionSlug: "sahih-bukhari", bookNumber: 34 },
-          { id: "business-t", title: "Chapters on Business", hadithCount: 75, collectionSlug: "jami-tirmidhi", bookNumber: 12 },
-        ],
-      },
-    ],
-  },
-  {
-    id: "hadith-sciences",
-    title: "Hadith Sciences",
-    subtitle: "Mustalah al-Hadith",
-    description:
-      "Understand the methodology behind hadith authentication: chains of narration (isnad), narrator reliability, and hadith classification.",
-    icon: GraduationCap,
-    color: "text-[#3b82f6]",
-    bgColor: "bg-blue-50",
-    borderColor: "border-blue-200",
-    level: "Intermediate",
-    isPremium: true,
-    modules: [
-      {
-        id: "classification",
-        title: "Hadith Classification",
-        description: "Understanding Sahih, Hasan, Da'if, and Mawdu' categories",
-        lessons: [
-          { id: "sahih-intro", title: "What Makes a Hadith Sahih?", hadithCount: 20, collectionSlug: "sahih-bukhari" },
-          { id: "hasan-intro", title: "The Hasan Category", hadithCount: 20, collectionSlug: "jami-tirmidhi" },
-          { id: "grades", title: "Understanding Grading", hadithCount: 15, collectionSlug: "sunan-abu-dawud" },
-        ],
-      },
-      {
-        id: "narrators",
-        title: "Science of Narrators",
-        description: "Study of narrator chains and their reliability assessment",
-        lessons: [
-          { id: "isnad", title: "Chain of Narration Basics", hadithCount: 25, collectionSlug: "sahih-muslim" },
-          { id: "rijal", title: "Narrator Biographies", hadithCount: 20, collectionSlug: "sahih-bukhari" },
-        ],
-      },
-    ],
-  },
-  {
-    id: "comparative",
-    title: "Comparative Study",
-    subtitle: "Cross-Collection Analysis",
-    description:
-      "Study the same topics across multiple collections to see how different scholars compiled and organized the prophetic traditions.",
-    icon: Trophy,
-    color: "text-[#7c3aed]",
-    bgColor: "bg-purple-50",
-    borderColor: "border-purple-200",
-    level: "Advanced",
-    isPremium: true,
-    modules: [
-      {
-        id: "six-books",
-        title: "The Six Major Collections",
-        description: "Compare how the Kutub al-Sittah approach the same hadith material",
-        lessons: [
-          { id: "bukhari-study", title: "Sahih al-Bukhari Overview", hadithCount: 50, collectionSlug: "sahih-bukhari" },
-          { id: "muslim-study", title: "Sahih Muslim Overview", hadithCount: 50, collectionSlug: "sahih-muslim" },
-          { id: "tirmidhi-study", title: "Jami at-Tirmidhi Overview", hadithCount: 50, collectionSlug: "jami-tirmidhi" },
-          { id: "abu-dawud-study", title: "Sunan Abu Dawud Overview", hadithCount: 50, collectionSlug: "sunan-abu-dawud" },
-          { id: "nasai-study", title: "Sunan an-Nasai Overview", hadithCount: 50, collectionSlug: "sunan-nasai" },
-          { id: "ibn-majah-study", title: "Sunan Ibn Majah Overview", hadithCount: 50, collectionSlug: "sunan-ibn-majah" },
-        ],
-      },
-    ],
-  },
-]
+interface LessonProgress {
+  lesson_id: string
+  status: string
+  completed_at: string | null
+  quiz_passed: boolean
+}
 
 export default function LearnPage() {
   const router = useRouter()
   const supabase = getSupabaseBrowserClient()
   const { isPremium } = useSubscription()
-  const [expandedPath, setExpandedPath] = useState<string | null>("foundations")
-  const [collectionStats, setCollectionStats] = useState<Record<string, number>>({})
+  const [paths, setPaths] = useState<LearningPath[]>([])
+  const [modules, setModules] = useState<LearningModule[]>([])
+  const [lessons, setLessons] = useState<LearningLesson[]>([])
+  const [loading, setLoading] = useState(true)
+  const [expandedPath, setExpandedPath] = useState<string | null>(null)
   const [bookIdMap, setBookIdMap] = useState<Record<string, string>>({})
+  const [progressMap, setProgressMap] = useState<Map<string, LessonProgress>>(new Map())
 
   useEffect(() => {
-    async function loadStats() {
-      const { data } = await supabase.from("collections").select("slug, total_hadiths")
-      if (data) {
-        const stats: Record<string, number> = {}
-        for (const c of data) stats[c.slug] = c.total_hadiths
-        setCollectionStats(stats)
-      }
+    async function loadData() {
+      const [pathsRes, modulesRes, lessonsRes, booksRes] = await Promise.all([
+        supabase.from("learning_paths").select("*").order("sort_order"),
+        supabase.from("learning_modules").select("*").order("sort_order"),
+        supabase.from("learning_lessons").select("*").order("sort_order"),
+        supabase.from("books").select("id, number, collection:collections!collection_id(slug)"),
+      ])
 
-      // Pre-load book IDs for deep-linking
-      const { data: books } = await supabase
-        .from("books")
-        .select("id, number, collection:collections!collection_id(slug)")
+      setPaths(pathsRes.data || [])
+      setModules(modulesRes.data || [])
+      setLessons(lessonsRes.data || [])
 
-      if (books) {
+      // Build book ID map for deep-linking
+      if (booksRes.data) {
         const map: Record<string, string> = {}
-        for (const b of books) {
+        for (const b of booksRes.data) {
           const collSlug = (b.collection as { slug: string } | null)?.slug
-          if (collSlug) {
-            map[`${collSlug}:${b.number}`] = b.id
-          }
+          if (collSlug) map[`${collSlug}:${b.number}`] = b.id
         }
         setBookIdMap(map)
       }
+
+      // Fetch user progress
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: progressData } = await supabase
+          .from("learning_progress")
+          .select("lesson_id, status, completed_at, quiz_passed")
+          .eq("user_id", user.id)
+        if (progressData) {
+          const pMap = new Map<string, LessonProgress>()
+          for (const p of progressData) {
+            pMap.set(p.lesson_id, p)
+          }
+          setProgressMap(pMap)
+        }
+      }
+
+      // Auto-expand first path
+      if (pathsRes.data && pathsRes.data.length > 0) {
+        setExpandedPath(pathsRes.data[0].id)
+      }
+
+      setLoading(false)
     }
-    loadStats()
+    loadData()
   }, [supabase])
 
-  const totalLessons = (path: LearningPath) => path.modules.reduce((sum, m) => sum + m.lessons.length, 0)
-  const totalHadiths = (path: LearningPath) =>
-    path.modules.reduce((sum, m) => sum + m.lessons.reduce((s, l) => s + l.hadithCount, 0), 0)
+  const getModulesForPath = (pathId: string) =>
+    modules.filter((m) => m.path_id === pathId).sort((a, b) => a.sort_order - b.sort_order)
+
+  const getLessonsForModule = (moduleId: string) =>
+    lessons.filter((l) => l.module_id === moduleId).sort((a, b) => a.sort_order - b.sort_order)
+
+  const getTotalLessons = (pathId: string) => {
+    const pathModules = getModulesForPath(pathId)
+    return pathModules.reduce((sum, m) => sum + getLessonsForModule(m.id).length, 0)
+  }
+
+  const getCompletedLessons = (pathId: string) => {
+    const pathModules = getModulesForPath(pathId)
+    let completed = 0
+    for (const mod of pathModules) {
+      for (const lesson of getLessonsForModule(mod.id)) {
+        const p = progressMap.get(lesson.id)
+        if (p?.status === "completed") completed++
+      }
+    }
+    return completed
+  }
+
+  const getModuleCompletedCount = (moduleId: string) => {
+    const modLessons = getLessonsForModule(moduleId)
+    return modLessons.filter((l) => progressMap.get(l.id)?.status === "completed").length
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen marble-bg flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#C5A059]" />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
@@ -268,36 +206,36 @@ export default function LearnPage() {
           Follow a structured path through the hadith collections. Each path is organized into modules and
           lessons, drawing from authentic narrations across multiple collections.
         </p>
-        {Object.keys(collectionStats).length > 0 && (
-          <div className="flex gap-3 mt-4 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
-            <div className="flex-shrink-0 px-3 py-1.5 rounded-full bg-[#1B5E43]/10 text-[#1B5E43] text-xs font-medium">
-              {Object.values(collectionStats)
-                .reduce((a, b) => a + b, 0)
-                .toLocaleString()}{" "}
-              hadiths available
-            </div>
-            <div className="flex-shrink-0 px-3 py-1.5 rounded-full bg-[#C5A059]/10 text-[#C5A059] text-xs font-medium">
-              {Object.keys(collectionStats).length} collections
-            </div>
-            <div className="flex-shrink-0 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
-              4 learning paths
-            </div>
+        <div className="flex gap-3 mt-4 overflow-x-auto pb-2" style={{ scrollbarWidth: "none" }}>
+          <div className="flex-shrink-0 px-3 py-1.5 rounded-full bg-[#1B5E43]/10 text-[#1B5E43] text-xs font-medium">
+            {paths.length} learning paths
           </div>
-        )}
+          <div className="flex-shrink-0 px-3 py-1.5 rounded-full bg-[#C5A059]/10 text-[#C5A059] text-xs font-medium">
+            {modules.length} modules
+          </div>
+          <div className="flex-shrink-0 px-3 py-1.5 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
+            {lessons.length} lessons
+          </div>
+        </div>
       </section>
 
       {/* Learning Paths */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4">
-        {LEARNING_PATHS.map((path) => {
+        {paths.map((path) => {
           const isExpanded = expandedPath === path.id
-          const Icon = path.icon
+          const Icon = ICON_MAP[path.icon_name] || BookOpen
+          const colors = COLOR_MAP[path.color] || COLOR_MAP.emerald
+          const pathModules = getModulesForPath(path.id)
+          const lessonCount = getTotalLessons(path.id)
+          const completedCount = getCompletedLessons(path.id)
+          const progressPercent = lessonCount > 0 ? Math.round((completedCount / lessonCount) * 100) : 0
 
           return (
             <div
               key={path.id}
               className={cn(
                 "rounded-xl border transition-all overflow-hidden",
-                isExpanded ? path.borderColor + " shadow-md" : "border-border",
+                isExpanded ? colors.border + " shadow-md" : "border-border",
               )}
             >
               {/* Path Header */}
@@ -305,15 +243,15 @@ export default function LearnPage() {
                 onClick={() => setExpandedPath(isExpanded ? null : path.id)}
                 className="w-full p-4 flex items-start gap-4 text-left premium-card"
               >
-                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", path.bgColor)}>
-                  <Icon className={cn("w-6 h-6", path.color)} />
+                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0", colors.bg)}>
+                  <Icon className={cn("w-6 h-6", colors.color)} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
-                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", path.color)}>
+                    <span className={cn("text-[10px] font-bold uppercase tracking-wider", colors.color)}>
                       {path.subtitle}
                     </span>
-                    {path.isPremium && (
+                    {path.is_premium && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#C5A059]/10 text-[10px] font-medium text-[#C5A059]">
                         <Lock className="w-2.5 h-2.5" /> Premium
                       </span>
@@ -323,16 +261,30 @@ export default function LearnPage() {
                   <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <BookOpen className="w-3 h-3" />
-                      {totalLessons(path)} lessons
+                      {lessonCount || path.total_lessons} lessons
                     </span>
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
-                      {totalHadiths(path).toLocaleString()} hadiths
+                      {path.estimated_hours}h
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-muted text-[10px] font-medium capitalize">
                       {path.level}
                     </span>
                   </div>
+                  {/* Progress bar */}
+                  {completedCount > 0 && (
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-[#1B5E43] transition-all duration-500"
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-medium text-[#1B5E43]">
+                        {completedCount}/{lessonCount}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <ChevronRight
                   className={cn(
@@ -347,58 +299,111 @@ export default function LearnPage() {
                 <div className="px-4 pb-4 border-t border-border">
                   <p className="text-xs text-muted-foreground py-3 leading-relaxed">{path.description}</p>
 
-                  {/* Premium gate */}
-                  {path.isPremium && !isPremium ? (
+                  {path.is_premium && !isPremium ? (
                     <PremiumGate featureName={path.title} />
+                  ) : pathModules.length === 0 ? (
+                    <div className="text-center py-6">
+                      <BookOpen className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+                      <p className="text-sm text-muted-foreground">Modules coming soon</p>
+                    </div>
                   ) : (
                     <div className="flex flex-col gap-3">
-                      {path.modules.map((mod, modIdx) => (
-                        <div key={mod.id} className="rounded-lg border border-border overflow-hidden">
-                          {/* Module Header */}
-                          <div className="px-3 py-2.5 bg-muted/50">
-                            <div className="flex items-center gap-2">
-                              <span className="text-[10px] font-bold text-muted-foreground uppercase">
-                                Module {modIdx + 1}
-                              </span>
+                      {pathModules.map((mod, modIdx) => {
+                        const modLessons = getLessonsForModule(mod.id)
+                        return (
+                          <div key={mod.id} className="rounded-lg border border-border overflow-hidden">
+                            {/* Module Header */}
+                            <div className="px-3 py-2.5 bg-muted/50">
+                              <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase">
+                                  Module {modIdx + 1}
+                                </span>
+                                {getModuleCompletedCount(mod.id) > 0 && (
+                                  <span className="text-[10px] font-medium text-[#1B5E43]">
+                                    {getModuleCompletedCount(mod.id)}/{modLessons.length} done
+                                  </span>
+                                )}
+                              </div>
+                              <h4 className="text-sm font-semibold text-foreground mt-0.5">{mod.title}</h4>
+                              <p className="text-xs text-muted-foreground mt-0.5">{mod.description}</p>
                             </div>
-                            <h4 className="text-sm font-semibold text-foreground mt-0.5">{mod.title}</h4>
-                            <p className="text-xs text-muted-foreground mt-0.5">{mod.description}</p>
-                          </div>
 
-                          {/* Lessons */}
-                          <div className="divide-y divide-border/50">
-                            {mod.lessons.map((lesson) => (
-                              <button
-                                key={lesson.id}
-                                onClick={() => {
-                                  if (lesson.bookNumber) {
-                                    const bookId = bookIdMap[`${lesson.collectionSlug}:${lesson.bookNumber}`]
-                                    if (bookId) {
-                                      router.push(`/collections/${lesson.collectionSlug}/books/${bookId}`)
-                                    } else {
-                                      router.push(`/collections/${lesson.collectionSlug}`)
-                                    }
-                                  } else {
-                                    router.push(`/collections/${lesson.collectionSlug}`)
-                                  }
-                                }}
-                                className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
-                              >
-                                <div className="w-6 h-6 rounded-full border border-border flex items-center justify-center shrink-0">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-muted-foreground/30" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm text-foreground truncate">{lesson.title}</p>
-                                  <p className="text-[10px] text-muted-foreground">
-                                    {lesson.hadithCount} hadiths
-                                  </p>
-                                </div>
-                                <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
-                              </button>
-                            ))}
+                            {/* Lessons */}
+                            {modLessons.length > 0 ? (
+                              <div className="divide-y divide-border/50">
+                                {modLessons.map((lesson) => {
+                                  const lessonProgress = progressMap.get(lesson.id)
+                                  const isLessonDone = lessonProgress?.status === "completed"
+                                  const hasContent = !!lesson.content_markdown
+
+                                  return (
+                                    <button
+                                      key={lesson.id}
+                                      onClick={() => {
+                                        // If lesson has markdown content, go to lesson page
+                                        if (hasContent) {
+                                          router.push(`/learn/lesson/${lesson.id}`)
+                                        } else if (lesson.book_number && lesson.collection_slug) {
+                                          const bookId = bookIdMap[`${lesson.collection_slug}:${lesson.book_number}`]
+                                          if (bookId) {
+                                            router.push(`/collections/${lesson.collection_slug}/books/${bookId}`)
+                                          } else {
+                                            router.push(`/collections/${lesson.collection_slug}`)
+                                          }
+                                        } else if (lesson.collection_slug) {
+                                          router.push(`/collections/${lesson.collection_slug}`)
+                                        }
+                                      }}
+                                      className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-muted/50 transition-colors text-left"
+                                    >
+                                      <div
+                                        className={cn(
+                                          "w-6 h-6 rounded-full flex items-center justify-center shrink-0",
+                                          isLessonDone
+                                            ? "bg-[#1B5E43] border-0"
+                                            : "border border-border"
+                                        )}
+                                      >
+                                        <CheckCircle2
+                                          className={cn(
+                                            "w-3.5 h-3.5",
+                                            isLessonDone ? "text-white" : "text-muted-foreground/30"
+                                          )}
+                                        />
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p
+                                          className={cn(
+                                            "text-sm truncate",
+                                            isLessonDone ? "text-muted-foreground line-through" : "text-foreground"
+                                          )}
+                                        >
+                                          {lesson.title}
+                                        </p>
+                                        <div className="flex items-center gap-2">
+                                          {lesson.estimated_minutes > 0 && (
+                                            <p className="text-[10px] text-muted-foreground">
+                                              ~{lesson.estimated_minutes} min
+                                            </p>
+                                          )}
+                                          {lesson.has_quiz && (
+                                            <span className="text-[10px] text-[#C5A059]">Quiz</span>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            ) : (
+                              <div className="px-3 py-3 text-xs text-muted-foreground text-center">
+                                Lessons coming soon
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                   )}
                 </div>
@@ -407,7 +412,6 @@ export default function LearnPage() {
           )
         })}
       </main>
-
     </div>
   )
 }

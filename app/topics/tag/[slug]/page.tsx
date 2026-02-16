@@ -43,16 +43,28 @@ export default function TagDetailPage() {
       }
       setTag(tagData)
 
-      // Get published hadith_tags for this tag
-      const { data: taggedRows } = await supabase
-        .from("hadith_tags")
-        .select("hadith_id, enrichment_id")
+      // Get hadith IDs from hadith_tag_weights (primary) and hadith_tags (fallback)
+      const { data: weightedRows } = await supabase
+        .from("hadith_tag_weights")
+        .select("hadith_id")
         .eq("tag_id", tagData.id)
-        .eq("status", "published")
+        .order("weight", { ascending: false })
+        .limit(50)
 
-      if (taggedRows && taggedRows.length > 0) {
-        const hadithIds = taggedRows.map((t: { hadith_id: string }) => t.hadith_id)
-        const enrichmentIds = taggedRows.map((t: { enrichment_id: string }) => t.enrichment_id).filter(Boolean)
+      let hadithIds = (weightedRows || []).map((t: { hadith_id: string }) => t.hadith_id)
+
+      // Fall back to hadith_tags if no weighted results
+      if (hadithIds.length === 0) {
+        const { data: taggedRows } = await supabase
+          .from("hadith_tags")
+          .select("hadith_id")
+          .eq("tag_id", tagData.id)
+          .eq("status", "published")
+          .limit(50)
+        hadithIds = (taggedRows || []).map((t: { hadith_id: string }) => t.hadith_id)
+      }
+
+      if (hadithIds.length > 0) {
 
         const { data: hadithData } = await supabase
           .from("hadiths")

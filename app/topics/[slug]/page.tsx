@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { ChevronLeft, Hash, Loader2, BookOpen } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
-
 import { HadithCardCondensed } from "@/components/collections/hadith-card-condensed"
 import { cn } from "@/lib/utils"
 
@@ -12,7 +11,7 @@ interface Tag {
   id: string
   slug: string
   name_en: string
-  usage_count: number
+  hadith_count: number
 }
 
 interface EnrichedHadith {
@@ -25,7 +24,6 @@ interface EnrichedHadith {
   reference: string
   hadith_number: number
   summary_line?: string
-  tags?: string[]
 }
 
 export default function CategoryDetailPage() {
@@ -34,7 +32,12 @@ export default function CategoryDetailPage() {
   const slug = params.slug as string
   const supabase = getSupabaseBrowserClient()
 
-  const [category, setCategory] = useState<{ name_en: string; name_ar: string | null; description: string | null; icon: string | null } | null>(null)
+  const [category, setCategory] = useState<{
+    name_en: string
+    name_ar: string | null
+    description: string | null
+    icon: string | null
+  } | null>(null)
   const [hadiths, setHadiths] = useState<EnrichedHadith[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [activeTag, setActiveTag] = useState<string | null>(null)
@@ -58,34 +61,49 @@ export default function CategoryDetailPage() {
       // Get tags for this category
       const { data: catTags } = await supabase
         .from("tags")
-        .select("id, slug, name_en, usage_count")
+        .select("id, slug, name_en")
         .eq("category_id", cat.id)
         .eq("is_active", true)
-        .order("usage_count", { ascending: false })
-      setTags(catTags || [])
 
-      // Get published enrichments for this category
-      const { data: enrichments } = await supabase
-        .from("hadith_enrichment")
-        .select("hadith_id, summary_line")
-        .eq("category_id", cat.id)
-        .eq("status", "published")
-        .limit(100)
+      const tagList = catTags || []
+      const tagIds = tagList.map((t: { id: string }) => t.id)
 
-      if (enrichments && enrichments.length > 0) {
-        const hadithIds = enrichments.map((e: { hadith_id: string }) => e.hadith_id)
+      if (tagIds.length === 0) {
+        setTags([])
+        setHadiths([])
+        setLoading(false)
+        return
+      }
+
+      // Count hadiths per tag via hadith_tag_weights
+      const { data: weights } = await supabase
+        .from("hadith_tag_weights")
+        .select("tag_id, hadith_id")
+        .in("tag_id", tagIds)
+
+      const tagCountMap = new Map<string, number>()
+      const allHadithIds = new Set<string>()
+      for (const w of weights || []) {
+        tagCountMap.set(w.tag_id, (tagCountMap.get(w.tag_id) || 0) + 1)
+        allHadithIds.add(w.hadith_id)
+      }
+
+      const enrichedTags: Tag[] = tagList.map((t: any) => ({
+        ...t,
+        hadith_count: tagCountMap.get(t.id) || 0,
+      }))
+      enrichedTags.sort((a, b) => b.hadith_count - a.hadith_count)
+      setTags(enrichedTags)
+
+      // Load hadiths from all tags in this category
+      const hadithIdArr = [...allHadithIds].slice(0, 50)
+      if (hadithIdArr.length > 0) {
         const { data: hadithData } = await supabase
           .from("hadiths")
           .select("id, arabic_text, english_translation, narrator, grade, collection, reference, hadith_number")
-          .in("id", hadithIds)
+          .in("id", hadithIdArr)
 
-        // Merge summary lines
-        const summaryMap = new Map(enrichments.map((e: { hadith_id: string; summary_line: string }) => [e.hadith_id, e.summary_line]))
-        const merged = (hadithData || []).map((h: EnrichedHadith) => ({
-          ...h,
-          summary_line: summaryMap.get(h.id) || undefined,
-        }))
-        setHadiths(merged)
+        setHadiths(hadithData || [])
       }
 
       setLoading(false)
@@ -93,40 +111,26 @@ export default function CategoryDetailPage() {
     fetchData()
   }, [supabase, slug])
 
-  // Filter by tag
+  // Filter by specific tag
   useEffect(() => {
     if (!activeTag || !category) return
 
     const filterByTag = async () => {
       setLoading(true)
-      // Get hadith_ids for this tag
-      const { data: taggedIds } = await supabase
-        .from("hadith_tags")
+      const { data: weightedIds } = await supabase
+        .from("hadith_tag_weights")
         .select("hadith_id")
         .eq("tag_id", activeTag)
-        .eq("status", "published")
+        .order("weight", { ascending: false })
+        .limit(50)
 
-      if (taggedIds && taggedIds.length > 0) {
-        const ids = taggedIds.map((t: { hadith_id: string }) => t.hadith_id)
+      const ids = (weightedIds || []).map((w: { hadith_id: string }) => w.hadith_id)
+      if (ids.length > 0) {
         const { data: hadithData } = await supabase
           .from("hadiths")
           .select("id, arabic_text, english_translation, narrator, grade, collection, reference, hadith_number")
           .in("id", ids)
-
-        // Get summaries
-        const { data: enrichments } = await supabase
-          .from("hadith_enrichment")
-          .select("hadith_id, summary_line")
-          .in("hadith_id", ids)
-          .eq("status", "published")
-
-        const summaryMap = new Map((enrichments || []).map((e: { hadith_id: string; summary_line: string }) => [e.hadith_id, e.summary_line]))
-        setHadiths(
-          (hadithData || []).map((h: EnrichedHadith) => ({
-            ...h,
-            summary_line: summaryMap.get(h.id) || undefined,
-          })),
-        )
+        setHadiths(hadithData || [])
       } else {
         setHadiths([])
       }
@@ -134,6 +138,48 @@ export default function CategoryDetailPage() {
     }
     filterByTag()
   }, [activeTag, supabase, category])
+
+  // Reset to all hadiths when clearing tag
+  const clearTagFilter = () => {
+    setActiveTag(null)
+    // Re-trigger the main fetch by forcing a re-render
+    setLoading(true)
+    const refetch = async () => {
+      const { data: cat } = await supabase
+        .from("categories")
+        .select("id")
+        .eq("slug", slug)
+        .single()
+      if (!cat) { setLoading(false); return }
+
+      const { data: catTags } = await supabase
+        .from("tags")
+        .select("id")
+        .eq("category_id", cat.id)
+        .eq("is_active", true)
+
+      const tagIds = (catTags || []).map((t: { id: string }) => t.id)
+      if (tagIds.length === 0) { setHadiths([]); setLoading(false); return }
+
+      const { data: weights } = await supabase
+        .from("hadith_tag_weights")
+        .select("hadith_id")
+        .in("tag_id", tagIds)
+
+      const ids = [...new Set((weights || []).map((w: { hadith_id: string }) => w.hadith_id))].slice(0, 50)
+      if (ids.length > 0) {
+        const { data: hadithData } = await supabase
+          .from("hadiths")
+          .select("id, arabic_text, english_translation, narrator, grade, collection, reference, hadith_number")
+          .in("id", ids)
+        setHadiths(hadithData || [])
+      } else {
+        setHadiths([])
+      }
+      setLoading(false)
+    }
+    refetch()
+  }
 
   if (loading) {
     return (
@@ -159,11 +205,12 @@ export default function CategoryDetailPage() {
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
-      <header className="sticky top-0 z-40 border-b border-border bg-muted/95 backdrop-blur-sm">
+      <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-4">
           <button
             onClick={() => router.push("/topics")}
-            className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            className="w-10 h-10 rounded-full bg-background border border-border flex items-center justify-center hover:border-[#C5A059] transition-colors"
+            aria-label="Back to topics"
           >
             <ChevronLeft className="w-5 h-5 text-muted-foreground" />
           </button>
@@ -178,7 +225,6 @@ export default function CategoryDetailPage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Description */}
         {category.description && (
           <p className="text-sm text-muted-foreground leading-relaxed">{category.description}</p>
         )}
@@ -187,7 +233,7 @@ export default function CategoryDetailPage() {
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-2">
             <button
-              onClick={() => setActiveTag(null)}
+              onClick={clearTagFilter}
               className={cn(
                 "px-3 py-1.5 rounded-full text-xs font-medium transition-colors",
                 !activeTag
@@ -197,7 +243,7 @@ export default function CategoryDetailPage() {
             >
               All
             </button>
-            {tags.map((tag) => (
+            {tags.filter((t) => t.hadith_count > 0).map((tag) => (
               <button
                 key={tag.id}
                 onClick={() => setActiveTag(tag.id === activeTag ? null : tag.id)}
@@ -210,6 +256,7 @@ export default function CategoryDetailPage() {
               >
                 <Hash className="w-3 h-3" />
                 {tag.name_en}
+                <span className="text-[10px] opacity-60 ml-0.5">({tag.hadith_count})</span>
               </button>
             ))}
           </div>
@@ -219,29 +266,21 @@ export default function CategoryDetailPage() {
         {hadiths.length === 0 ? (
           <div className="premium-card rounded-xl p-8 text-center">
             <BookOpen className="w-10 h-10 mx-auto mb-3 text-muted-foreground/40" />
-            <p className="text-muted-foreground">No published hadiths in this category yet.</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Hadiths will appear here once they are enriched and published by reviewers.
-            </p>
+            <p className="text-muted-foreground">No hadiths tagged in this category yet.</p>
           </div>
         ) : (
           <div className="space-y-3">
             {hadiths.map((hadith, idx) => (
-              <div key={hadith.id} className="space-y-1">
-                {hadith.summary_line && (
-                  <p className="text-xs font-medium text-[#C5A059] px-1">{hadith.summary_line}</p>
-                )}
-                <HadithCardCondensed
-                  hadith={hadith}
-                  referenceNumber={idx + 1}
-                  collectionName={hadith.collection}
-                />
-              </div>
+              <HadithCardCondensed
+                key={hadith.id}
+                hadith={hadith}
+                referenceNumber={idx + 1}
+                collectionName={hadith.collection}
+              />
             ))}
           </div>
         )}
       </main>
-
     </div>
   )
 }

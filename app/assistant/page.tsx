@@ -1,12 +1,10 @@
 "use client"
 
-import React from "react"
-
-import { Suspense, useRef, useEffect } from "react"
+import React, { Suspense, useRef, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Bot, ChevronLeft, Send, Sparkles, Loader2 } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
-
+import { DefaultChatTransport } from "ai"
 
 const promptTemplates = [
   { label: "Explain the hadith about intentions", icon: "📖" },
@@ -15,16 +13,26 @@ const promptTemplates = [
   { label: "Who is Prophet Mohammed?", icon: "⚖️" },
 ]
 
+function getMessageText(msg: { parts?: Array<{ type: string; text?: string }> }): string {
+  if (!msg.parts || !Array.isArray(msg.parts)) return ""
+  return msg.parts
+    .filter((p): p is { type: "text"; text: string } => p.type === "text" && typeof p.text === "string")
+    .map((p) => p.text)
+    .join("")
+}
+
 function AssistantContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const initialPrompt = searchParams.get("prompt") || ""
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [input, setInput] = useState(initialPrompt)
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, setInput, error } = useChat({
-    api: "/api/chat",
-    initialInput: initialPrompt,
+  const { messages, sendMessage, status, error } = useChat({
+    transport: new DefaultChatTransport({ api: "/api/chat" }),
   })
+
+  const isLoading = status === "streaming" || status === "submitted"
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -36,8 +44,9 @@ function AssistantContent() {
 
   const onFormSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if ((input || "").trim() && !isLoading) {
-      handleSubmit(e)
+    if (input.trim() && !isLoading) {
+      sendMessage({ text: input })
+      setInput("")
     }
   }
 
@@ -91,20 +100,25 @@ function AssistantContent() {
           </div>
         ) : (
           <div className="space-y-4">
-            {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                <div
-                  className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                    msg.role === "user"
-                      ? "bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white"
-                      : "gold-border premium-card text-foreground"
-                  }`}
-                >
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+            {messages.map((msg) => {
+              const text = getMessageText(msg)
+              if (!text && msg.role === "assistant" && status === "streaming") return null
+
+              return (
+                <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-4 py-3 ${
+                      msg.role === "user"
+                        ? "bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white"
+                        : "gold-border premium-card text-foreground"
+                    }`}
+                  >
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{text}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
-            {isLoading && messages[messages.length - 1]?.role === "user" && (
+              )
+            })}
+            {isLoading && (!messages.length || messages[messages.length - 1]?.role === "user") && (
               <div className="flex justify-start">
                 <div className="gold-border premium-card rounded-2xl px-4 py-3 flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-[#C5A059]" />
@@ -114,7 +128,7 @@ function AssistantContent() {
             )}
             {error && (
               <div className="flex justify-start">
-                <div className="rounded-2xl px-4 py-3 bg-red-50 border border-red-200 text-red-700 max-w-[85%]">
+                <div className="rounded-2xl px-4 py-3 bg-red-50 border border-red-200 text-red-700 max-w-[85%] dark:bg-red-950/30 dark:border-red-800 dark:text-red-400">
                   <p className="text-sm">Something went wrong. Please try again.</p>
                 </div>
               </div>
@@ -130,14 +144,14 @@ function AssistantContent() {
           <input
             type="text"
             value={input}
-            onChange={handleInputChange}
+            onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about hadiths..."
             className="flex-1 px-4 py-3 rounded-xl border border-border bg-background focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all text-foreground"
             disabled={isLoading}
           />
           <button
             type="submit"
-            disabled={!(input || "").trim() || isLoading}
+            disabled={!input.trim() || isLoading}
             className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
             aria-label="Send message"
           >
@@ -145,7 +159,6 @@ function AssistantContent() {
           </button>
         </form>
       </div>
-
     </div>
   )
 }

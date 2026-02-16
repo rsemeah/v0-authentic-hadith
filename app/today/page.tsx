@@ -53,6 +53,7 @@ export default function TodayPage() {
   const router = useRouter()
   const supabase = getSupabaseBrowserClient()
   const [hadith, setHadith] = useState<Hadith | null>(null)
+  const [sunnah, setSunnah] = useState<{ title: string; description: string; category: string; source_reference: string } | null>(null)
   const [isSaved, setIsSaved] = useState(false)
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
@@ -77,6 +78,14 @@ export default function TodayPage() {
             setIsSaved(!!saved)
           }
         }
+        // Fetch today's sunnah
+        const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000)
+        const { data: sunnahData } = await supabase
+          .from("sunnah_practices")
+          .select("title, description, category, source_reference")
+          .eq("day_of_year", dayOfYear)
+          .single()
+        if (sunnahData) setSunnah(sunnahData)
       } catch {
         // Failed to load
       }
@@ -216,6 +225,31 @@ export default function TodayPage() {
             <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </section>
+
+        {/* Today's Sunnah */}
+        {sunnah && (
+          <section className="premium-card gold-border rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Sun className="w-4 h-4 text-[#C5A059]" />
+              <span className="text-xs font-bold uppercase tracking-wider text-[#C5A059]">Today's Sunnah</span>
+              <span className="ml-auto px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#1B5E43]/10 text-[#1B5E43] capitalize">
+                {sunnah.category}
+              </span>
+            </div>
+            <h3 className="font-semibold text-foreground mb-2">{sunnah.title}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-3">{sunnah.description}</p>
+            {sunnah.source_reference && (
+              <p className="text-[10px] text-muted-foreground/60 italic">{sunnah.source_reference}</p>
+            )}
+            <button
+              onClick={() => router.push("/sunnah")}
+              className="mt-3 text-xs font-medium text-[#C5A059] hover:text-[#8A6E3A] transition-colors flex items-center gap-1"
+            >
+              View all sunnah practices
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </section>
+        )}
 
         {/* Small Action */}
         <section className="premium-card rounded-xl p-5">

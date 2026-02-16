@@ -1,7 +1,6 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Cinzel, Geist, Geist_Mono } from "next/font/google"
-import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AppShell } from "@/components/layout/app-shell"
 import "./globals.css"
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
   title: "Authentic Hadith - Learn From Verified Sources",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://authentichadith.app"),
   description:
-    "Access verified collections of prophetic traditions, meticulously authenticated and preserved for generations of knowledge seekers.",
+    "Access verified hadith collections, guided learning paths, daily sunnah practices, stories of the prophets and companions, and AI-powered study tools -- all from authenticated sources.",
   generator: "v0.app",
   icons: {
     icon: [
@@ -65,7 +64,6 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange>
           <AppShell>{children}</AppShell>
         </ThemeProvider>
-        <Analytics />
       </body>
     </html>
   )

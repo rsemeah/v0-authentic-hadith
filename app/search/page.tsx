@@ -72,6 +72,12 @@ function SearchContent() {
   )
 
   const results = data?.results || []
+  const facets: Array<{ slug: string; name_en: string; count: number }> = data?.facets || []
+  const [activeTag, setActiveTag] = useState<string | null>(null)
+
+  const filteredResults = activeTag
+    ? results.filter((h: any) => h.tags?.some((t: any) => t.slug === activeTag))
+    : results
 
   return (
     <div className="min-h-screen marble-bg pb-20 md:pb-0">
@@ -124,10 +130,39 @@ function SearchContent() {
           </div>
         ) : results.length > 0 ? (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              Found {results.length} result{results.length !== 1 ? "s" : ""}
+            <p className="text-sm text-muted-foreground mb-2">
+              Found {filteredResults.length} result{filteredResults.length !== 1 ? "s" : ""}{activeTag ? ` for #${activeTag}` : ""}
             </p>
-            {results.map((hadith: any) => (
+            {/* Tag facets */}
+            {facets.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 pb-2">
+                {activeTag && (
+                  <button
+                    onClick={() => setActiveTag(null)}
+                    className="px-2.5 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    Clear filter
+                  </button>
+                )}
+                {facets.map((facet) => (
+                  <button
+                    key={facet.slug}
+                    onClick={() => setActiveTag(activeTag === facet.slug ? null : facet.slug)}
+                    className={cn(
+                      "flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
+                      activeTag === facet.slug
+                        ? "bg-[#C5A059] text-white"
+                        : "bg-[#C5A059]/10 text-[#8A6E3A] hover:bg-[#C5A059]/20"
+                    )}
+                  >
+                    <Hash className="w-3 h-3" />
+                    {facet.name_en}
+                    <span className="opacity-60">({facet.count})</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {filteredResults.map((hadith: any) => (
               <div
                 key={hadith.id}
                 role="button"

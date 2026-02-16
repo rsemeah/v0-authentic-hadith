@@ -1,4 +1,4 @@
-import { streamText, tool } from "ai"
+import { streamText, tool, convertToModelMessages, UIMessage } from "ai"
 import { createGroq } from "@ai-sdk/groq"
 import { z } from "zod"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
@@ -40,7 +40,7 @@ Use the searchHadiths tool to find relevant hadiths before answering questions.`
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json()
+    const { messages }: { messages: UIMessage[] } = await req.json()
 
     // Auth check
     const supabase = await getSupabaseServerClient()
@@ -79,14 +79,15 @@ export async function POST(req: Request) {
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
       system: SYSTEM_PROMPT,
-      messages,
+      messages: await convertToModelMessages(messages),
+      abortSignal: req.signal,
       tools: {
         searchHadiths: tool({
           description:
             "Search the hadith database for relevant narrations by keyword. Use this when the user asks about a topic, narrator, or specific hadith.",
-          parameters: z.object({
+          inputSchema: z.object({
             query: z.string().describe("The search term to find relevant hadiths"),
-            limit: z.number().optional().default(5).describe("Max number of results"),
+            limit: z.number().nullable().describe("Max number of results, defaults to 5"),
           }),
           execute: async ({ query, limit }) => {
             const supabase = await getSupabaseServerClient()
@@ -125,13 +126,14 @@ export async function POST(req: Request) {
         }),
       },
       maxSteps: 3,
+    })
+
+    return result.toUIMessageStreamResponse({
+      originalMessages: messages,
       onFinish: async () => {
-        // Increment usage after successful response
         await incrementAIUsage(user.id)
       },
     })
-
-    return result.toDataStreamResponse()
   } catch (error) {
     console.error("[HadithChat] Chat API error:", error)
     return new Response(

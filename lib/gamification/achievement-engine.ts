@@ -77,6 +77,28 @@ export async function checkAndUnlockAchievements(userId: string): Promise<string
         break
       }
 
+      case "all_prophet_stories_complete": {
+        const { count: totalProphets } = await supabase
+          .from("prophets")
+          .select("*", { count: "exact", head: true })
+          .eq("is_published", true)
+        // Check if user has read story parts for all prophets (simplified -- check total_parts)
+        shouldUnlock = (stats.prophet_stories_completed || 0) >= (totalProphets || 25)
+        break
+      }
+
+      case "learning_path_complete":
+        shouldUnlock = (stats.learning_paths_completed || 0) >= (criteria.threshold || 1)
+        break
+
+      case "quiz_perfect_score":
+        shouldUnlock = (stats.quiz_perfect_scores || 0) >= (criteria.threshold || 1)
+        break
+
+      case "sunnah_streak":
+        shouldUnlock = (stats.sunnah_streak_days || 0) >= (criteria.threshold || 30)
+        break
+
       case "account_age_before": {
         const cutoff = new Date(criteria.date || "2099-01-01")
         shouldUnlock = new Date(stats.created_at) < cutoff

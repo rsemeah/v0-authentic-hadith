@@ -28,6 +28,9 @@ export const metadata: Metadata = {
   description:
     "Access verified collections of prophetic traditions, meticulously authenticated and preserved for generations of knowledge seekers.",
   generator: "v0.app",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "YOUR_VERIFICATION_CODE",
+  },
   icons: {
     icon: [
       {

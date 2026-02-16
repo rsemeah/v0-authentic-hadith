@@ -180,8 +180,8 @@ export default function LandingPage() {
               <h3 className="font-semibold text-foreground">Pro</h3>
             </div>
             <div className="mb-4">
-              <span className="text-3xl font-bold text-foreground">Pro</span>
-              <span className="text-sm text-muted-foreground ml-1">plans available</span>
+              <span className="text-3xl font-bold text-foreground">$9.99</span>
+              <span className="text-sm text-muted-foreground ml-1">/month</span>
             </div>
             <ul className="space-y-2 mb-5">
               {["Unlimited AI explanations", "Advanced search & semantic search", "Learning paths & progress tracking"].map((feature) => (

@@ -1,5 +1,8 @@
-export const REVENUECAT_API_KEY =
-  process.env.NEXT_PUBLIC_REVENUECAT_API_KEY || "test_gngYicqPNakjsEBKvUwfIlFHrUg"
+const rcKey = process.env.NEXT_PUBLIC_REVENUECAT_API_KEY
+if (!rcKey) {
+  console.warn("[RevenueCat] NEXT_PUBLIC_REVENUECAT_API_KEY is not set — payments will not work in production")
+}
+export const REVENUECAT_API_KEY = rcKey || ""
 
 export const ENTITLEMENT_ID = "RedLantern Studios Pro"
 

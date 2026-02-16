@@ -48,7 +48,7 @@ export default function ResetPasswordPage() {
     } else {
       setMessage("Password updated successfully! Redirecting...")
       setTimeout(() => {
-        router.push("/dashboard")
+        router.push("/home")
       }, 2000)
     }
   }

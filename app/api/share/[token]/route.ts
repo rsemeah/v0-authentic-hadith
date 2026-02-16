@@ -30,7 +30,7 @@ export async function GET(
 
     // Get folder data
     const { data: folder, error } = await supabase
-      .from('hadith_folders')
+      .from('user_folders')
       .select(`
         *,
         saved_hadiths(

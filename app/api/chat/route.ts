@@ -68,6 +68,10 @@ export async function POST(req: Request) {
       )
     }
 
+    // Increment usage before streaming to prevent race conditions
+    // (quota checked above, increment now so concurrent requests can't bypass limits)
+    await incrementAIUsage(user.id)
+
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
       system: SYSTEM_PROMPT,
@@ -117,10 +121,6 @@ export async function POST(req: Request) {
         }),
       },
       maxSteps: 3,
-      onFinish: async () => {
-        // Increment usage after successful response
-        await incrementAIUsage(user.id)
-      },
     })
 
     return result.toDataStreamResponse()

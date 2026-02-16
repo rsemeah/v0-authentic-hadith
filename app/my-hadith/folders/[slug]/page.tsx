@@ -51,7 +51,7 @@ export default function FolderDetailPage() {
 
       // Fetch folder
       const { data: folderData } = await supabase
-        .from('hadith_folders')
+        .from('user_folders')
         .select('*')
         .eq('id', slug)
         .single()

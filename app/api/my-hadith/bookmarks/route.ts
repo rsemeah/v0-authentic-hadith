@@ -14,7 +14,7 @@ export async function GET(request: Request) {
   const offset = Number.parseInt(url.searchParams.get("offset") || "0")
 
   let query = supabase
-    .from("user_bookmarks")
+    .from("saved_hadiths")
     .select("*")
     .eq("user_id", user.id)
     .eq("item_type", itemType)
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
   }
 
   const { data, error } = await supabase
-    .from("user_bookmarks")
+    .from("saved_hadiths")
     .upsert({
       user_id: user.id,
       item_type,
@@ -77,7 +77,7 @@ export async function DELETE(request: Request) {
   }
 
   const { error } = await supabase
-    .from("user_bookmarks")
+    .from("saved_hadiths")
     .delete()
     .eq("user_id", user.id)
     .eq("item_type", itemType)

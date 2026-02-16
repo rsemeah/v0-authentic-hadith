@@ -136,7 +136,7 @@ export default function OnboardingPage() {
           .eq("user_id", user.id)
 
         if (profileError) {
-          // Profile update failed
+          throw new Error(`Profile update failed: ${profileError.message}`)
         }
       } else {
         const { error: profileError } = await supabase.from("profiles").insert({
@@ -147,7 +147,7 @@ export default function OnboardingPage() {
         })
 
         if (profileError) {
-          // Profile insert failed
+          throw new Error(`Profile creation failed: ${profileError.message}`)
         }
       }
 
@@ -175,7 +175,7 @@ export default function OnboardingPage() {
         : await supabase.from("user_preferences").insert(prefsPayload)
 
       if (prefsError) {
-        // Preferences upsert failed
+        throw new Error(`Preferences save failed: ${prefsError.message}`)
       }
 
       // Set onboarded cookie

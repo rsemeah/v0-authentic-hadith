@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   title: "Authentic Hadith - Learn From Verified Sources",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://authentichadith.app"),
   description:
-    "Access verified collections of prophetic traditions, meticulously authenticated and preserved for generations of knowledge seekers.",
+    "Access verified hadith collections, guided learning paths, daily sunnah practices, stories of the prophets and companions, and AI-powered study tools -- all from authenticated sources.",
   generator: "v0.app",
   icons: {
     icon: [

@@ -8,6 +8,8 @@ import Image from "next/image"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { DailyHadithCard } from "@/components/home/daily-hadith-card"
 import { AIAssistantBlock } from "@/components/home/ai-assistant-block"
+import { ContinueLearningWidget } from "@/components/home/continue-learning-widget"
+import { TodaysSunnahWidget } from "@/components/home/todays-sunnah-widget"
 
 import { ShareBanner } from "@/components/share-banner"
 import { ReminderBanner } from "@/components/home/reminder-banner"
@@ -441,6 +443,9 @@ export default function HomePage() {
           <DailyHadithCard hadith={displayHadith} onSave={handleSaveHadith} onShare={handleShareHadith} />
         </section>
 
+        {/* Today's Sunnah */}
+        <TodaysSunnahWidget />
+
         {/* Continue Reading */}
         {continueReading.length > 0 && (
           <section className="pb-6 md:pb-8" aria-label="Continue Reading">
@@ -484,6 +489,9 @@ export default function HomePage() {
           </section>
         )}
 
+        {/* Continue Learning */}
+        <ContinueLearningWidget />
+
         {/* Quick Actions */}
         <section className="pb-6 md:pb-8" aria-label="Quick Actions">
           <h2 className="text-lg font-bold text-foreground mb-4">Quick Actions</h2>
@@ -522,19 +530,19 @@ export default function HomePage() {
                 iconColor: "text-white",
               },
               {
-                icon: PenLine,
-                label: "Reflections",
-                desc: "Your journal",
-                href: "/reflections",
-                gradient: "from-[#7c3aed] to-[#a78bfa]",
+                icon: GraduationCap,
+                label: "Learn",
+                desc: "Guided paths",
+                href: "/learn",
+                gradient: "from-[#1B5E43] to-[#2D7A5B]",
                 iconColor: "text-white",
               },
               {
-                icon: Bot,
-                label: "AI Chat",
-                desc: "Ask anything",
-                href: "/assistant",
-                gradient: "from-[#0369a1] to-[#38bdf8]",
+                icon: Search,
+                label: "Topics",
+                desc: "Browse by tag",
+                href: "/topics",
+                gradient: "from-[#8a6e3a] to-[#C5A059]",
                 iconColor: "text-white",
               },
             ].map((action) => (

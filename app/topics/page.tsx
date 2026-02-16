@@ -65,10 +65,11 @@ export default function TopicsPage() {
         .select("id, slug, name_en, name_ar, category_id")
         .eq("is_active", true)
 
-      // Count hadiths per tag via hadith_tag_weights
+      // Count hadiths per tag via hadith_tag_weights (use RPC or manual grouping)
+      // Fetch distinct tag_ids with counts using a lightweight select
       const { data: tagWeights } = await supabase
         .from("hadith_tag_weights")
-        .select("tag_id")
+        .select("tag_id", { count: "exact", head: false })
 
       // Build count map: tag_id -> count
       const tagCountMap = new Map<string, number>()

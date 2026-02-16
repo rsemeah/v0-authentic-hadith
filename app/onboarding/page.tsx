@@ -8,11 +8,12 @@ import { ProgressIndicator } from "@/components/onboarding/progress-indicator"
 import { StepProfile } from "@/components/onboarding/step-profile"
 import { StepPreferences } from "@/components/onboarding/step-preferences"
 import { StepSafety } from "@/components/onboarding/step-safety"
+import { StepSubscription } from "@/components/onboarding/step-subscription"
 import { SuccessAnimation } from "@/components/onboarding/success-animation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
-const TOTAL_STEPS = 3
+const TOTAL_STEPS = 4
 
 interface OnboardingData {
   // Step 1
@@ -62,6 +63,8 @@ export default function OnboardingPage() {
         return true // All optional
       case 3:
         return data.safetyAgreed && data.termsAgreed
+      case 4:
+        return true // Handled by plan selection buttons
       default:
         return false
     }
@@ -286,32 +289,45 @@ export default function OnboardingPage() {
                 onUpdate={updateData}
               />
             )}
+            {currentStep === 4 && (
+              <StepSubscription
+                onSelectPlan={(planId) => {
+                  // Save onboarding first, then redirect to pricing/checkout
+                  handleComplete().then(() => {
+                    router.push(`/pricing?plan=${planId}`)
+                  })
+                }}
+                onContinueFree={() => {
+                  handleComplete()
+                }}
+              />
+            )}
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
-            {/* Skip Link (Step 1 only) */}
-            {currentStep === 1 ? (
-              <button
-                type="button"
-                onClick={handleSkip}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-              >
-                Skip for now
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleBack}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#C5A059] text-[#C5A059] hover:bg-muted transition-colors text-sm font-medium"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back
-              </button>
-            )}
+          {/* Navigation Buttons - hidden on subscription step (step 4 has its own buttons) */}
+          {currentStep !== 4 && (
+            <div className="flex items-center justify-between mt-8 pt-6 border-t border-border">
+              {/* Skip Link (Step 1 only) */}
+              {currentStep === 1 ? (
+                <button
+                  type="button"
+                  onClick={handleSkip}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Skip for now
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="flex items-center gap-2 px-4 py-2 rounded-lg border border-[#C5A059] text-[#C5A059] hover:bg-muted transition-colors text-sm font-medium"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  Back
+                </button>
+              )}
 
-            {/* Next / Complete Button */}
-            {currentStep < TOTAL_STEPS ? (
+              {/* Next Button */}
               <button
                 type="button"
                 onClick={handleNext}
@@ -324,27 +340,8 @@ export default function OnboardingPage() {
                 Next
                 <ArrowRight className="w-4 h-4" />
               </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleComplete}
-                disabled={!canProceed() || loading}
-                className={cn(
-                  "flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold tracking-wide transition-all",
-                  canProceed() && !loading ? "gold-button" : "bg-[#e5e7eb] text-muted-foreground cursor-not-allowed",
-                )}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Completing...
-                  </>
-                ) : (
-                  "Complete"
-                )}
-              </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

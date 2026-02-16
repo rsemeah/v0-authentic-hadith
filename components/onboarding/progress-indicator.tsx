@@ -9,7 +9,7 @@ interface ProgressIndicatorProps {
 }
 
 export function ProgressIndicator({ currentStep, totalSteps }: ProgressIndicatorProps) {
-  const steps = [{ label: "Profile Setup" }, { label: "Preferences" }, { label: "Safety Guidelines" }]
+  const steps = [{ label: "Profile Setup" }, { label: "Preferences" }, { label: "Safety Guidelines" }, { label: "Choose Your Plan" }]
 
   return (
     <div className="flex flex-col items-center gap-3">

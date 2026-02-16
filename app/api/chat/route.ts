@@ -4,9 +4,13 @@ import { z } from "zod"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { checkAIQuota, incrementAIUsage } from "@/lib/quotas/check"
 
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
-})
+function getGroqClient() {
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) {
+    throw new Error("GROQ_API_KEY environment variable is not configured. Please set it in your .env.local file.")
+  }
+  return createGroq({ apiKey })
+}
 
 const SYSTEM_PROMPT = `You are HadithChat, a knowledgeable Islamic scholar assistant specializing in hadith studies.
 
@@ -68,6 +72,7 @@ export async function POST(req: Request) {
       )
     }
 
+    const groq = getGroqClient()
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
       system: SYSTEM_PROMPT,
@@ -126,12 +131,16 @@ export async function POST(req: Request) {
     return result.toDataStreamResponse()
   } catch (error) {
     console.error("[HadithChat] Chat API error:", error)
+    const message = error instanceof Error ? error.message : "Unknown error"
+    const isConfigError = message.includes("environment variable") || message.includes("not configured")
     return new Response(
       JSON.stringify({
-        error: "Failed to process your request. Please try again.",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: isConfigError
+          ? "The AI assistant is not configured yet. Please contact the administrator."
+          : "Failed to process your request. Please try again.",
+        details: message,
       }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
+      { status: isConfigError ? 503 : 500, headers: { "Content-Type": "application/json" } },
     )
   }
 }

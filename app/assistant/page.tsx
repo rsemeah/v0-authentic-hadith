@@ -6,6 +6,8 @@ import { Suspense, useRef, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Bot, ChevronLeft, Send, Sparkles, Loader2 } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
+import { useSubscription } from "@/hooks/use-subscription"
+import { PremiumGate } from "@/components/premium-gate"
 
 
 const promptTemplates = [
@@ -20,6 +22,7 @@ function AssistantContent() {
   const searchParams = useSearchParams()
   const initialPrompt = searchParams.get("prompt") || ""
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const { isPremium, loading: subLoading } = useSubscription()
 
   const { messages, input, handleInputChange, handleSubmit, isLoading, setInput, error } = useChat({
     api: "/api/chat",
@@ -62,7 +65,22 @@ function AssistantContent() {
         </div>
       </header>
 
+      {/* Premium Gate */}
+      {!subLoading && !isPremium && (
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] flex items-center justify-center mx-auto mb-6">
+            <Sparkles className="w-8 h-8 text-[#E8C77D]" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground mb-2 text-center">HadithChat is a Premium Feature</h2>
+          <p className="text-sm text-muted-foreground text-center mb-6 max-w-md">
+            Get AI-powered hadith explanations, scholarly context, and search across 31,000+ authenticated narrations.
+          </p>
+          <PremiumGate featureName="AI Assistant" />
+        </div>
+      )}
+
       {/* Messages */}
+      {(isPremium || subLoading) && (
       <main className="flex-1 max-w-3xl mx-auto px-4 sm:px-6 py-6 w-full overflow-y-auto">
         {messages.length === 0 ? (
           <div className="text-center py-12">
@@ -115,7 +133,13 @@ function AssistantContent() {
             {error && (
               <div className="flex justify-start">
                 <div className="rounded-2xl px-4 py-3 bg-red-50 border border-red-200 text-red-700 max-w-[85%]">
-                  <p className="text-sm">Something went wrong. Please try again.</p>
+                  <p className="text-sm font-medium">
+                    {error.message?.includes("not configured")
+                      ? "The AI assistant is not available right now. Please try again later."
+                      : error.message?.includes("quota")
+                        ? "You've reached your usage limit. Upgrade to Premium for more."
+                        : "Something went wrong. Please try again."}
+                  </p>
                 </div>
               </div>
             )}
@@ -123,8 +147,10 @@ function AssistantContent() {
           </div>
         )}
       </main>
+      )}
 
       {/* Input */}
+      {(isPremium || subLoading) && (
       <div className="sticky bottom-20 md:bottom-0 bg-card border-t border-border p-4">
         <form onSubmit={onFormSubmit} className="max-w-3xl mx-auto flex items-center gap-3">
           <input
@@ -145,6 +171,7 @@ function AssistantContent() {
           </button>
         </form>
       </div>
+      )}
 
     </div>
   )

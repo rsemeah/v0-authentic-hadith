@@ -8,11 +8,12 @@ import { ProgressIndicator } from "@/components/onboarding/progress-indicator"
 import { StepProfile } from "@/components/onboarding/step-profile"
 import { StepPreferences } from "@/components/onboarding/step-preferences"
 import { StepSafety } from "@/components/onboarding/step-safety"
+import { StepPlan } from "@/components/onboarding/step-plan"
 import { SuccessAnimation } from "@/components/onboarding/success-animation"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
-const TOTAL_STEPS = 3
+const TOTAL_STEPS = 4
 
 interface OnboardingData {
   // Step 1
@@ -27,6 +28,8 @@ interface OnboardingData {
   // Step 3
   safetyAgreed: boolean
   termsAgreed: boolean
+  // Step 4
+  selectedPlanId: string | null
 }
 
 export default function OnboardingPage() {
@@ -48,6 +51,7 @@ export default function OnboardingPage() {
     learningLevel: "Intermediate",
     safetyAgreed: false,
     termsAgreed: false,
+    selectedPlanId: null,
   })
 
   const updateData = (updates: Partial<OnboardingData>) => {
@@ -62,6 +66,8 @@ export default function OnboardingPage() {
         return true // All optional
       case 3:
         return data.safetyAgreed && data.termsAgreed
+      case 4:
+        return true // Free plan (null) or a paid plan
       default:
         return false
     }
@@ -181,7 +187,37 @@ export default function OnboardingPage() {
       // Set onboarded cookie
       document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
 
-      // Show success animation
+      // If user selected a paid plan, handle checkout
+      if (data.selectedPlanId) {
+        const { isNativeApp, showNativePaywall } = await import("@/lib/native-bridge")
+        if (isNativeApp()) {
+          // In native app, show RevenueCat paywall
+          const success = await showNativePaywall()
+          if (success) {
+            setShowSuccess(true)
+            return
+          }
+          // If cancelled, still show success and go to home
+        } else {
+          // On web, redirect to Stripe checkout
+          try {
+            const res = await fetch("/api/checkout/create-session", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ productId: data.selectedPlanId }),
+            })
+            const result = await res.json()
+            if (result.url) {
+              window.location.href = result.url
+              return
+            }
+          } catch {
+            // Checkout failed -- continue to home, user can subscribe later
+          }
+        }
+      }
+
+      // Show success animation (free plan or checkout failed gracefully)
       setShowSuccess(true)
     } catch (error) {
       console.error("Onboarding error:", error)
@@ -284,6 +320,12 @@ export default function OnboardingPage() {
                   termsAgreed: data.termsAgreed,
                 }}
                 onUpdate={updateData}
+              />
+            )}
+            {currentStep === 4 && (
+              <StepPlan
+                selectedPlanId={data.selectedPlanId}
+                onSelect={(planId) => updateData({ selectedPlanId: planId })}
               />
             )}
           </div>

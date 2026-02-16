@@ -39,6 +39,16 @@ You have access to a database of 31,839 authenticated hadiths from: Sahih al-Buk
 Use the searchHadiths tool to find relevant hadiths before answering questions.`
 
 export async function POST(req: Request) {
+  // Graceful check for missing GROQ_API_KEY
+  if (!process.env.GROQ_API_KEY) {
+    return new Response(
+      JSON.stringify({
+        error: "AI service is not configured. Please set the GROQ_API_KEY environment variable.",
+      }),
+      { status: 503, headers: { "Content-Type": "application/json" } },
+    )
+  }
+
   try {
     const { messages }: { messages: UIMessage[] } = await req.json()
 

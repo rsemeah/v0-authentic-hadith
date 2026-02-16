@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle, Star, ChevronDown, Info, ChevronRight, Trash2, AlertTriangle, Loader2 } from "lucide-react"
+import { ChevronLeft, Bell, Moon, Globe, Shield, HelpCircle, Star, ChevronDown, Info, ChevronRight, Trash2, AlertTriangle, Loader2, Mail } from "lucide-react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/ui/theme-toggle"
 
@@ -212,7 +212,7 @@ export default function SettingsPage() {
                   {item.id === "help" && (
                     <div className="pt-2 border-t border-border">
                       <p className="text-sm text-muted-foreground mt-3">
-                        {"Need help? Contact us at support@authentichadith.com"}
+                        {"Need help? Contact us at support@authentichadith.app"}
                       </p>
                     </div>
                   )}
@@ -233,6 +233,20 @@ export default function SettingsPage() {
           <div className="flex-1 min-w-0">
             <h3 className="font-medium text-foreground">About Authentic Hadith</h3>
             <p className="text-sm text-muted-foreground">Mission, sources, AI policy & more</p>
+          </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
+        </Link>
+
+        <Link
+          href="/contact"
+          className="mt-3 w-full rounded-xl p-4 border border-border bg-card flex items-center gap-4 hover:border-[#C5A059]/50 active:bg-muted/50 transition-colors"
+        >
+          <div className="w-11 h-11 rounded-lg bg-[#1B5E43]/10 dark:bg-[#4a9973]/15 flex items-center justify-center shrink-0">
+            <Mail className="w-5 h-5 text-[#1B5E43] dark:text-[#6bb895]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-medium text-foreground">Contact Us</h3>
+            <p className="text-sm text-muted-foreground">support@authentichadith.app</p>
           </div>
           <ChevronRight className="w-5 h-5 text-muted-foreground shrink-0" />
         </Link>

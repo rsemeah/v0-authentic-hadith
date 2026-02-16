@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { getNativeSubscriptionStatus, isNativeApp } from "@/lib/native-bridge"
 
 export interface UserSubscription {
   isPremium: boolean
@@ -24,6 +25,22 @@ export function useSubscription(): UserSubscription {
     const supabase = getSupabaseBrowserClient()
 
     async function check() {
+      // First check native bridge (instant, no network call)
+      if (isNativeApp()) {
+        const nativeStatus = getNativeSubscriptionStatus()
+        if (nativeStatus?.isPro) {
+          setSub({
+            isPremium: true,
+            plan: "native",
+            status: "active",
+            currentPeriodEnd: null,
+            loading: false,
+          })
+          return
+        }
+      }
+
+      // Fall back to Supabase check (covers Stripe + RevenueCat webhook syncs)
       const {
         data: { user },
       } = await supabase.auth.getUser()
@@ -56,6 +73,24 @@ export function useSubscription(): UserSubscription {
     }
 
     check()
+
+    // Listen for native subscription changes (e.g. user just purchased)
+    if (isNativeApp()) {
+      const handler = () => {
+        const nativeStatus = getNativeSubscriptionStatus()
+        if (nativeStatus?.isPro) {
+          setSub({
+            isPremium: true,
+            plan: "native",
+            status: "active",
+            currentPeriodEnd: null,
+            loading: false,
+          })
+        }
+      }
+      window.addEventListener("nativeSubscriptionUpdate", handler)
+      return () => window.removeEventListener("nativeSubscriptionUpdate", handler)
+    }
   }, [])
 
   return sub

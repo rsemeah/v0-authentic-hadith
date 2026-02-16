@@ -2,9 +2,11 @@
 
 import React, { Suspense, useRef, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Bot, ChevronLeft, Send, Sparkles, Loader2 } from "lucide-react"
+import { Bot, ChevronLeft, Send, Sparkles, Loader2, Lock, Crown } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
+import { useSubscription } from "@/hooks/use-subscription"
+import { isNativeApp, showNativePaywall } from "@/lib/native-bridge"
 
 const promptTemplates = [
   { label: "Explain the hadith about intentions", icon: "📖" },
@@ -27,6 +29,7 @@ function AssistantContent() {
   const initialPrompt = searchParams.get("prompt") || ""
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [input, setInput] = useState(initialPrompt)
+  const { isPremium, loading: subLoading } = useSubscription()
 
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -37,6 +40,60 @@ function AssistantContent() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
+  // Paywall for non-premium users
+  if (subLoading) {
+    return (
+      <div className="min-h-screen marble-bg flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen marble-bg flex flex-col items-center justify-center p-6 pb-24">
+        <div className="max-w-md w-full text-center">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#C5A059]/20 to-[#C5A059]/5 flex items-center justify-center mx-auto mb-6 border border-[#C5A059]/30">
+            <Lock className="w-10 h-10 text-[#C5A059]" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-3 text-balance">
+            HadithChat is a Premium Feature
+          </h1>
+          <p className="text-muted-foreground mb-8 leading-relaxed">
+            Get AI-powered explanations of authentic hadiths, ask questions about Islamic teachings, and explore hadith collections with your personal assistant.
+          </p>
+          <div className="space-y-3">
+            <button
+              onClick={async () => {
+                if (isNativeApp()) {
+                  const success = await showNativePaywall()
+                  if (success) window.location.reload()
+                } else {
+                  router.push("/pricing")
+                }
+              }}
+              className="w-full gold-button py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+            >
+              <Crown className="w-4 h-4" />
+              View Premium Plans
+            </button>
+            <button
+              onClick={() => router.back()}
+              className="w-full py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-border hover:border-[#C5A059] transition-colors"
+            >
+              Go Back
+            </button>
+          </div>
+          <div className="mt-8 p-4 rounded-lg bg-muted border border-border">
+            <p className="text-xs text-muted-foreground">
+              Premium includes unlimited AI conversations, all learning paths, advanced search, and priority support. Start with a 7-day free trial.
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   const handleTemplateClick = (template: string) => {
     setInput(template)

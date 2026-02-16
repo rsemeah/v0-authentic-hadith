@@ -4,7 +4,7 @@ import React from "react"
 
 import { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { ChevronLeft, Check, Star, Crown, Zap, Infinity, X, RotateCcw } from "lucide-react"
+import { ChevronLeft, Check, Star, Crown, Infinity, X, RotateCcw } from "lucide-react"
 
 import { PRODUCTS } from "@/lib/products"
 import type { Product } from "@/lib/products"
@@ -41,7 +41,6 @@ function PriceDisplay({ product }: { product: Product }) {
 }
 
 const planIcons: Record<string, React.ReactNode> = {
-  "monthly-intro": <Zap className="w-5 h-5 text-[#C5A059]" />,
   "monthly-premium": <Star className="w-5 h-5 text-[#C5A059]" />,
   "annual-premium": <Crown className="w-5 h-5 text-[#C5A059]" />,
   "lifetime-access": <Infinity className="w-5 h-5 text-[#C5A059]" />,

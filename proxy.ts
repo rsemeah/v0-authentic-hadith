@@ -1,10 +1,32 @@
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
-const publicPaths = ["/", "/login", "/pricing", "/checkout/success", "/reset-password"]
-const protectedPrefixes = ["/home", "/dashboard", "/onboarding", "/profile", "/settings", "/saved", "/collections", "/hadith", "/assistant", "/search", "/learn", "/today", "/sunnah", "/stories", "/reflections", "/quiz", "/progress", "/share", "/topics"]
+const publicPaths = ["/", "/pricing", "/checkout/success", "/reset-password"]
+const publicPrefixes = ["/api", "/auth", "/admin", "/about", "/privacy", "/terms", "/contact", "/my-hadith"]
+const authPages = ["/login"]
+const protectedPrefixes = ["/home", "/dashboard", "/onboarding", "/profile", "/settings", "/saved", "/collections", "/hadith", "/assistant", "/search", "/learn", "/today", "/sunnah", "/stories", "/reflections", "/quiz", "/progress", "/share", "/topics", "/achievements"]
 
 export async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  // Fast-path: skip auth check entirely for public pages (allows crawlers/bots through)
+  const isPublic =
+    publicPaths.some((p) => pathname === p) ||
+    publicPrefixes.some((prefix) => pathname.startsWith(prefix))
+
+  if (isPublic) {
+    return NextResponse.next({ request })
+  }
+
+  const isAuthPage = authPages.some((p) => pathname === p)
+  const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
+
+  // If the path isn't protected and isn't an auth page, just pass through
+  if (!isProtected && !isAuthPage) {
+    return NextResponse.next({ request })
+  }
+
+  // Only run Supabase auth for protected routes
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -32,31 +54,29 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
   const hasOnboarded = request.cookies.get("qbos_onboarded")?.value === "1"
 
-  const isPublic = publicPaths.some((p) => pathname === p) ||
-    pathname.startsWith("/api") ||
-    pathname.startsWith("/auth") ||
-    pathname.startsWith("/admin") ||
-    pathname.startsWith("/about") ||
-    pathname.startsWith("/my-hadith")
-
-  const isProtected = protectedPrefixes.some((prefix) => pathname.startsWith(prefix))
-
-  if (!user && isProtected) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/login"
-    return NextResponse.redirect(url)
-  }
-
-  if (user && pathname === "/login") {
+  // Auth page: redirect logged-in users away from login
+  if (isAuthPage && user) {
     const url = request.nextUrl.clone()
     url.pathname = hasOnboarded ? "/home" : "/onboarding"
     return NextResponse.redirect(url)
   }
 
-  if (user && !hasOnboarded && isProtected && pathname !== "/onboarding") {
+  // Auth page but not logged in: allow through
+  if (isAuthPage) {
+    return supabaseResponse
+  }
+
+  // Protected page: redirect unauthenticated users to login
+  if (!user) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/login"
+    return NextResponse.redirect(url)
+  }
+
+  // Protected page: redirect to onboarding if not yet onboarded
+  if (!hasOnboarded && pathname !== "/onboarding") {
     const url = request.nextUrl.clone()
     url.pathname = "/onboarding"
     return NextResponse.redirect(url)

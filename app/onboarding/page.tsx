@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Suspense, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react"
@@ -33,6 +33,18 @@ interface OnboardingData {
 }
 
 export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen marble-bg flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-[#C5A059]" />
+      </div>
+    }>
+      <OnboardingContent />
+    </Suspense>
+  )
+}
+
+function OnboardingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const postOnboardingRedirect = searchParams.get("redirect")

@@ -86,8 +86,6 @@ export async function POST(req: Request) {
       )
     }
 
-    console.log("[v0] Chat API: Starting streamText with", messages.length, "messages")
-
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
       system: SYSTEM_PROMPT,
@@ -103,7 +101,6 @@ export async function POST(req: Request) {
           }),
           execute: async ({ query, limit }) => {
             try {
-              console.log("[v0] Tool searchHadiths called with query:", query)
               const supabase = await getSupabaseServerClient()
               const { data, error } = await supabase
                 .from("hadiths")
@@ -116,7 +113,6 @@ export async function POST(req: Request) {
                 .limit(limit ?? 5)
 
               if (error) {
-                console.error("[v0] Hadith search error:", error.message)
                 return { results: [], error: error.message }
               }
 
@@ -136,10 +132,8 @@ export async function POST(req: Request) {
                 return { ...h, english_translation: text, narrator }
               })
 
-              console.log("[v0] Hadith search returned", cleaned.length, "results")
               return { results: cleaned }
             } catch (toolError) {
-              console.error("[v0] Tool execution error:", toolError)
               return { results: [], error: "Failed to search hadiths" }
             }
           },

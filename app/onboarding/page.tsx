@@ -48,7 +48,6 @@ function OnboardingContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const postOnboardingRedirect = searchParams.get("redirect")
-  console.log("[v0] Onboarding redirect param:", postOnboardingRedirect)
   const supabase = getSupabaseBrowserClient()
 
   const [currentStep, setCurrentStep] = useState(1)
@@ -203,12 +202,10 @@ function OnboardingContent() {
       document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
 
       // If the user was redirected from pricing (e.g. after sign-up), send them back there
-      console.log("[v0] handleComplete - postOnboardingRedirect:", postOnboardingRedirect)
       if (postOnboardingRedirect) {
         const destination = postOnboardingRedirect.startsWith("%") 
           ? decodeURIComponent(postOnboardingRedirect) 
           : postOnboardingRedirect
-        console.log("[v0] Redirecting to:", destination)
         window.location.href = destination
         return
       }

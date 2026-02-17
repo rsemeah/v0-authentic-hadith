@@ -1,8 +1,10 @@
-import { streamText, tool, convertToModelMessages, UIMessage } from "ai"
+import { streamText, tool, convertToModelMessages, UIMessage, consumeStream, stepCountIs } from "ai"
 import { createGroq } from "@ai-sdk/groq"
 import { z } from "zod"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { checkAIQuota, incrementAIUsage } from "@/lib/quotas/check"
+
+export const maxDuration = 30
 
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
@@ -50,7 +52,9 @@ export async function POST(req: Request) {
   }
 
   try {
+    console.log("[v0] Chat API: POST received")
     const { messages }: { messages: UIMessage[] } = await req.json()
+    console.log("[v0] Chat API: messages count:", messages?.length)
 
     // Auth check
     const supabase = await getSupabaseServerClient()
@@ -58,6 +62,7 @@ export async function POST(req: Request) {
       data: { user },
     } = await supabase.auth.getUser()
 
+    console.log("[v0] Chat API: user:", user?.id ?? "NONE")
     if (!user) {
       return new Response(
         JSON.stringify({ error: "You must be logged in to use the AI assistant." }),
@@ -66,7 +71,9 @@ export async function POST(req: Request) {
     }
 
     // Quota check
+    console.log("[v0] Chat API: checking quota for user", user.id)
     const quotaCheck = await checkAIQuota(user.id)
+    console.log("[v0] Chat API: quota result:", JSON.stringify(quotaCheck))
 
     if (!quotaCheck.allowed) {
       return new Response(
@@ -86,6 +93,7 @@ export async function POST(req: Request) {
       )
     }
 
+    console.log("[v0] Chat API: starting streamText with Groq")
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
       system: SYSTEM_PROMPT,
@@ -97,7 +105,7 @@ export async function POST(req: Request) {
             "Search the hadith database for relevant narrations by keyword. Use this when the user asks about a topic, narrator, or specific hadith.",
           inputSchema: z.object({
             query: z.string().describe("The search term to find relevant hadiths"),
-            limit: z.number().nullable().describe("Max number of results, defaults to 5"),
+            limit: z.number().nullable().describe("Max results to return, defaults to 5"),
           }),
           execute: async ({ query, limit }) => {
             try {
@@ -139,7 +147,7 @@ export async function POST(req: Request) {
           },
         }),
       },
-      maxSteps: 3,
+      stopWhen: stepCountIs(3),
     })
 
     return result.toUIMessageStreamResponse({
@@ -147,6 +155,7 @@ export async function POST(req: Request) {
       onFinish: async () => {
         await incrementAIUsage(user.id)
       },
+      consumeSseStream: consumeStream,
     })
   } catch (error) {
     console.error("[HadithChat] Chat API error:", error)

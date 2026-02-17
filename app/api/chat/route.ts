@@ -86,6 +86,8 @@ export async function POST(req: Request) {
       )
     }
 
+    console.log("[v0] Chat API: Starting streamText with", messages.length, "messages")
+
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
       system: SYSTEM_PROMPT,
@@ -100,38 +102,46 @@ export async function POST(req: Request) {
             limit: z.number().nullable().describe("Max number of results, defaults to 5"),
           }),
           execute: async ({ query, limit }) => {
-            const supabase = await getSupabaseServerClient()
-            const { data, error } = await supabase
-              .from("hadiths")
-              .select(
-                "id, hadith_number, collection, arabic_text, english_translation, narrator, grade, reference",
-              )
-              .or(
-                `english_translation.ilike.%${query}%,narrator.ilike.%${query}%,arabic_text.ilike.%${query}%`,
-              )
-              .limit(limit || 5)
+            try {
+              console.log("[v0] Tool searchHadiths called with query:", query)
+              const supabase = await getSupabaseServerClient()
+              const { data, error } = await supabase
+                .from("hadiths")
+                .select(
+                  "id, hadith_number, collection, arabic_text, english_translation, narrator, grade, reference",
+                )
+                .or(
+                  `english_translation.ilike.%${query}%,narrator.ilike.%${query}%,arabic_text.ilike.%${query}%`,
+                )
+                .limit(limit ?? 5)
 
-            if (error) {
-              return { results: [], error: error.message }
-            }
-
-            // Clean up any JSON-encoded translations
-            const cleaned = (data || []).map((h) => {
-              let text = h.english_translation || ""
-              let narrator = h.narrator || ""
-              if (text.startsWith("{") && text.includes('"text"')) {
-                try {
-                  const parsed = JSON.parse(text)
-                  text = parsed.text || text
-                  if (!narrator && parsed.narrator) narrator = parsed.narrator
-                } catch {
-                  // keep original
-                }
+              if (error) {
+                console.error("[v0] Hadith search error:", error.message)
+                return { results: [], error: error.message }
               }
-              return { ...h, english_translation: text, narrator }
-            })
 
-            return { results: cleaned }
+              // Clean up any JSON-encoded translations
+              const cleaned = (data || []).map((h) => {
+                let text = h.english_translation || ""
+                let narrator = h.narrator || ""
+                if (text.startsWith("{") && text.includes('"text"')) {
+                  try {
+                    const parsed = JSON.parse(text)
+                    text = parsed.text || text
+                    if (!narrator && parsed.narrator) narrator = parsed.narrator
+                  } catch {
+                    // keep original
+                  }
+                }
+                return { ...h, english_translation: text, narrator }
+              })
+
+              console.log("[v0] Hadith search returned", cleaned.length, "results")
+              return { results: cleaned }
+            } catch (toolError) {
+              console.error("[v0] Tool execution error:", toolError)
+              return { results: [], error: "Failed to search hadiths" }
+            }
           },
         }),
       },

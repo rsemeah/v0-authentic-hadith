@@ -23,8 +23,8 @@ export function PremiumGate({ variant = "card", featureName, className }: Premiu
           className="flex flex-col items-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white shadow-lg hover:shadow-xl transition-all hover:scale-105"
         >
           <Lock className="w-5 h-5" />
-          <span className="text-sm font-semibold">Unlock {featureName || "Premium"}</span>
-          <span className="text-[10px] opacity-80">Starting at $9.99/mo</span>
+          <span className="text-sm font-semibold">Unlock {featureName || "Pro"}</span>
+          <span className="text-[10px] opacity-80">7-day free trial</span>
         </button>
       </div>
     )
@@ -44,10 +44,10 @@ export function PremiumGate({ variant = "card", featureName, className }: Premiu
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-foreground">
-            Unlock {featureName || "Premium Content"}
+            Upgrade to Pro
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Get full access to all learning paths, AI explanations, and advanced features.
+            Unlimited AI, advanced search, all learning paths, and unlimited saves.
           </p>
         </div>
         <ChevronRight className="w-5 h-5 text-[#C5A059] group-hover:translate-x-0.5 transition-transform shrink-0" />

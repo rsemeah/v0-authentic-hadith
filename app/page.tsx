@@ -128,19 +128,38 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Pricing Section - Real Products */}
+      {/* Pricing Section */}
       <section id="pricing" className="px-4 md:px-6 py-10 md:py-16 max-w-5xl mx-auto">
         <div className="text-center mb-8 md:mb-12">
           <h2 className="text-xl md:text-2xl font-bold text-foreground mb-3 md:mb-4">
-            Choose Your Plan
+            Free to explore. Pro for depth.
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Start free or unlock the full experience. All premium plans include
-            unlimited access to every collection, AI assistant, and learning path.
+            Browse all 8 collections, read full hadiths, and get 3 AI explanations daily --
+            completely free. Upgrade when you want deeper study tools.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto">
+        {/* Explorer highlight */}
+        <div className="max-w-3xl mx-auto mb-6 rounded-xl border border-border bg-card p-5">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <BookOpen className="w-5 h-5 text-[#1B5E43] dark:text-[#6bb895]" />
+              <h3 className="font-semibold text-foreground">Explorer</h3>
+              <span className="text-xs font-bold text-[#1B5E43] dark:text-[#6bb895]">FREE</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1.5">
+            {["All 8 collections", "Full Arabic + English text", "Basic search", "3 AI explanations/day", "40 saved hadiths", "1 quiz/day"].map((f) => (
+              <span key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Check className="w-3 h-3 text-[#1B5E43] dark:text-[#6bb895] shrink-0" />{f}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Paid plans */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 max-w-3xl mx-auto">
           {PRODUCTS.map((plan) => {
             const icons: Record<string, typeof Star> = {
               "monthly-premium": Star,
@@ -152,56 +171,54 @@ export default function LandingPage() {
             return (
               <div
                 key={plan.id}
-                className={`relative rounded-xl p-6 ${
+                className={`relative rounded-xl p-5 flex flex-col ${
                   plan.highlighted
                     ? "gold-border premium-card ring-2 ring-[#C5A059]/30"
-                    : "premium-card"
+                    : plan.id === "lifetime-access"
+                      ? "border-2 border-[#1B5E43]/40 dark:border-[#4a9973]/40 bg-card"
+                      : "premium-card"
                 }`}
               >
                 {plan.badge && (
                   <div
-                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold ${
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-white text-xs font-bold whitespace-nowrap ${
                       plan.highlighted
                         ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D]"
-                        : plan.id === "lifetime-access"
-                          ? "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]"
-                          : "bg-[#6b7280]"
+                        : "bg-gradient-to-r from-[#1B5E43] to-[#2D7A5B]"
                     }`}
                   >
                     {plan.badge}
                   </div>
                 )}
 
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-lg gold-icon-bg flex items-center justify-center">
-                    <Icon className="w-5 h-5 text-[#C5A059]" />
-                  </div>
-                  <h3 className="font-semibold text-foreground">{plan.name}</h3>
+                <div className="flex items-center gap-2 mb-2">
+                  <Icon className="w-4 h-4 text-[#C5A059]" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C5A059]">{plan.tierLabel}</span>
                 </div>
 
-                <div className="mb-4">
-                  <span className="text-3xl font-bold text-foreground">
+                <div className="mb-3">
+                  <span className="text-2xl font-bold text-foreground">
                     ${(plan.priceInCents / 100).toFixed(2)}
                   </span>
                   <span className="text-sm text-muted-foreground ml-1">
                     {plan.interval === "month"
-                      ? "/month"
+                      ? "/mo"
                       : plan.interval === "year"
-                        ? "/year"
-                        : " one-time"}
+                        ? "/yr"
+                        : ""}
                   </span>
                   {plan.interval === "year" && (
-                    <span className="block text-xs text-[#C5A059] font-medium mt-1">
+                    <span className="block text-xs text-[#C5A059] font-medium mt-0.5">
                       ${(plan.priceInCents / 100 / 12).toFixed(2)}/mo billed yearly
                     </span>
                   )}
                 </div>
 
                 {plan.features && (
-                  <ul className="space-y-2 mb-5">
+                  <ul className="space-y-1.5 mb-4 flex-1">
                     {plan.features.slice(0, 3).map((feature) => (
-                      <li key={feature} className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Check className="w-4 h-4 text-[#1B5E43] shrink-0" />
+                      <li key={feature} className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Check className="w-3.5 h-3.5 text-[#1B5E43] dark:text-[#6bb895] shrink-0" />
                         {feature}
                       </li>
                     ))}
@@ -210,7 +227,7 @@ export default function LandingPage() {
 
                 <Link
                   href={`/pricing?plan=${plan.id}`}
-                  className={`block w-full py-3 rounded-xl font-semibold text-sm text-center transition-all ${
+                  className={`block w-full py-2.5 rounded-xl font-semibold text-sm text-center transition-all mt-auto ${
                     plan.highlighted
                       ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 shadow-md"
                       : plan.id === "lifetime-access"
@@ -218,16 +235,15 @@ export default function LandingPage() {
                         : "bg-muted border border-border text-foreground hover:border-secondary hover:text-secondary"
                   }`}
                 >
-                  {plan.mode === "payment" ? "Buy Lifetime Access" : "Subscribe Now"}
+                  {plan.trialDays ? `Start Free Trial` : plan.mode === "payment" ? "Get Founding Access" : "Subscribe"}
                 </Link>
               </div>
             )
           })}
         </div>
 
-        {/* Free tier note */}
         <p className="text-center text-sm text-muted-foreground mt-8">
-          Not ready to commit? <Link href="/login" className="gold-text font-medium hover:underline">Start with our free tier</Link> -- browse all collections and basic search included.
+          Not ready to commit? <Link href="/login" className="gold-text font-medium hover:underline">Start free as an Explorer</Link> -- browse all collections, basic search, and 3 AI explanations daily.
         </p>
       </section>
 

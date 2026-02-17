@@ -58,10 +58,14 @@ function AssistantContent() {
             <Lock className="w-10 h-10 text-[#C5A059]" />
           </div>
           <h1 className="text-2xl font-bold text-foreground mb-3 text-balance">
-            HadithChat is a Premium Feature
+            HadithChat is a Pro Feature
           </h1>
-          <p className="text-muted-foreground mb-8 leading-relaxed">
-            Get AI-powered explanations of authentic hadiths, ask questions about Islamic teachings, and explore hadith collections with your personal assistant.
+          <p className="text-muted-foreground mb-4 leading-relaxed">
+            Get unlimited AI-powered explanations with Deep Mode -- full scholarly context, narrator analysis, and cross-referenced hadith insights.
+          </p>
+          <p className="text-sm text-muted-foreground/80 mb-8">
+            Explorer accounts include 3 free AI explanations per day.
+            Upgrade to Pro for unlimited access.
           </p>
           <div className="space-y-3">
             <button
@@ -76,7 +80,7 @@ function AssistantContent() {
               className="w-full gold-button py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
             >
               <Crown className="w-4 h-4" />
-              View Premium Plans
+              View Pro Plans
             </button>
             <button
               onClick={() => router.back()}
@@ -87,7 +91,7 @@ function AssistantContent() {
           </div>
           <div className="mt-8 p-4 rounded-lg bg-muted border border-border">
             <p className="text-xs text-muted-foreground">
-              Premium includes unlimited AI conversations, all learning paths, advanced search, and priority support. Start with a 7-day free trial.
+              Pro includes unlimited AI conversations (Deep Mode), all learning paths, advanced search, and priority support. Start with a 7-day free trial.
             </p>
           </div>
         </div>

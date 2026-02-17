@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from "@/lib/supabase/config"
+import { createClient as createSupabaseClient } from "@supabase/supabase-js"
 
 const USER_DATA_TABLES = [
   "discussion_likes",
@@ -24,6 +26,29 @@ const USER_DATA_TABLES = [
   "profiles",
 ] as const
 
+/**
+ * Resolves the authenticated user from either:
+ * 1. Bearer token in Authorization header (mobile app)
+ * 2. Cookie-based session (web app)
+ */
+async function getAuthenticatedUser(request: Request) {
+  const authHeader = request.headers.get("authorization")
+
+  // Mobile app sends Bearer token
+  if (authHeader?.startsWith("Bearer ")) {
+    const token = authHeader.slice(7)
+    const client = createSupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+      auth: { autoRefreshToken: false, persistSession: false },
+    })
+    return client.auth.getUser(token)
+  }
+
+  // Web app uses cookie-based session
+  const supabase = await createClient()
+  return supabase.auth.getUser()
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json()
@@ -34,11 +59,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const supabase = await createClient()
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    const { data: { user }, error: authError } = await getAuthenticatedUser(request)
 
     if (authError || !user) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
@@ -48,20 +69,30 @@ export async function POST(request: Request) {
     const admin = getSupabaseAdmin()
     const deletionErrors: string[] = []
 
-    for (const table of USER_DATA_TABLES) {
-      const { error } = await admin.from(table).delete().eq("user_id", userId)
-      if (error) {
-        console.error(`Failed to delete from ${table}:`, error.message)
-        deletionErrors.push(`${table}: ${error.message}`)
+    // Archive user data first via RPC (if migration has been applied)
+    const { error: archiveError } = await admin.rpc("delete_user_account", {
+      p_user_id: userId,
+    })
+    if (archiveError) {
+      // RPC not available — fall back to table-by-table deletion
+      console.warn("Archive RPC unavailable, falling back to direct deletion:", archiveError.message)
+      for (const table of USER_DATA_TABLES) {
+        const { error } = await admin.from(table).delete().eq("user_id", userId)
+        if (error) {
+          console.error(`Failed to delete from ${table}:`, error.message)
+          deletionErrors.push(`${table}: ${error.message}`)
+        }
       }
     }
 
+    // Clean up avatar storage
     const { data: avatarFiles } = await admin.storage.from("avatars").list(userId)
     if (avatarFiles && avatarFiles.length > 0) {
       const filePaths = avatarFiles.map((f) => `${userId}/${f.name}`)
       await admin.storage.from("avatars").remove(filePaths)
     }
 
+    // Delete auth user
     const { error: deleteUserError } = await admin.auth.admin.deleteUser(userId)
     if (deleteUserError) {
       return NextResponse.json(
@@ -69,8 +100,6 @@ export async function POST(request: Request) {
         { status: 500 }
       )
     }
-
-    await supabase.auth.signOut()
 
     const response = NextResponse.json({
       success: true,

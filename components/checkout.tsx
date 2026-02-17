@@ -24,7 +24,8 @@ export default function Checkout({ productId }: { productId: string }) {
       const message = err instanceof Error ? err.message : "Failed to start checkout"
       // If user isn't logged in, redirect to login with a return URL
       if (message.includes("logged in")) {
-        router.push(`/login?redirect=/pricing?plan=${productId}`)
+        const returnUrl = encodeURIComponent(`/pricing?plan=${productId}`)
+        router.push(`/login?redirect=${returnUrl}`)
         throw err
       }
       setError(message)

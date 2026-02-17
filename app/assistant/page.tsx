@@ -35,6 +35,7 @@ function AssistantContent() {
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onError: (err) => {
+      console.log("[v0] Chat error:", err.message, err)
       // Detect quota exceeded from the API 429 response
       if (err.message?.includes("quota_exceeded") || err.message?.includes("limit reached")) {
         setQuotaExceeded(true)
@@ -112,7 +113,24 @@ function AssistantContent() {
           <div className="space-y-4">
             {messages.map((msg) => {
               const text = getMessageText(msg)
-              if (!text && msg.role === "assistant" && status === "streaming") return null
+              const hasToolCalls = msg.parts?.some((p) => p.type === "tool-invocation")
+
+              // Skip rendering empty assistant messages while streaming (tool calls in progress)
+              if (!text && msg.role === "assistant") {
+                // Show a "searching" indicator if the assistant is calling tools
+                if (hasToolCalls && isLoading) {
+                  return (
+                    <div key={msg.id} className="flex justify-start">
+                      <div className="gold-border premium-card rounded-2xl px-4 py-3 flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#C5A059]" />
+                        <span className="text-sm text-muted-foreground">Searching hadiths...</span>
+                      </div>
+                    </div>
+                  )
+                }
+                // If no text and not loading, skip rendering
+                if (!text) return null
+              }
 
               return (
                 <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>

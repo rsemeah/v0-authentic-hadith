@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { Loader2, ArrowLeft, ArrowRight } from "lucide-react"
 import { ProgressIndicator } from "@/components/onboarding/progress-indicator"
@@ -34,6 +34,8 @@ interface OnboardingData {
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const postOnboardingRedirect = searchParams.get("redirect")
   const supabase = getSupabaseBrowserClient()
 
   const [currentStep, setCurrentStep] = useState(1)
@@ -88,9 +90,9 @@ export default function OnboardingPage() {
   }
 
   const handleSkip = () => {
-    // Set onboarded cookie and redirect to home
+    // Set onboarded cookie and redirect
     document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
-    router.push("/home")
+    router.push(postOnboardingRedirect ? decodeURIComponent(postOnboardingRedirect) : "/home")
   }
 
   const handleComplete = async () => {
@@ -187,7 +189,13 @@ export default function OnboardingPage() {
       // Set onboarded cookie
       document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
 
-      // If user selected a paid plan, handle checkout
+      // If the user was redirected from pricing (e.g. after sign-up), send them back there
+      if (postOnboardingRedirect) {
+        window.location.href = decodeURIComponent(postOnboardingRedirect)
+        return
+      }
+
+      // If user selected a paid plan during onboarding, handle checkout
       if (data.selectedPlanId) {
         const { isNativeApp, showNativePaywall } = await import("@/lib/native-bridge")
         if (isNativeApp()) {
@@ -227,7 +235,7 @@ export default function OnboardingPage() {
   }
 
   const handleSuccessComplete = () => {
-    router.push("/home")
+    router.push(postOnboardingRedirect ? decodeURIComponent(postOnboardingRedirect) : "/home")
   }
 
   return (

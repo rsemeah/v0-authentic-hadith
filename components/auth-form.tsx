@@ -22,7 +22,8 @@ export function AuthForm() {
   const [message, setMessage] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const redirectTo = searchParams.get("redirect")
+  const rawRedirect = searchParams.get("redirect")
+  const redirectTo = rawRedirect ? decodeURIComponent(rawRedirect) : null
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -52,7 +53,10 @@ export function AuthForm() {
       if (prefs?.onboarded) {
         router.push(redirectTo || "/home")
       } else {
-        router.push("/onboarding")
+        const onboardingUrl = redirectTo
+          ? `/onboarding?redirect=${encodeURIComponent(redirectTo)}`
+          : "/onboarding"
+        router.push(onboardingUrl)
       }
     } else {
       router.push(redirectTo || "/home")
@@ -85,7 +89,11 @@ export function AuthForm() {
 
     // If email confirmation is disabled in Supabase, the user gets a session immediately
     if (data?.session) {
-      router.push("/onboarding")
+      // Pass the redirect through onboarding so user ends up at pricing after
+      const onboardingUrl = redirectTo
+        ? `/onboarding?redirect=${encodeURIComponent(redirectTo)}`
+        : "/onboarding"
+      router.push(onboardingUrl)
       router.refresh()
       return
     }

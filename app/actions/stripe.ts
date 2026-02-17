@@ -46,35 +46,32 @@ export async function startCheckoutSession(productId: string) {
       .eq("user_id", user.id)
   }
 
-  // Resolve the price ID: use the configured stripePriceId or fall back to looking up the product
-  let priceId = product.stripePriceId
-  if (!priceId) {
-    const prices = await stripe.prices.list({
-      product: product.stripeProductId,
-      active: true,
-      limit: 1,
-    })
-
-    if (!prices.data.length) {
-      throw new Error(`No active price found for product "${product.stripeProductId}"`)
-    }
-
-    priceId = prices.data[0].id
-  }
-
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL ||
     (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
 
   const isSubscription = product.mode === "subscription"
 
+  // Build price_data inline so we don't depend on pre-created Stripe prices
+  const priceData: Record<string, unknown> = {
+    currency: "usd",
+    product_data: {
+      name: product.name,
+      description: product.description,
+    },
+    unit_amount: product.priceInCents,
+  }
+
+  if (isSubscription && product.interval) {
+    priceData.recurring = { interval: product.interval }
+  }
+
   const sessionParams: Record<string, unknown> = {
     customer: customerId,
     ui_mode: "embedded",
-    line_items: [{ price: priceId, quantity: 1 }],
+    line_items: [{ price_data: priceData, quantity: 1 }],
     mode: product.mode,
-    return_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-    allow_promotion_codes: true,
+    redirect_on_completion: "never",
     metadata: {
       supabase_user_id: user.id,
       product_id: product.id,

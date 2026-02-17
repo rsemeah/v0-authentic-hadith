@@ -24,7 +24,7 @@ export function PremiumGate({ variant = "card", featureName, className }: Premiu
         >
           <Lock className="w-5 h-5" />
           <span className="text-sm font-semibold">Unlock {featureName || "Premium"}</span>
-          <span className="text-[10px] opacity-80">Starting at $4.99/mo</span>
+          <span className="text-[10px] opacity-80">Starting at $9.99/mo</span>
         </button>
       </div>
     )

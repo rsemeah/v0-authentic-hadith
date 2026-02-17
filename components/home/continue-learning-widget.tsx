@@ -37,8 +37,7 @@ export function ContinueLearningWidget() {
         // Fetch all learning paths with their modules and lessons
         const { data: pathsData } = await supabase
           .from("learning_paths")
-          .select("id, title, slug, icon, sort_order")
-          .eq("is_published", true)
+          .select("id, title, slug, icon_name, sort_order")
           .order("sort_order")
 
         if (!pathsData || pathsData.length === 0) {
@@ -61,11 +60,11 @@ export function ContinueLearningWidget() {
         // Fetch user progress
         const { data: progress } = await supabase
           .from("learning_progress")
-          .select("lesson_id, completed")
+          .select("lesson_id, status")
           .eq("user_id", user.id)
 
         const completedSet = new Set(
-          (progress || []).filter((p: { completed: boolean }) => p.completed).map((p: { lesson_id: string }) => p.lesson_id)
+          (progress || []).filter((p: { status: string }) => p.status === "completed").map((p: { lesson_id: string }) => p.lesson_id)
         )
 
         // Build path progress
@@ -90,7 +89,7 @@ export function ContinueLearningWidget() {
               path_id: path.id,
               path_title: path.title,
               path_slug: path.slug,
-              path_icon: path.icon,
+              path_icon: path.icon_name,
               total_lessons: pathLessons.length,
               completed_lessons: completedLessons.length,
               current_lesson_id: currentLesson?.id || null,

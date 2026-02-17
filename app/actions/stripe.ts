@@ -71,7 +71,7 @@ export async function startCheckoutSession(productId: string) {
     ui_mode: "embedded",
     line_items: [{ price_data: priceData, quantity: 1 }],
     mode: product.mode,
-    redirect_on_completion: "never",
+    return_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     metadata: {
       supabase_user_id: user.id,
       product_id: product.id,

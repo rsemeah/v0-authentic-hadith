@@ -9,6 +9,7 @@ import {
 import { PRODUCTS, TIER_FEATURES } from "@/lib/products"
 import type { Product } from "@/lib/products"
 import { isNativeApp, showNativePaywall, restoreNativePurchases } from "@/lib/native-bridge"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import dynamic from "next/dynamic"
 import { cn } from "@/lib/utils"
 
@@ -103,6 +104,22 @@ function PricingContent() {
   useEffect(() => {
     setIsNative(isNativeApp())
   }, [])
+
+  const handleSelectPlan = async (planId: string) => {
+    if (isNative) {
+      handleNativeSubscribe()
+      return
+    }
+    // Check if user is logged in before showing Stripe checkout
+    const supabase = getSupabaseBrowserClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      const returnUrl = encodeURIComponent(`/pricing?plan=${planId}`)
+      router.push(`/login?redirect=${returnUrl}`)
+      return
+    }
+    setSelectedProduct(planId)
+  }
 
   const handleNativeSubscribe = async () => {
     const success = await showNativePaywall()
@@ -262,7 +279,7 @@ function PricingContent() {
               )}
 
               <button
-                onClick={() => isNative ? handleNativeSubscribe() : setSelectedProduct(plan.id)}
+                onClick={() => handleSelectPlan(plan.id)}
                 className={cn(
                   "w-full py-3 rounded-xl font-semibold text-sm transition-all mt-auto",
                   plan.highlighted

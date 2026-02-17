@@ -203,7 +203,10 @@ function OnboardingContent() {
 
       // If the user was redirected from pricing (e.g. after sign-up), send them back there
       if (postOnboardingRedirect) {
-        window.location.href = decodeURIComponent(postOnboardingRedirect)
+        const destination = postOnboardingRedirect.startsWith("%") 
+          ? decodeURIComponent(postOnboardingRedirect) 
+          : postOnboardingRedirect
+        window.location.href = destination
         return
       }
 

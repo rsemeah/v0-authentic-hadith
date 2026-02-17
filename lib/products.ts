@@ -59,8 +59,8 @@ export const TIER_FEATURES = {
 export const PRODUCTS: Product[] = [
   {
     id: "monthly-premium",
-    stripeProductId: process.env.STRIPE_PRODUCT_MONTHLY || "",
-    stripePriceId: process.env.STRIPE_PRICE_PREMIUM_MONTHLY || "",
+    stripeProductId: "",
+    stripePriceId: "",
     revenuecatProductId: "ah_monthly_999",
     name: "Monthly",
     tierLabel: "Pro",
@@ -74,8 +74,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "annual-premium",
-    stripeProductId: process.env.STRIPE_PRODUCT_ANNUAL || "",
-    stripePriceId: process.env.STRIPE_PRICE_PREMIUM_ANNUAL || "",
+    stripeProductId: "",
+    stripePriceId: "",
     revenuecatProductId: "ah_annual_4999",
     name: "Annual",
     tierLabel: "Pro",
@@ -95,8 +95,8 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: "lifetime-access",
-    stripeProductId: process.env.STRIPE_PRODUCT_LIFETIME || "",
-    stripePriceId: process.env.STRIPE_PRICE_LIFETIME || "",
+    stripeProductId: "",
+    stripePriceId: "",
     revenuecatProductId: "ah_lifetime_9999",
     name: "Lifetime",
     tierLabel: "Founding",

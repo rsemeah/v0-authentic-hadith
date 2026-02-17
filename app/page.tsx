@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { BookOpen, Search, Shield, MessageCircle, Star, Heart, Zap, Crown, Infinity, Check, Share2, Users, Copy } from "lucide-react"
+import { BookOpen, Search, Shield, MessageCircle, Star, Heart, Crown, Infinity, Check, Share2, Users, Copy } from "lucide-react"
 import { PRODUCTS } from "@/lib/products"
 import { ShareBanner } from "@/components/share-banner"
 
@@ -142,8 +142,7 @@ export default function LandingPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-3xl mx-auto">
           {PRODUCTS.map((plan) => {
-            const icons: Record<string, typeof Zap> = {
-              "monthly-intro": Zap,
+            const icons: Record<string, typeof Star> = {
               "monthly-premium": Star,
               "annual-premium": Crown,
               "lifetime-access": Infinity,

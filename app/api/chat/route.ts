@@ -72,7 +72,7 @@ export async function POST(req: Request) {
       return new Response(
         JSON.stringify({
           error: "quota_exceeded",
-          message: quotaCheck.reason,
+          message: `Daily limit reached. ${quotaCheck.tier === "free" ? "Explorer accounts include 3 AI explanations per day. Upgrade to Pro for unlimited access." : quotaCheck.reason}`,
           quota: {
             daily_remaining: quotaCheck.daily_remaining,
             monthly_remaining: quotaCheck.monthly_remaining,

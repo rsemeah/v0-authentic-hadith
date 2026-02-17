@@ -8,8 +8,7 @@ import Image from "next/image"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { DailyHadithCard } from "@/components/home/daily-hadith-card"
 import { AIAssistantBlock } from "@/components/home/ai-assistant-block"
-import { ContinueLearningWidget } from "@/components/home/continue-learning-widget"
-import { TodaysSunnahWidget } from "@/components/home/todays-sunnah-widget"
+
 
 import { ShareBanner } from "@/components/share-banner"
 import { ReminderBanner } from "@/components/home/reminder-banner"
@@ -443,9 +442,6 @@ export default function HomePage() {
           <DailyHadithCard hadith={displayHadith} onSave={handleSaveHadith} onShare={handleShareHadith} />
         </section>
 
-        {/* Today's Sunnah */}
-        <TodaysSunnahWidget />
-
         {/* Continue Reading */}
         {continueReading.length > 0 && (
           <section className="pb-6 md:pb-8" aria-label="Continue Reading">
@@ -488,9 +484,6 @@ export default function HomePage() {
             </div>
           </section>
         )}
-
-        {/* Continue Learning */}
-        <ContinueLearningWidget />
 
         {/* Quick Actions */}
         <section className="pb-6 md:pb-8" aria-label="Quick Actions">

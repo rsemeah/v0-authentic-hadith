@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { stripe } from "@/lib/stripe"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
-import { getProductById, STRIPE_COUPONS } from "@/lib/products"
+import { getProductById } from "@/lib/products"
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,7 +60,6 @@ export async function POST(request: NextRequest) {
     }
 
     const isSubscription = product.mode === "subscription"
-    const isIntro = productId === "monthly-intro"
 
     const baseUrl =
       process.env.NEXT_PUBLIC_APP_URL ||
@@ -84,9 +83,7 @@ export async function POST(request: NextRequest) {
         metadata: { supabase_user_id: user.id },
       }
 
-      if (isIntro) {
-        sessionParams.discounts = [{ coupon: STRIPE_COUPONS.INTRO_MONTHLY }]
-      } else if (!skipTrial && product.trialDays) {
+      if (!skipTrial && product.trialDays) {
         subscriptionData.trial_period_days = product.trialDays
       }
 

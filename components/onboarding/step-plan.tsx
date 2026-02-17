@@ -1,6 +1,6 @@
 "use client"
 
-import { Crown, Check, Star, Sparkles } from "lucide-react"
+import { Crown, Check, Star, Sparkles, BookOpen } from "lucide-react"
 import { PRODUCTS, type Product } from "@/lib/products"
 import { cn } from "@/lib/utils"
 
@@ -34,11 +34,11 @@ export function StepPlan({ selectedPlanId, onSelect }: StepPlanProps) {
         </div>
         <h2 className="text-2xl font-bold text-foreground mb-2">Choose Your Plan</h2>
         <p className="text-muted-foreground text-sm">
-          Start with a free plan or unlock the full experience. You can change this anytime.
+          Start free as an Explorer or unlock deeper study with Pro. Change anytime.
         </p>
       </div>
 
-      {/* Free Plan Option */}
+      {/* Explorer (Free) Option */}
       <button
         type="button"
         onClick={() => onSelect(null)}
@@ -57,19 +57,22 @@ export function StepPlan({ selectedPlanId, onSelect }: StepPlanProps) {
             <Check className="w-3 h-3 text-white" />
           )}
         </div>
-        <div className="flex-1">
-          <div className="font-semibold text-foreground">Free Plan</div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            Browse collections, daily hadith, basic search, and community features
-          </p>
+        <div className="flex items-center gap-2 flex-1">
+          <BookOpen className="w-4 h-4 text-[#1B5E43] dark:text-[#6bb895] shrink-0" />
+          <div>
+            <div className="font-semibold text-foreground">Explorer</div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Browse all collections, basic search, 3 AI/day, 40 saves, 1 quiz/day
+            </p>
+          </div>
         </div>
-        <span className="text-sm font-bold text-[#1B5E43]">$0</span>
+        <span className="text-sm font-bold text-[#1B5E43] dark:text-[#6bb895]">Free</span>
       </button>
 
       {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-border" />
-        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Premium Plans</span>
+        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Upgrade for depth</span>
         <div className="flex-1 h-px bg-border" />
       </div>
 
@@ -112,7 +115,7 @@ export function StepPlan({ selectedPlanId, onSelect }: StepPlanProps) {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <IconComponent className="w-4 h-4 text-[#C5A059]" />
-                  <span className="font-semibold text-foreground text-sm">{product.name}</span>
+                  <span className="font-semibold text-foreground text-sm">{product.tierLabel} -- {product.name}</span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
                 {/* Key features preview */}

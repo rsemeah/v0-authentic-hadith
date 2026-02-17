@@ -2,7 +2,7 @@
 
 import React, { Suspense, useRef, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Bot, ChevronLeft, Send, Sparkles, Loader2, Lock, Crown } from "lucide-react"
+import { Bot, ChevronLeft, Send, Sparkles, Loader2, Crown, AlertCircle } from "lucide-react"
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { useSubscription } from "@/hooks/use-subscription"
@@ -29,10 +29,17 @@ function AssistantContent() {
   const initialPrompt = searchParams.get("prompt") || ""
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [input, setInput] = useState(initialPrompt)
-  const { isPremium, loading: subLoading } = useSubscription()
+  const [quotaExceeded, setQuotaExceeded] = useState(false)
+  const { isPremium } = useSubscription()
 
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
+    onError: (err) => {
+      // Detect quota exceeded from the API 429 response
+      if (err.message?.includes("quota_exceeded") || err.message?.includes("limit reached")) {
+        setQuotaExceeded(true)
+      }
+    },
   })
 
   const isLoading = status === "streaming" || status === "submitted"
@@ -40,60 +47,6 @@ function AssistantContent() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
-
-  // Paywall for non-premium users
-  if (subLoading) {
-    return (
-      <div className="min-h-screen marble-bg flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#C5A059] border-t-transparent rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  if (!isPremium) {
-    return (
-      <div className="min-h-screen marble-bg flex flex-col items-center justify-center p-6 pb-24">
-        <div className="max-w-md w-full text-center">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#C5A059]/20 to-[#C5A059]/5 flex items-center justify-center mx-auto mb-6 border border-[#C5A059]/30">
-            <Lock className="w-10 h-10 text-[#C5A059]" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground mb-3 text-balance">
-            HadithChat is a Premium Feature
-          </h1>
-          <p className="text-muted-foreground mb-8 leading-relaxed">
-            Get AI-powered explanations of authentic hadiths, ask questions about Islamic teachings, and explore hadith collections with your personal assistant.
-          </p>
-          <div className="space-y-3">
-            <button
-              onClick={async () => {
-                if (isNativeApp()) {
-                  const success = await showNativePaywall()
-                  if (success) window.location.reload()
-                } else {
-                  router.push("/pricing")
-                }
-              }}
-              className="w-full gold-button py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
-            >
-              <Crown className="w-4 h-4" />
-              View Premium Plans
-            </button>
-            <button
-              onClick={() => router.back()}
-              className="w-full py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground border border-border hover:border-[#C5A059] transition-colors"
-            >
-              Go Back
-            </button>
-          </div>
-          <div className="mt-8 p-4 rounded-lg bg-muted border border-border">
-            <p className="text-xs text-muted-foreground">
-              Premium includes unlimited AI conversations, all learning paths, advanced search, and priority support. Start with a 7-day free trial.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   const handleTemplateClick = (template: string) => {
     setInput(template)
@@ -183,7 +136,37 @@ function AssistantContent() {
                 </div>
               </div>
             )}
-            {error && (
+            {quotaExceeded && (
+              <div className="flex justify-start">
+                <div className="rounded-2xl px-4 py-3 bg-[#C5A059]/10 border border-[#C5A059]/30 max-w-[85%]">
+                  <div className="flex items-start gap-2">
+                    <AlertCircle className="w-4 h-4 text-[#C5A059] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">Daily limit reached</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Explorer accounts include 3 AI explanations per day.
+                        Upgrade to Pro for unlimited access.
+                      </p>
+                      <button
+                        onClick={async () => {
+                          if (isNativeApp()) {
+                            const success = await showNativePaywall()
+                            if (success) window.location.reload()
+                          } else {
+                            router.push("/pricing")
+                          }
+                        }}
+                        className="mt-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white text-xs font-semibold flex items-center gap-1.5"
+                      >
+                        <Crown className="w-3 h-3" />
+                        View Pro Plans
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {error && !quotaExceeded && (
               <div className="flex justify-start">
                 <div className="rounded-2xl px-4 py-3 bg-red-50 border border-red-200 text-red-700 max-w-[85%] dark:bg-red-950/30 dark:border-red-800 dark:text-red-400">
                   <p className="text-sm">Something went wrong. Please try again.</p>
@@ -202,19 +185,26 @@ function AssistantContent() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about hadiths..."
-            className="flex-1 px-4 py-3 rounded-xl border border-border bg-background focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all text-foreground"
-            disabled={isLoading}
+            placeholder={quotaExceeded ? "Daily limit reached -- upgrade for unlimited" : "Ask about hadiths..."}
+            className="flex-1 px-4 py-3 rounded-xl border border-border bg-background focus:border-[#C5A059] focus:ring-2 focus:ring-[#C5A059]/20 outline-none transition-all text-foreground disabled:opacity-60"
+            disabled={isLoading || quotaExceeded}
           />
           <button
             type="submit"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || quotaExceeded}
             className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1B5E43] to-[#2D7A5B] text-white flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
             aria-label="Send message"
           >
             {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
           </button>
         </form>
+        {!isPremium && !quotaExceeded && (
+          <p className="max-w-3xl mx-auto text-center text-[10px] text-muted-foreground/60 mt-1.5">
+            Explorer: 3 AI explanations per day.{" "}
+            <button onClick={() => router.push("/pricing")} className="text-[#C5A059] hover:underline">Upgrade to Pro</button>{" "}
+            for unlimited.
+          </p>
+        )}
       </div>
     </div>
   )

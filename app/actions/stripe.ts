@@ -23,7 +23,7 @@ export async function startCheckoutSession(productId: string) {
   // Get or create Stripe customer
   const { data: profile } = await supabase
     .from("profiles")
-    .select("stripe_customer_id, email, full_name")
+    .select("stripe_customer_id, name")
     .eq("user_id", user.id)
     .single()
 
@@ -32,7 +32,7 @@ export async function startCheckoutSession(productId: string) {
   if (!customerId) {
     const customer = await stripe.customers.create({
       email: user.email!,
-      name: profile?.full_name || undefined,
+      name: profile?.name || undefined,
       metadata: {
         supabase_user_id: user.id,
       },

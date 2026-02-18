@@ -35,6 +35,7 @@ function AssistantContent() {
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onError: (err) => {
+      console.log("[v0] Chat error:", err.message, err)
       // Detect quota exceeded from the API 429 response
       if (err.message?.includes("quota_exceeded") || err.message?.includes("limit reached")) {
         setQuotaExceeded(true)

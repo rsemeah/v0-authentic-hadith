@@ -2,7 +2,68 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronLeft, ChevronRight, BookOpen, Hash, Loader2 } from "lucide-react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  BookOpen,
+  Hash,
+  Loader2,
+  type LucideIcon,
+  // Category icons
+  Landmark,
+  Moon,
+  HandCoins,
+  MapPin,
+  Heart,
+  Shield,
+  Sparkles,
+  Droplets,
+  Star,
+  Users,
+  Sun,
+  Briefcase,
+  BookOpenCheck,
+  Megaphone,
+  Scale,
+  GraduationCap,
+  Sword,
+  Scroll,
+  Flame,
+  CircleDot,
+} from "lucide-react"
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Mosque: Landmark,
+  Landmark: Landmark,
+  Moon: Moon,
+  HandCoins: HandCoins,
+  MapPin: MapPin,
+  Heart: Heart,
+  Shield: Shield,
+  Sparkles: Sparkles,
+  BookOpen: BookOpen,
+  Droplets: Droplets,
+  Star: Star,
+  Users: Users,
+  Sun: Sun,
+  Briefcase: Briefcase,
+  BookOpenCheck: BookOpenCheck,
+  Megaphone: Megaphone,
+  Scale: Scale,
+  GraduationCap: GraduationCap,
+  Sword: Sword,
+  Scroll: Scroll,
+  Flame: Flame,
+  CircleDot: CircleDot,
+}
+
+function CategoryIcon({ name, className }: { name: string | null; className?: string }) {
+  const IconComponent = name ? ICON_MAP[name] : null
+  if (IconComponent) {
+    return <IconComponent className={className} />
+  }
+  return <BookOpen className={className} />
+}
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { cn } from "@/lib/utils"
 
@@ -174,8 +235,8 @@ export default function TopicsPage() {
                     onClick={() => setExpandedCategory(isExpanded ? null : cat.id)}
                     className="w-full p-4 flex items-center gap-4 text-left"
                   >
-                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0", colors.bg)}>
-                      {cat.icon || ""}
+                    <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0", colors.bg)}>
+                      <CategoryIcon name={cat.icon} className={cn("w-6 h-6", colors.icon)} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className={cn("font-semibold text-sm", colors.text)}>{cat.name_en}</h3>

@@ -129,15 +129,25 @@ interface Tag {
 
 const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string; icon: string }> = {
   worship: { bg: "bg-emerald-900/10", border: "border-emerald-700/30", text: "text-emerald-800 dark:text-emerald-300", icon: "text-emerald-600" },
+  fasting: { bg: "bg-indigo-900/10", border: "border-indigo-700/30", text: "text-indigo-800 dark:text-indigo-300", icon: "text-indigo-600" },
+  zakat: { bg: "bg-purple-900/10", border: "border-purple-700/30", text: "text-purple-800 dark:text-purple-300", icon: "text-purple-600" },
+  hajj: { bg: "bg-orange-900/10", border: "border-orange-700/30", text: "text-orange-800 dark:text-orange-300", icon: "text-orange-600" },
   character: { bg: "bg-amber-900/10", border: "border-amber-700/30", text: "text-amber-800 dark:text-amber-300", icon: "text-amber-600" },
+  faith: { bg: "bg-blue-900/10", border: "border-blue-700/30", text: "text-blue-800 dark:text-blue-300", icon: "text-blue-600" },
+  dhikr: { bg: "bg-cyan-900/10", border: "border-cyan-700/30", text: "text-cyan-800 dark:text-cyan-300", icon: "text-cyan-600" },
+  quran: { bg: "bg-green-900/10", border: "border-green-700/30", text: "text-green-800 dark:text-green-300", icon: "text-green-600" },
+  purification: { bg: "bg-teal-900/10", border: "border-teal-700/30", text: "text-teal-800 dark:text-teal-300", icon: "text-teal-600" },
+  "sunnah-acts": { bg: "bg-orange-900/10", border: "border-orange-700/30", text: "text-orange-800 dark:text-orange-300", icon: "text-orange-600" },
   family: { bg: "bg-rose-900/10", border: "border-rose-700/30", text: "text-rose-800 dark:text-rose-300", icon: "text-rose-600" },
   "daily-life": { bg: "bg-sky-900/10", border: "border-sky-700/30", text: "text-sky-800 dark:text-sky-300", icon: "text-sky-600" },
-  knowledge: { bg: "bg-violet-900/10", border: "border-violet-700/30", text: "text-violet-800 dark:text-violet-300", icon: "text-violet-600" },
+  business: { bg: "bg-stone-900/10", border: "border-stone-700/30", text: "text-stone-800 dark:text-stone-300", icon: "text-stone-600" },
+  knowledge: { bg: "bg-emerald-900/10", border: "border-emerald-700/30", text: "text-emerald-800 dark:text-emerald-300", icon: "text-emerald-600" },
+  dawah: { bg: "bg-pink-900/10", border: "border-pink-700/30", text: "text-pink-800 dark:text-pink-300", icon: "text-pink-600" },
   community: { bg: "bg-blue-900/10", border: "border-blue-700/30", text: "text-blue-800 dark:text-blue-300", icon: "text-blue-600" },
+  warfare: { bg: "bg-slate-900/10", border: "border-slate-700/30", text: "text-slate-800 dark:text-slate-300", icon: "text-slate-600" },
+  history: { bg: "bg-amber-900/10", border: "border-amber-700/30", text: "text-amber-800 dark:text-amber-300", icon: "text-amber-600" },
   afterlife: { bg: "bg-slate-900/10", border: "border-slate-700/30", text: "text-slate-800 dark:text-slate-300", icon: "text-slate-600" },
-  "faith-belief": { bg: "bg-indigo-900/10", border: "border-indigo-700/30", text: "text-indigo-800 dark:text-indigo-300", icon: "text-indigo-600" },
-  ethics: { bg: "bg-teal-900/10", border: "border-teal-700/30", text: "text-teal-800 dark:text-teal-300", icon: "text-teal-600" },
-  transactions: { bg: "bg-orange-900/10", border: "border-orange-700/30", text: "text-orange-800 dark:text-orange-300", icon: "text-orange-600" },
+  fitna: { bg: "bg-red-900/10", border: "border-red-700/30", text: "text-red-800 dark:text-red-300", icon: "text-red-600" },
 }
 
 const DEFAULT_COLOR = { bg: "bg-muted", border: "border-border", text: "text-foreground", icon: "text-muted-foreground" }
@@ -152,7 +162,7 @@ export default function TopicsPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Fetch categories
+      // Fetch categories with pre-computed hadith_count
       const { data: cats } = await supabase
         .from("categories")
         .select("*")
@@ -165,16 +175,13 @@ export default function TopicsPage() {
         .select("id, slug, name_en, name_ar, category_id")
         .eq("is_active", true)
 
-      // Count hadiths per tag via hadith_tag_weights (use RPC or manual grouping)
-      // Fetch distinct tag_ids with counts using a lightweight select
-      const { data: tagWeights } = await supabase
-        .from("hadith_tag_weights")
-        .select("tag_id", { count: "exact", head: false })
+      // Use RPC for efficient server-side tag counts (avoids 1000-row pagination limit)
+      const { data: tagCounts } = await supabase.rpc("get_tag_hadith_counts")
 
       // Build count map: tag_id -> count
       const tagCountMap = new Map<string, number>()
-      for (const tw of tagWeights || []) {
-        tagCountMap.set(tw.tag_id, (tagCountMap.get(tw.tag_id) || 0) + 1)
+      for (const tc of tagCounts || []) {
+        tagCountMap.set(tc.tag_id, Number(tc.hadith_count) || 0)
       }
 
       // Enrich tags with hadith counts
@@ -186,14 +193,13 @@ export default function TopicsPage() {
       enrichedTags.sort((a, b) => b.hadith_count - a.hadith_count)
       setTags(enrichedTags)
 
-      // Enrich categories
+      // Categories already have hadith_count from the DB
       const enrichedCats: Category[] = (cats || []).map((c: any) => {
         const catTags = enrichedTags.filter((t) => t.category_id === c.id)
-        const totalHadiths = catTags.reduce((sum, t) => sum + t.hadith_count, 0)
         return {
           ...c,
           tag_count: catTags.length,
-          hadith_count: totalHadiths,
+          hadith_count: c.hadith_count || catTags.reduce((sum: number, t: Tag) => sum + t.hadith_count, 0),
         }
       })
 

@@ -72,7 +72,7 @@ export function StepProfile({ data, onUpdate }: StepProfileProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-h-[65vh] overflow-y-auto pr-1 -mr-1">
       {/* Heading */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground mb-2">{"Welcome! Let's set up your profile"}</h2>

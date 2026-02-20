@@ -96,6 +96,7 @@ export default function LearnPage() {
   const [expandedPath, setExpandedPath] = useState<string | null>(null)
   const [bookIdMap, setBookIdMap] = useState<Record<string, string>>({})
   const [progressMap, setProgressMap] = useState<Map<string, LessonProgress>>(new Map())
+  const [userLevel, setUserLevel] = useState<string>("intermediate")
 
   useEffect(() => {
     async function loadData() {
@@ -105,10 +106,6 @@ export default function LearnPage() {
         supabase.from("learning_lessons").select("*").order("sort_order"),
         supabase.from("books").select("id, number, collection:collections!collection_id(slug)"),
       ])
-
-      setPaths(pathsRes.data || [])
-      setModules(modulesRes.data || [])
-      setLessons(lessonsRes.data || [])
 
       // Build book ID map for deep-linking
       if (booksRes.data) {
@@ -120,25 +117,59 @@ export default function LearnPage() {
         setBookIdMap(map)
       }
 
-      // Fetch user progress
+      setModules(modulesRes.data || [])
+      setLessons(lessonsRes.data || [])
+
+      // Fetch user progress + preferences
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        const { data: progressData } = await supabase
-          .from("learning_progress")
-          .select("lesson_id, status, completed_at, quiz_passed")
-          .eq("user_id", user.id)
-        if (progressData) {
+        const [progressRes, prefsRes] = await Promise.all([
+          supabase
+            .from("learning_progress")
+            .select("lesson_id, status, completed_at, quiz_passed")
+            .eq("user_id", user.id),
+          supabase
+            .from("user_preferences")
+            .select("learning_level")
+            .eq("user_id", user.id)
+            .single(),
+        ])
+
+        if (progressRes.data) {
           const pMap = new Map<string, LessonProgress>()
-          for (const p of progressData) {
+          for (const p of progressRes.data) {
             pMap.set(p.lesson_id, p)
           }
           setProgressMap(pMap)
         }
-      }
 
-      // Auto-expand first path
-      if (pathsRes.data && pathsRes.data.length > 0) {
-        setExpandedPath(pathsRes.data[0].id)
+        const level = prefsRes.data?.learning_level || "intermediate"
+        setUserLevel(level)
+
+        // Sort paths: user's level first, then others, preserving sort_order within each group
+        const allPaths = pathsRes.data || []
+        const LEVEL_ORDER = ["beginner", "intermediate", "advanced"]
+        const levelIdx = LEVEL_ORDER.indexOf(level)
+        const sorted = [...allPaths].sort((a, b) => {
+          const aMatch = a.level === level ? 0 : 1
+          const bMatch = b.level === level ? 0 : 1
+          if (aMatch !== bMatch) return aMatch - bMatch
+          // Within same group, sort by proximity to user level then sort_order
+          const aLevelDist = Math.abs(LEVEL_ORDER.indexOf(a.level) - levelIdx)
+          const bLevelDist = Math.abs(LEVEL_ORDER.indexOf(b.level) - levelIdx)
+          if (aLevelDist !== bLevelDist) return aLevelDist - bLevelDist
+          return a.sort_order - b.sort_order
+        })
+        setPaths(sorted)
+
+        // Auto-expand first matching-level path
+        const firstMatch = sorted.find((p) => p.level === level) || sorted[0]
+        if (firstMatch) setExpandedPath(firstMatch.id)
+      } else {
+        setPaths(pathsRes.data || [])
+        if (pathsRes.data && pathsRes.data.length > 0) {
+          setExpandedPath(pathsRes.data[0].id)
+        }
       }
 
       setLoading(false)
@@ -195,7 +226,9 @@ export default function LearnPage() {
           </button>
           <div>
             <h1 className="text-lg font-semibold text-foreground">Learning Paths</h1>
-            <p className="text-xs text-muted-foreground">Structured hadith study</p>
+            <p className="text-xs text-muted-foreground">
+              Personalized for <span className="capitalize font-medium text-[#C5A059]">{userLevel}</span> level
+            </p>
           </div>
         </div>
       </header>
@@ -251,6 +284,11 @@ export default function LearnPage() {
                     <span className={cn("text-[10px] font-bold uppercase tracking-wider", colors.color)}>
                       {path.subtitle}
                     </span>
+                    {path.level === userLevel && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#1B5E43]/10 text-[10px] font-medium text-[#1B5E43]">
+                        <Star className="w-2.5 h-2.5" /> For you
+                      </span>
+                    )}
                     {path.is_premium && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[#C5A059]/10 text-[10px] font-medium text-[#C5A059]">
                         <Lock className="w-2.5 h-2.5" /> Premium

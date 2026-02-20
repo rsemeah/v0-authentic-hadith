@@ -10,7 +10,7 @@ const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
 })
 
-const SYSTEM_PROMPT = `You are HadithChat, a knowledgeable Islamic scholar assistant specializing in hadith studies.
+const BASE_SYSTEM_PROMPT = `You are HadithChat, a knowledgeable Islamic scholar assistant specializing in hadith studies.
 
 Your role:
 1. Help users understand the meanings and context of hadiths
@@ -39,6 +39,56 @@ Critical content safety rules (you MUST follow these):
 You have access to a database of 31,839 authenticated hadiths from: Sahih al-Bukhari, Sahih Muslim, Sunan Abu Dawud, Jami at-Tirmidhi, Sunan an-Nasai, Sunan Ibn Majah, Muwatta Malik, and Musnad Ahmad.
 
 Use the searchHadiths tool to find relevant hadiths before answering questions.`
+
+const MADHAB_PROMPT_SECTION = (madhab: string) =>
+  `\n\nUser's School of Thought: ${madhab}
+When the user's question involves a fiqh ruling where the four schools of thought differ:
+1. Present the positions of all relevant schools briefly.
+2. Then clarify which position the ${madhab} school holds.
+3. Never dismiss other schools or imply one is more correct than another.
+4. Only reference the user's madhab when there is a genuine difference of opinion -- do not mention it when scholars are unanimous.
+5. Always recommend consulting a qualified local scholar for personal rulings.`
+
+const LEVEL_PROMPT_SECTIONS: Record<string, string> = {
+  beginner: `\n\nUser's Learning Level: Beginner
+Adapt your responses for someone new to Islamic studies:
+- Use short, clear sentences. Avoid jargon.
+- Define any Arabic term the first time you use it (e.g. "isnad (chain of narration)").
+- Focus on practical application and spiritual benefit.
+- Do not assume prior knowledge of fiqh, usul, or hadith sciences.
+- Keep explanations warm, encouraging, and concise.`,
+
+  intermediate: `\n\nUser's Learning Level: Intermediate
+Adapt your responses for a practicing Muslim with foundational knowledge:
+- You may use common Arabic terminology with brief definitions.
+- You can mention scholarly disagreements and different opinions.
+- Reference classical scholars when relevant (e.g. Imam al-Nawawi, Ibn Hajar).
+- Provide moderate depth -- explain reasoning behind rulings, not just conclusions.
+- Balance accessibility with scholarly rigor.`,
+
+  advanced: `\n\nUser's Learning Level: Advanced
+Adapt your responses for a student of knowledge:
+- Use Arabic terminology freely; no need to define well-known terms.
+- Cite specific scholars, books, and chains of narration when relevant.
+- Discuss minority vs. majority scholarly opinions with nuance.
+- Reference classical works (Fath al-Bari, Sharh Muslim, al-Mughni, etc.).
+- Provide structured academic analysis. Do not oversimplify.`,
+}
+
+function buildSystemPrompt(madhab?: string | null, level?: string | null): string {
+  let prompt = BASE_SYSTEM_PROMPT
+
+  if (madhab && madhab !== "Other / Prefer not to say") {
+    prompt += MADHAB_PROMPT_SECTION(madhab)
+  }
+
+  const normalizedLevel = (level || "intermediate").toLowerCase()
+  if (LEVEL_PROMPT_SECTIONS[normalizedLevel]) {
+    prompt += LEVEL_PROMPT_SECTIONS[normalizedLevel]
+  }
+
+  return prompt
+}
 
 export async function POST(req: Request) {
   if (!process.env.GROQ_API_KEY) {
@@ -93,13 +143,32 @@ export async function POST(req: Request) {
       )
     }
 
+    // Fetch user preferences for personalized system prompt
+    const [{ data: prefs }, { data: profile }] = await Promise.all([
+      supabase
+        .from("user_preferences")
+        .select("learning_level")
+        .eq("user_id", user.id)
+        .single(),
+      supabase
+        .from("profiles")
+        .select("school_of_thought")
+        .eq("user_id", user.id)
+        .single(),
+    ])
+
+    const systemPrompt = buildSystemPrompt(
+      profile?.school_of_thought,
+      prefs?.learning_level,
+    )
+
     console.log("[v0] Chat API: converting messages")
     const convertedMessages = await convertToModelMessages(messages)
     console.log("[v0] Chat API: converted, starting streamText with Groq")
 
     const result = streamText({
       model: groq("llama-3.3-70b-versatile"),
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       messages: convertedMessages,
       tools: {
         searchHadiths: tool({

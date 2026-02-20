@@ -17,6 +17,8 @@ import {
   Share2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useQuota } from "@/hooks/use-quota"
+import { UsageBanner, ProUpgradeCTA } from "@/components/usage-banner"
 
 interface SavedHadith {
   id: string
@@ -45,6 +47,7 @@ const FOLDERS = [
 export default function SavedPage() {
   const router = useRouter()
   const supabase = getSupabaseBrowserClient()
+  const { quota } = useQuota()
   const [savedHadiths, setSavedHadiths] = useState<SavedHadith[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFolder, setActiveFolder] = useState("all")
@@ -194,6 +197,16 @@ export default function SavedPage() {
               )
             })}
           </div>
+
+          {/* Usage Banner for free users */}
+          {quota && !quota.isPremium && (
+            <UsageBanner
+              used={quota.usage.saves}
+              limit={quota.usage.savesLimit}
+              label="Saved hadiths"
+              className="mt-3"
+            />
+          )}
         </div>
       </header>
 
@@ -219,6 +232,10 @@ export default function SavedPage() {
           </div>
         ) : (
           <div className="space-y-4">
+            {/* Pro CTA for free users after a few saves */}
+            {quota && !quota.isPremium && savedHadiths.length >= 10 && (
+              <ProUpgradeCTA />
+            )}
             {filtered.map((saved) => (
               <div key={saved.id} className="premium-card gold-border rounded-xl overflow-hidden">
                 <div className="p-4">

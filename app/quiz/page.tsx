@@ -14,8 +14,12 @@ import {
   RotateCcw,
   BookOpen,
   Sparkles,
+  Crown,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useQuota } from "@/hooks/use-quota"
+import { UsageBanner } from "@/components/usage-banner"
+import { UpgradeModal, type UpgradeReason } from "@/components/upgrade-modal"
 
 interface QuizQuestion {
   id: string
@@ -50,6 +54,7 @@ type Stage = "setup" | "quiz" | "results"
 export default function QuizPage() {
   const router = useRouter()
   const supabase = getSupabaseBrowserClient()
+  const { quota, refresh: refreshQuota } = useQuota()
   const [stage, setStage] = useState<Stage>("setup")
   const [questions, setQuestions] = useState<QuizQuestion[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -64,6 +69,9 @@ export default function QuizPage() {
   const [quizMode, setQuizMode] = useState<QuizMode>("general")
   const [learningPaths, setLearningPaths] = useState<LearningPath[]>([])
   const [selectedPathId, setSelectedPathId] = useState<string | null>(null)
+  const [showUpgrade, setShowUpgrade] = useState(false)
+
+  const quizLimitReached = quota && !quota.isPremium && quota.usage.quizzesRemaining <= 0
 
   useEffect(() => {
     const fetchInit = async () => {
@@ -459,17 +467,46 @@ export default function QuizPage() {
               </div>
             </div>
 
+            {/* Quiz limit banner for free users */}
+            {quota && !quota.isPremium && (
+              <UsageBanner
+                used={quota.usage.quizzesToday}
+                limit={quota.usage.quizDailyLimit}
+                label="Daily quizzes"
+              />
+            )}
+
             {/* Start Button */}
             <button
-              onClick={quizMode === "ai_learning" ? generateAIQuiz : generateQuiz}
+              onClick={() => {
+                if (quizLimitReached) {
+                  setShowUpgrade(true)
+                  return
+                }
+                if (quizMode === "ai_learning") {
+                  generateAIQuiz()
+                } else {
+                  generateQuiz()
+                }
+              }}
               disabled={loading || (quizMode === "ai_learning" && !selectedPathId)}
-              className="w-full py-4 rounded-xl gold-button text-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              className={cn(
+                "w-full py-4 rounded-xl text-lg flex items-center justify-center gap-2 disabled:opacity-50",
+                quizLimitReached
+                  ? "bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-[#2c2416]"
+                  : "gold-button",
+              )}
             >
               {loading ? (
                 <div className="flex items-center gap-3">
                   <div className="w-5 h-5 border-2 border-[#2c2416] border-t-transparent rounded-full animate-spin" />
                   <span className="text-sm">{quizMode === "ai_learning" ? "AI is generating questions..." : "Loading..."}</span>
                 </div>
+              ) : quizLimitReached ? (
+                <>
+                  <Crown className="w-5 h-5" />
+                  Upgrade for Unlimited Quizzes
+                </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
@@ -477,6 +514,8 @@ export default function QuizPage() {
                 </>
               )}
             </button>
+
+            <UpgradeModal open={showUpgrade} onClose={() => setShowUpgrade(false)} reason="quiz_limit" />
 
             {/* Past Attempts */}
             {pastAttempts.length > 0 && (

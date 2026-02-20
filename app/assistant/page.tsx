@@ -6,6 +6,8 @@ import { Bot, ChevronLeft, Send, Sparkles, Loader2, Crown, AlertCircle } from "l
 import { useChat } from "@ai-sdk/react"
 import { DefaultChatTransport } from "ai"
 import { useSubscription } from "@/hooks/use-subscription"
+import { useQuota } from "@/hooks/use-quota"
+import { UsageBanner } from "@/components/usage-banner"
 import { isNativeApp, showNativePaywall } from "@/lib/native-bridge"
 
 const promptTemplates = [
@@ -31,6 +33,7 @@ function AssistantContent() {
   const [input, setInput] = useState(initialPrompt)
   const [quotaExceeded, setQuotaExceeded] = useState(false)
   const { isPremium } = useSubscription()
+  const { quota, refresh: refreshQuota } = useQuota()
 
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
@@ -58,6 +61,8 @@ function AssistantContent() {
     if (input.trim() && !isLoading) {
       sendMessage({ text: input })
       setInput("")
+      // Refresh quota after a short delay so the counter updates
+      setTimeout(() => refreshQuota(), 3000)
     }
   }
 
@@ -198,6 +203,16 @@ function AssistantContent() {
 
       {/* Input */}
       <div className="sticky bottom-20 md:bottom-0 bg-card border-t border-border p-4">
+        {/* AI Usage counter for free users */}
+        {quota && !quota.isPremium && (
+          <div className="max-w-3xl mx-auto mb-3">
+            <UsageBanner
+              used={quota.usage.aiToday}
+              limit={quota.usage.aiDailyLimit}
+              label="Daily AI explanations"
+            />
+          </div>
+        )}
         <form onSubmit={onFormSubmit} className="max-w-3xl mx-auto flex items-center gap-3">
           <input
             type="text"

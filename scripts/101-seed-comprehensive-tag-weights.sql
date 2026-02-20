@@ -11,7 +11,7 @@
 -- CATEGORY: Salah & Prayer (slug: worship)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('prayer', 'salah', 'friday-prayer', 'night-prayer', 'voluntary-prayer')
 AND (
@@ -33,7 +33,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Fasting & Ramadan (slug: fasting)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('fasting', 'ramadan', 'voluntary-fasting', 'itikaf')
 AND (
@@ -52,7 +52,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Zakat & Charity (slug: zakat)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('charity', 'zakat', 'sadaqah', 'generosity')
 AND (
@@ -71,7 +71,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Hajj & Umrah (slug: hajj)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('hajj', 'umrah', 'pilgrimage')
 AND (
@@ -91,7 +91,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Character & Manners (slug: character)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('patience', 'gratitude', 'kindness', 'honesty', 'humility', 'manners', 'good-character', 'modesty')
 AND (
@@ -120,7 +120,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Iman & Aqeedah (slug: faith)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('faith', 'tawhid', 'belief', 'angels', 'qadr', 'iman')
 AND (
@@ -142,7 +142,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Dhikr & Du'a (slug: dhikr)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('dua', 'dhikr', 'remembrance', 'istighfar', 'supplication')
 AND (
@@ -165,7 +165,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Quran & Revelation (slug: quran)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('quran', 'recitation', 'revelation', 'tafsir')
 AND (
@@ -185,7 +185,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Purification & Cleanliness (slug: purification)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('purification', 'wudu', 'ghusl', 'cleanliness')
 AND (
@@ -205,7 +205,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Prophetic Sunnah (slug: sunnah-acts)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('sunnah', 'prophetic-habits', 'seerah-practice')
 AND (
@@ -222,7 +222,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Family & Marriage (slug: family)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('marriage', 'family', 'parenting', 'kinship', 'children', 'women', 'parents')
 AND (
@@ -250,7 +250,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Daily Conduct & Etiquette (slug: daily-life)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('food', 'greetings', 'travel', 'sleep', 'dress', 'etiquette', 'manners')
 AND (
@@ -275,7 +275,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Business & Trade (slug: business)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('trade', 'business', 'halal-earnings', 'riba', 'contracts')
 AND (
@@ -299,7 +299,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Knowledge & Learning (slug: knowledge)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.9, 'keyword_match'
+SELECT h.id, t.id, 0.9, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('knowledge', 'teaching', 'scholarship', 'learning')
 AND (
@@ -318,7 +318,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Da'wah & Guidance (slug: dawah)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('dawah', 'enjoining-good', 'forbidding-evil', 'guidance', 'advice')
 AND (
@@ -338,7 +338,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Social Justice & Rights (slug: community)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('justice', 'rights', 'governance', 'neighbor', 'neighbors', 'oppression')
 AND (
@@ -361,7 +361,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Jihad & Defense (slug: warfare)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('jihad', 'martyrdom', 'defense', 'warfare')
 AND (
@@ -382,7 +382,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Prophetic History & Seerah (slug: history)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('seerah', 'companions', 'history', 'battles')
 AND (
@@ -407,7 +407,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Death & Afterlife (slug: afterlife)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('death', 'paradise', 'hellfire', 'grave', 'resurrection', 'judgment-day')
 AND (
@@ -435,7 +435,7 @@ AND NOT EXISTS (SELECT 1 FROM hadith_tag_weights htw WHERE htw.hadith_id = h.id 
 -- CATEGORY: Trials & End Times (slug: fitna)
 -- ==========================================
 INSERT INTO hadith_tag_weights (hadith_id, tag_id, weight, source)
-SELECT h.id, t.id, 0.85, 'keyword_match'
+SELECT h.id, t.id, 0.85, 'enrichment'
 FROM hadiths h, tags t
 WHERE t.slug IN ('fitna', 'end-times', 'dajjal', 'signs-of-hour', 'trials')
 AND (

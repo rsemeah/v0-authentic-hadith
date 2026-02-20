@@ -1,14 +1,9 @@
 import { streamText, tool, convertToModelMessages, UIMessage } from "ai"
-import { createGroq } from "@ai-sdk/groq"
 import { z } from "zod"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { checkAIQuota, incrementAIUsage } from "@/lib/quotas/check"
 
 export const maxDuration = 30
-
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
-})
 
 const BASE_SYSTEM_PROMPT = `You are HadithChat, a knowledgeable Islamic scholar assistant specializing in hadith studies.
 
@@ -91,15 +86,6 @@ function buildSystemPrompt(madhab?: string | null, level?: string | null): strin
 }
 
 export async function POST(req: Request) {
-  if (!process.env.GROQ_API_KEY) {
-    return new Response(
-      JSON.stringify({
-        error: "AI service is not configured. Please set the GROQ_API_KEY environment variable.",
-      }),
-      { status: 503, headers: { "Content-Type": "application/json" } },
-    )
-  }
-
   try {
     console.log("[v0] Chat API: POST received")
     const body = await req.json()
@@ -167,7 +153,7 @@ export async function POST(req: Request) {
     console.log("[v0] Chat API: converted, starting streamText with Groq")
 
     const result = streamText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: "groq/llama-3.3-70b-versatile",
       system: systemPrompt,
       messages: convertedMessages,
       tools: {

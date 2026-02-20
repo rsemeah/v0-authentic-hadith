@@ -65,6 +65,11 @@ export async function GET(request: Request) {
         maxAge: 31536000,
         sameSite: "lax",
       })
+      response.cookies.set("qbos_safety_agreed", "1", {
+        path: "/",
+        maxAge: 31536000,
+        sameSite: "lax",
+      })
       return response
     }
   }

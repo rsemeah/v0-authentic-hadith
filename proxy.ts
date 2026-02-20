@@ -55,6 +55,7 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const hasOnboarded = request.cookies.get("qbos_onboarded")?.value === "1"
+  const hasSafetyAgreed = request.cookies.get("qbos_safety_agreed")?.value === "1"
 
   // Auth page: redirect logged-in users away from login
   if (isAuthPage && user) {
@@ -75,8 +76,8 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Protected page: redirect to onboarding if not yet onboarded
-  if (!hasOnboarded && pathname !== "/onboarding") {
+  // Protected page: redirect to onboarding if safety not agreed or not onboarded
+  if ((!hasOnboarded || !hasSafetyAgreed) && pathname !== "/onboarding") {
     const url = request.nextUrl.clone()
     url.pathname = "/onboarding"
     return NextResponse.redirect(url)

@@ -51,6 +51,8 @@ export function AuthForm() {
         .single()
 
       if (prefs?.onboarded) {
+        document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
+        document.cookie = "qbos_safety_agreed=1; path=/; max-age=31536000; SameSite=Lax"
         router.push(redirectTo || "/home")
       } else {
         const onboardingUrl = redirectTo

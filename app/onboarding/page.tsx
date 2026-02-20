@@ -102,9 +102,9 @@ function OnboardingContent() {
   }
 
   const handleSkip = () => {
-    // Set onboarded cookie and redirect
-    document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
-    router.push(postOnboardingRedirect ? decodeURIComponent(postOnboardingRedirect) : "/home")
+    // Skip to safety step -- safety agreement is required before entering the app
+    setSlideDirection("left")
+    setCurrentStep(3)
   }
 
   const handleComplete = async () => {
@@ -198,8 +198,9 @@ function OnboardingContent() {
         // Preferences upsert failed
       }
 
-      // Set onboarded cookie
+      // Set onboarded + safety agreed cookies
       document.cookie = "qbos_onboarded=1; path=/; max-age=31536000; SameSite=Lax"
+      document.cookie = "qbos_safety_agreed=1; path=/; max-age=31536000; SameSite=Lax"
 
       // If the user was redirected from pricing (e.g. after sign-up), send them back there
       if (postOnboardingRedirect) {
@@ -360,9 +361,9 @@ function OnboardingContent() {
               <button
                 type="button"
                 onClick={handleSkip}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-[#C5A059] transition-colors text-sm font-medium"
               >
-                Skip for now
+                Skip to essentials
               </button>
             ) : (
               <button

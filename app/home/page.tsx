@@ -38,6 +38,11 @@ import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-util
 interface UserProfile {
   name: string
   avatar_url: string | null
+  school_of_thought?: string | null
+}
+
+interface UserPreferences {
+  learning_level: string
 }
 
 interface Hadith {
@@ -96,6 +101,7 @@ export default function HomePage() {
   const [continueReading, setContinueReading] = useState<ContinueReading[]>([])
   const [totalReadCount, setTotalReadCount] = useState(0)
   const [lastActiveDate, setLastActiveDate] = useState<string | null>(null)
+  const [userPrefs, setUserPrefs] = useState<UserPreferences | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,13 +117,21 @@ export default function HomePage() {
         }
 
         if (user) {
-          // Fetch profile
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("name, avatar_url")
-            .eq("user_id", user.id)
-            .single()
+          // Fetch profile + preferences in parallel
+          const [{ data: profileData }, { data: prefsData }] = await Promise.all([
+            supabase
+              .from("profiles")
+              .select("name, avatar_url, school_of_thought")
+              .eq("user_id", user.id)
+              .single(),
+            supabase
+              .from("user_preferences")
+              .select("learning_level")
+              .eq("user_id", user.id)
+              .single(),
+          ])
           if (profileData) setProfile(profileData)
+          if (prefsData) setUserPrefs(prefsData)
 
           // Fetch daily hadith from API
           try {
@@ -395,7 +409,11 @@ export default function HomePage() {
             {greeting}, <span className="gold-text">{firstName}</span>
           </h1>
           <p className="text-sm md:text-base text-muted-foreground mb-6">
-            Continue your journey through authentic hadith literature
+            {userPrefs?.learning_level === "beginner"
+              ? "Start your journey through authentic hadith literature"
+              : userPrefs?.learning_level === "advanced"
+                ? "Deepen your study of the prophetic traditions"
+                : "Continue your journey through authentic hadith literature"}
           </p>
 
           {/* Search bar */}

@@ -19,6 +19,12 @@ WHERE user_id = (
   SELECT id FROM auth.users WHERE email = 'roryleesemeah@icloud.com'
 );
 
+-- Delete any existing subscription records for this user
+DELETE FROM subscriptions
+WHERE user_id = (
+  SELECT id FROM auth.users WHERE email = 'roryleesemeah@icloud.com'
+);
+
 -- Insert lifetime subscription record
 INSERT INTO subscriptions (
   user_id,
@@ -44,10 +50,10 @@ SELECT
   now(),
   now()
 FROM auth.users
-WHERE email = 'roryleesemeah@icloud.com'
-ON CONFLICT (user_id) DO UPDATE SET
-  status = 'lifetime',
-  plan_type = 'lifetime',
-  current_period_end = '2099-12-31T23:59:59Z',
-  cancel_at_period_end = false,
-  updated_at = now();
+WHERE email = 'roryleesemeah@icloud.com';
+
+-- Verify the grant
+SELECT p.subscription_tier, p.subscription_status, p.role, s.status as sub_status, s.plan_type
+FROM profiles p
+LEFT JOIN subscriptions s ON s.user_id = p.user_id
+WHERE p.user_id = (SELECT id FROM auth.users WHERE email = 'roryleesemeah@icloud.com');

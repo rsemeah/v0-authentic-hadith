@@ -30,9 +30,14 @@ import {
   Scroll,
   Flame,
   CircleDot,
+  Cloud,
+  AlertTriangle,
+  Swords,
+  Hand,
 } from "lucide-react"
 
 const ICON_MAP: Record<string, LucideIcon> = {
+  // PascalCase variants
   Mosque: Landmark,
   Landmark: Landmark,
   Moon: Moon,
@@ -52,13 +57,47 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Scale: Scale,
   GraduationCap: GraduationCap,
   Sword: Sword,
+  Swords: Swords,
   Scroll: Scroll,
   Flame: Flame,
   CircleDot: CircleDot,
+  Cloud: Cloud,
+  AlertTriangle: AlertTriangle,
+  Hand: Hand,
+  Book: BookOpen,
+  // kebab-case variants (from DB seed data)
+  "mosque": Landmark,
+  "landmark": Landmark,
+  "moon": Moon,
+  "hand-coins": HandCoins,
+  "map-pin": MapPin,
+  "heart": Heart,
+  "shield": Shield,
+  "sparkles": Sparkles,
+  "book-open": BookOpen,
+  "book": BookOpen,
+  "droplets": Droplets,
+  "star": Star,
+  "users": Users,
+  "sun": Sun,
+  "briefcase": Briefcase,
+  "book-open-check": BookOpenCheck,
+  "megaphone": Megaphone,
+  "scale": Scale,
+  "graduation-cap": GraduationCap,
+  "sword": Sword,
+  "swords": Swords,
+  "scroll": Scroll,
+  "flame": Flame,
+  "circle-dot": CircleDot,
+  "cloud": Cloud,
+  "alert-triangle": AlertTriangle,
+  "hand": Hand,
 }
 
 function CategoryIcon({ name, className }: { name: string | null; className?: string }) {
-  const IconComponent = name ? ICON_MAP[name] : null
+  if (!name) return <BookOpen className={className} />
+  const IconComponent = ICON_MAP[name] || ICON_MAP[name.toLowerCase()]
   if (IconComponent) {
     return <IconComponent className={className} />
   }

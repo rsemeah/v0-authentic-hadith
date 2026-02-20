@@ -87,10 +87,8 @@ function buildSystemPrompt(madhab?: string | null, level?: string | null): strin
 
 export async function POST(req: Request) {
   try {
-    console.log("[v0] Chat API: POST received")
     const body = await req.json()
     const messages: UIMessage[] = body.messages
-    console.log("[v0] Chat API: messages count:", messages?.length)
 
     // Auth check
     const supabase = await getSupabaseServerClient()
@@ -98,7 +96,6 @@ export async function POST(req: Request) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    console.log("[v0] Chat API: user:", user?.id ?? "NONE")
     if (!user) {
       return new Response(
         JSON.stringify({ error: "You must be logged in to use the AI assistant." }),
@@ -107,9 +104,7 @@ export async function POST(req: Request) {
     }
 
     // Quota check
-    console.log("[v0] Chat API: checking quota for user", user.id)
     const quotaCheck = await checkAIQuota(user.id)
-    console.log("[v0] Chat API: quota result:", JSON.stringify(quotaCheck))
 
     if (!quotaCheck.allowed) {
       return new Response(
@@ -148,9 +143,7 @@ export async function POST(req: Request) {
       prefs?.learning_level,
     )
 
-    console.log("[v0] Chat API: converting messages")
     const convertedMessages = await convertToModelMessages(messages)
-    console.log("[v0] Chat API: converted, starting streamText")
 
     const result = streamText({
       model: "openai/gpt-4o-mini",
@@ -166,7 +159,6 @@ export async function POST(req: Request) {
           }),
           execute: async ({ query, limit }) => {
             try {
-              console.log("[v0] Tool searchHadiths called with:", query)
               const supabase = await getSupabaseServerClient()
               const { data, error } = await supabase
                 .from("hadiths")
@@ -179,11 +171,8 @@ export async function POST(req: Request) {
                 .limit(limit ?? 5)
 
               if (error) {
-                console.log("[v0] Tool searchHadiths error:", error.message)
                 return { results: [], error: error.message }
               }
-
-              console.log("[v0] Tool searchHadiths found:", data?.length, "results")
 
               const cleaned = (data || []).map((h) => {
                 let text = h.english_translation || ""
@@ -216,7 +205,6 @@ export async function POST(req: Request) {
       console.error("[v0] Failed to increment usage:", err),
     )
 
-    console.log("[v0] Chat API: returning stream response")
     return result.toUIMessageStreamResponse()
   } catch (error) {
     console.error("[v0] Chat API error:", error)

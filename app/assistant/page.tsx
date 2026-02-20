@@ -38,7 +38,6 @@ function AssistantContent() {
   const { messages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({ api: "/api/chat" }),
     onError: (err) => {
-      console.log("[v0] Chat error:", err.message, err)
       // Detect quota exceeded from the API 429 response
       if (err.message?.includes("quota_exceeded") || err.message?.includes("limit reached")) {
         setQuotaExceeded(true)
@@ -51,16 +50,6 @@ function AssistantContent() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
-
-  useEffect(() => {
-    console.log("[v0] status:", status)
-    console.log("[v0] error:", error?.message)
-    console.log("[v0] messages count:", messages.length)
-    if (messages.length > 0) {
-      const last = messages[messages.length - 1]
-      console.log("[v0] last message role:", last.role, "parts:", JSON.stringify(last.parts?.slice(0, 3)))
-    }
-  }, [messages, status, error])
 
   const handleTemplateClick = (template: string) => {
     setInput(template)

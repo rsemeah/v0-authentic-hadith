@@ -150,10 +150,10 @@ export async function POST(req: Request) {
 
     console.log("[v0] Chat API: converting messages")
     const convertedMessages = await convertToModelMessages(messages)
-    console.log("[v0] Chat API: converted, starting streamText with Groq")
+    console.log("[v0] Chat API: converted, starting streamText")
 
     const result = streamText({
-      model: "groq/llama-3.3-70b-versatile",
+      model: "openai/gpt-4o-mini",
       system: systemPrompt,
       messages: convertedMessages,
       tools: {

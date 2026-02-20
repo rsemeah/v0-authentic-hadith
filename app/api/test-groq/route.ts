@@ -3,15 +3,15 @@ import { generateText } from "ai"
 export async function GET() {
   try {
     const { text } = await generateText({
-      model: "groq/llama-3.3-70b-versatile",
+      model: "openai/gpt-4o-mini",
       prompt: "Who is Prophet Mohammed? Please provide a brief, respectful summary in 2-3 sentences.",
       maxOutputTokens: 256,
     })
 
     return Response.json({
       success: true,
-      engine: "SilentEngine",
-      model: "groq/llama-3.3-70b-versatile",
+      engine: "AI Gateway",
+      model: "openai/gpt-4o-mini",
       response: text,
     })
   } catch (error) {

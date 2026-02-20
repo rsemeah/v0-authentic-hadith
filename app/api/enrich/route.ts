@@ -149,7 +149,7 @@ export async function POST(req: Request) {
         }
 
         const { output: object } = await generateText({
-          model: "groq/llama-3.3-70b-versatile",
+          model: "openai/gpt-4o-mini",
           output: Output.object({ schema: enrichmentSchema }),
           prompt: `You are a hadith scholar. Analyze this hadith and provide enrichment data.
 

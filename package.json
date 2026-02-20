@@ -9,7 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/groq": "^2.0.0",
+    "@ai-sdk/groq": "3.0.24",
     "@ai-sdk/react": "^3.0.0",
     "@expo/metro-runtime": "latest",
     "@hookform/resolvers": "^3.10.0",

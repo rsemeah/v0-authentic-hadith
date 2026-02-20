@@ -1,9 +1,6 @@
-import { generateObject } from "ai"
-import { createGroq } from "@ai-sdk/groq"
+import { generateText, Output } from "ai"
 import { z } from "zod"
 import { getSupabaseAdmin } from "@/lib/supabase/admin"
-
-const groq = createGroq({ apiKey: process.env.GROQ_API_KEY })
 
 // Schema for what the LLM must return per hadith
 const enrichmentSchema = z.object({
@@ -151,9 +148,9 @@ export async function POST(req: Request) {
           }
         }
 
-        const { object } = await generateObject({
-          model: groq("llama-3.3-70b-versatile"),
-          schema: enrichmentSchema,
+        const { output: object } = await generateText({
+          model: "groq/llama-3.3-70b-versatile",
+          output: Output.object({ schema: enrichmentSchema }),
           prompt: `You are a hadith scholar. Analyze this hadith and provide enrichment data.
 
 Hadith Text: "${translationText}"
@@ -167,6 +164,11 @@ Rules:
 - tag_slugs: 1-4 tags from the controlled list that apply
 - confidence: 0.9+ for clear topics, 0.6-0.8 for ambiguous`,
         })
+
+        if (!object) {
+          results.push({ hadithId: hadith.id, success: false, error: "LLM returned no structured output" })
+          continue
+        }
 
         // Map category slug to UUID
         const categoryId = categoryMap.get(object.category_slug)

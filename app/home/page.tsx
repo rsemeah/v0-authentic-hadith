@@ -12,6 +12,8 @@ import { AIAssistantBlock } from "@/components/home/ai-assistant-block"
 
 import { ShareBanner } from "@/components/share-banner"
 import { ReminderBanner } from "@/components/home/reminder-banner"
+import { ProUpgradeCTA } from "@/components/usage-banner"
+import { useQuota } from "@/hooks/use-quota"
 import {
   User,
   Search,
@@ -82,6 +84,7 @@ interface FeaturedCollection {
 export default function HomePage() {
   const router = useRouter()
   const carouselRef = useRef<HTMLDivElement>(null)
+  const { quota } = useQuota()
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [dailyHadith, setDailyHadith] = useState<Hadith | null>(null)
   const [recentlyViewed, setRecentlyViewed] = useState<RecentHadith[]>([])
@@ -439,10 +442,17 @@ export default function HomePage() {
             <Sparkles className="w-5 h-5 text-secondary" />
             <h2 className="text-lg font-bold text-foreground">Hadith of the Day</h2>
           </div>
-          <DailyHadithCard hadith={displayHadith} onSave={handleSaveHadith} onShare={handleShareHadith} />
-        </section>
+  <DailyHadithCard hadith={displayHadith} onSave={handleSaveHadith} onShare={handleShareHadith} />
+  </section>
 
-        {/* Continue Reading */}
+  {/* Pro CTA for free users */}
+  {quota && !quota.isPremium && (
+    <section className="px-4 md:px-8 pb-4">
+      <ProUpgradeCTA />
+    </section>
+  )}
+  
+  {/* Continue Reading */}
         {continueReading.length > 0 && (
           <section className="pb-6 md:pb-8" aria-label="Continue Reading">
             <div className="flex items-center gap-2 mb-4">

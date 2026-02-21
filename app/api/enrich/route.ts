@@ -27,6 +27,25 @@ const enrichmentSchema = z.object({
     .describe(
       "1-4 tag slugs from the controlled vocabulary: prayer, fasting, charity, pilgrimage, remembrance, patience, truthfulness, kindness, forgiveness, humility, anger, parents, marriage, children, relatives, neighbors, work, food, speech, cleanliness, greetings, seeking-knowledge, intention, faith, quran, justice, leadership, rights, brotherhood, death, judgment, paradise, hellfire",
     ),
+  key_teaching_en: z
+    .string()
+    .min(20)
+    .max(600)
+    .describe(
+      "2-4 sentence key teaching note. First sentence: plain-language accessible explanation anyone can understand. Remaining sentences: scholarly context referencing relevant fiqh rulings, scholars (Ibn Hajar, Al-Nawawi, etc.), or related Quran verses when applicable. Do NOT repeat the hadith text.",
+    ),
+  key_teaching_ar: z
+    .string()
+    .min(10)
+    .max(800)
+    .describe(
+      "Arabic translation of key_teaching_en. Same two-layer structure: accessible explanation first, then scholarly context. Must be fluent Modern Standard Arabic.",
+    ),
+  summary_ar: z
+    .string()
+    .min(3)
+    .max(120)
+    .describe("Arabic translation of summary_line. Concise, 3-10 words in Modern Standard Arabic."),
   confidence: z
     .number()
     .min(0)
@@ -151,7 +170,7 @@ export async function POST(req: Request) {
         const { output: object } = await generateText({
           model: "openai/gpt-4o-mini",
           output: Output.object({ schema: enrichmentSchema }),
-          prompt: `You are a hadith scholar. Analyze this hadith and provide enrichment data.
+          prompt: `You are a hadith scholar with expertise in Islamic jurisprudence and classical hadith commentary. Analyze this hadith and provide enrichment data.
 
 Hadith Text: "${translationText}"
 Narrator: ${hadith.narrator || "Unknown"}
@@ -160,6 +179,9 @@ Grade: ${hadith.grade}
 
 Rules:
 - summary_line: 5-12 words, present-tense, captures the core teaching. Example: "Kindness to animals earns divine reward"
+- key_teaching_en: 2-4 sentences. FIRST sentence must be a plain-language explanation anyone can understand. REMAINING sentences should provide scholarly context -- reference relevant fiqh rulings, classical scholars (Ibn Hajar, Al-Nawawi, Ibn Qayyim, etc.), or related Quran verses when applicable. Do NOT simply repeat the hadith text.
+- key_teaching_ar: Arabic translation of key_teaching_en with the same two-layer structure. Must be fluent Modern Standard Arabic.
+- summary_ar: Arabic translation of summary_line. 3-10 words in Modern Standard Arabic.
 - category_slug: Pick the SINGLE best-fit category
 - tag_slugs: 1-4 tags from the controlled list that apply
 - confidence: 0.9+ for clear topics, 0.6-0.8 for ambiguous`,
@@ -183,12 +205,15 @@ Rules:
           .insert({
             hadith_id: hadith.id,
             summary_line: object.summary_line,
+            summary_ar: object.summary_ar,
+            key_teaching_en: object.key_teaching_en,
+            key_teaching_ar: object.key_teaching_ar,
             category_id: categoryId,
             status: "suggested",
             confidence: object.confidence,
             rationale: object.rationale,
-            suggested_by: "groq-llama-3.3-70b",
-            methodology_version: "v1.0",
+            suggested_by: "openai-gpt-4o-mini",
+            methodology_version: "v1.1",
           })
           .select("id")
           .single()

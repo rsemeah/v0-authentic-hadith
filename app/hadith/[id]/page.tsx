@@ -32,6 +32,8 @@ export default function HadithDetailPage() {
   const [loading, setLoading] = useState(true)
   const [enrichment, setEnrichment] = useState<{
     summary_line: string | null
+    key_teaching_en: string | null
+    key_teaching_ar: string | null
     category: { slug: string; name_en: string } | null
     tags: Array<{ slug: string; name_en: string }>
   } | null>(null)
@@ -78,7 +80,7 @@ export default function HadithDetailPage() {
       // Fetch enrichment data
       const { data: enrichData } = await supabase
         .from("hadith_enrichment")
-        .select("summary_line, category:categories!category_id(slug, name_en)")
+        .select("summary_line, key_teaching_en, key_teaching_ar, category:categories!category_id(slug, name_en)")
         .eq("hadith_id", params.id)
         .eq("status", "published")
         .single()
@@ -93,6 +95,8 @@ export default function HadithDetailPage() {
 
         setEnrichment({
           summary_line: enrichData.summary_line,
+          key_teaching_en: enrichData.key_teaching_en,
+          key_teaching_ar: enrichData.key_teaching_ar,
           category: enrichData.category as { slug: string; name_en: string } | null,
           tags: (tagData || []).map((t: { tag: { slug: string; name_en: string } | null }) => t.tag).filter(Boolean) as Array<{ slug: string; name_en: string }>,
         })
@@ -306,6 +310,27 @@ export default function HadithDetailPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Key Teaching Note */}
+          {enrichment?.key_teaching_en && (
+            <div className="mb-8 rounded-xl border border-[#C5A059]/20 bg-[#C5A059]/5 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen className="w-4 h-4 text-[#C5A059]" />
+                <h3 className="text-sm font-semibold text-[#C5A059] uppercase tracking-wider">Key Teaching</h3>
+              </div>
+              <p className="text-sm leading-relaxed text-foreground/80">{enrichment.key_teaching_en}</p>
+              {enrichment.key_teaching_ar && (
+                <p
+                  className="mt-4 pt-4 border-t border-[#C5A059]/15 text-sm leading-[2] text-foreground/70 text-right"
+                  dir="rtl"
+                  lang="ar"
+                  style={{ fontFamily: "Amiri, serif" }}
+                >
+                  {enrichment.key_teaching_ar}
+                </p>
+              )}
             </div>
           )}
 

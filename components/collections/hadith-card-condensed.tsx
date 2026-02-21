@@ -2,9 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Bookmark, Share2, ChevronRight, Hash } from "lucide-react"
+import { Bookmark, Share2, ChevronRight, Hash, BookOpen, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
@@ -22,6 +22,7 @@ interface HadithCardCondensedProps {
     hadith_number?: number
     reference?: string
     summary_line?: string
+    key_teaching_en?: string
     category?: { slug: string; name_en: string } | null
     tags?: Array<{ slug: string; name_en: string }>
   }
@@ -41,7 +42,16 @@ export function HadithCardCondensed({
   const router = useRouter()
   const [saved, setSaved] = useState(isSaved)
   const [saving, setSaving] = useState(false)
+  const [teachingOpen, setTeachingOpen] = useState(false)
+  const teachingRef = useRef<HTMLDivElement>(null)
+  const [teachingHeight, setTeachingHeight] = useState(0)
   const supabase = getSupabaseBrowserClient()
+
+  useEffect(() => {
+    if (teachingRef.current) {
+      setTeachingHeight(teachingRef.current.scrollHeight)
+    }
+  }, [teachingOpen, hadith.key_teaching_en])
 
   const arabicText = hadith.text_ar || hadith.arabic_text || ""
   const englishText = getCleanTranslation(hadith.text_en || hadith.english_translation || "")
@@ -144,6 +154,34 @@ export function HadithCardCondensed({
         <div className="mb-4" dir="ltr" lang="en">
           <p className="text-sm md:text-base text-muted-foreground line-clamp-4 leading-relaxed">{englishText}</p>
         </div>
+
+        {/* Key Teaching Expand-on-tap */}
+        {hadith.key_teaching_en && (
+          <div className="mb-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setTeachingOpen(!teachingOpen)
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#C5A059] bg-[#C5A059]/8 hover:bg-[#C5A059]/15 transition-colors"
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              Key Teaching
+              <ChevronDown
+                className={cn("w-3.5 h-3.5 transition-transform duration-200", teachingOpen && "rotate-180")}
+              />
+            </button>
+            <div
+              ref={teachingRef}
+              className="overflow-hidden transition-all duration-300 ease-in-out"
+              style={{ maxHeight: teachingOpen ? `${teachingHeight}px` : "0px", opacity: teachingOpen ? 1 : 0 }}
+            >
+              <div className="mt-3 rounded-lg border border-[#C5A059]/15 bg-[#C5A059]/5 p-3.5">
+                <p className="text-xs leading-relaxed text-foreground/75">{hadith.key_teaching_en}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Category Badge */}
         {hadith.category && (

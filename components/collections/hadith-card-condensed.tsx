@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Bookmark, Share2, ChevronRight, Hash, BookOpen, ChevronDown } from "lucide-react"
+import { Bookmark, Share2, ChevronRight, Hash, BookOpen, ChevronDown, Sparkles, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
@@ -45,13 +45,37 @@ export function HadithCardCondensed({
   const [teachingOpen, setTeachingOpen] = useState(false)
   const teachingRef = useRef<HTMLDivElement>(null)
   const [teachingHeight, setTeachingHeight] = useState(0)
+  const [summarizing, setSummarizing] = useState(false)
+  const [localTeaching, setLocalTeaching] = useState<string | null>(hadith.key_teaching_en || null)
+  const [localSummary, setLocalSummary] = useState<string | null>(hadith.summary_line || null)
   const supabase = getSupabaseBrowserClient()
 
   useEffect(() => {
     if (teachingRef.current) {
       setTeachingHeight(teachingRef.current.scrollHeight)
     }
-  }, [teachingOpen, hadith.key_teaching_en])
+  }, [teachingOpen, localTeaching])
+
+  const handleSummarize = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSummarizing(true)
+    try {
+      const res = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hadithId: hadith.id }),
+      })
+      const data = await res.json()
+      if (res.ok && data.key_teaching_en) {
+        setLocalTeaching(data.key_teaching_en)
+        if (data.summary_line) setLocalSummary(data.summary_line)
+        setTeachingOpen(true)
+      }
+    } catch (err) {
+      console.error("Summarize failed:", err)
+    }
+    setSummarizing(false)
+  }
 
   const arabicText = hadith.text_ar || hadith.arabic_text || ""
   const englishText = getCleanTranslation(hadith.text_en || hadith.english_translation || "")
@@ -117,8 +141,8 @@ export function HadithCardCondensed({
     <div className="relative rounded-xl premium-card overflow-hidden border-l-4 border-l-[#C5A059]">
       <div className="p-5 md:p-6">
         {/* Summary Line */}
-        {hadith.summary_line && (
-          <p className="text-sm font-semibold text-[#C5A059] mb-3 leading-snug">{hadith.summary_line}</p>
+        {localSummary && (
+          <p className="text-sm font-semibold text-[#C5A059] mb-3 leading-snug">{localSummary}</p>
         )}
 
         {/* Header */}
@@ -155,33 +179,48 @@ export function HadithCardCondensed({
           <p className="text-sm md:text-base text-muted-foreground line-clamp-4 leading-relaxed">{englishText}</p>
         </div>
 
-        {/* Key Teaching Expand-on-tap */}
-        {hadith.key_teaching_en && (
-          <div className="mb-4">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                setTeachingOpen(!teachingOpen)
-              }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#C5A059] bg-[#C5A059]/8 hover:bg-[#C5A059]/15 transition-colors"
-            >
-              <BookOpen className="w-3.5 h-3.5" />
-              Key Teaching
-              <ChevronDown
-                className={cn("w-3.5 h-3.5 transition-transform duration-200", teachingOpen && "rotate-180")}
-              />
-            </button>
-            <div
-              ref={teachingRef}
-              className="overflow-hidden transition-all duration-300 ease-in-out"
-              style={{ maxHeight: teachingOpen ? `${teachingHeight}px` : "0px", opacity: teachingOpen ? 1 : 0 }}
-            >
-              <div className="mt-3 rounded-lg border border-[#C5A059]/15 bg-[#C5A059]/5 p-3.5">
-                <p className="text-xs leading-relaxed text-foreground/75">{hadith.key_teaching_en}</p>
+        {/* Key Teaching / Summarize */}
+        <div className="mb-4">
+          {localTeaching ? (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setTeachingOpen(!teachingOpen)
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#C5A059] bg-[#C5A059]/8 hover:bg-[#C5A059]/15 transition-colors"
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                Key Teaching
+                <ChevronDown
+                  className={cn("w-3.5 h-3.5 transition-transform duration-200", teachingOpen && "rotate-180")}
+                />
+              </button>
+              <div
+                ref={teachingRef}
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+                style={{ maxHeight: teachingOpen ? `${teachingHeight}px` : "0px", opacity: teachingOpen ? 1 : 0 }}
+              >
+                <div className="mt-3 rounded-lg border border-[#C5A059]/15 bg-[#C5A059]/5 p-3.5">
+                  <p className="text-xs leading-relaxed text-foreground/75">{localTeaching}</p>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </>
+          ) : (
+            <button
+              onClick={handleSummarize}
+              disabled={summarizing}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-[#1B5E43] bg-[#1B5E43]/8 hover:bg-[#1B5E43]/15 transition-colors disabled:opacity-50"
+            >
+              {summarizing ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5" />
+              )}
+              {summarizing ? "Summarizing..." : "Summarize"}
+            </button>
+          )}
+        </div>
 
         {/* Category Badge */}
         {hadith.category && (

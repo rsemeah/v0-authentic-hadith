@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2, Hash, FolderOpen } from "lucide-react"
+import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2, Hash, FolderOpen, Sparkles, Loader2 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 import { DiscussionSection } from "@/components/hadith/discussion-section"
@@ -30,6 +30,7 @@ export default function HadithDetailPage() {
   const [isSaved, setIsSaved] = useState(false)
   const [isRead, setIsRead] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [summarizing, setSummarizing] = useState(false)
   const [enrichment, setEnrichment] = useState<{
     summary_line: string | null
     key_teaching_en: string | null
@@ -107,6 +108,31 @@ export default function HadithDetailPage() {
 
     fetchHadith()
   }, [supabase, params.id])
+
+  const handleSummarize = async () => {
+    if (!hadith) return
+    setSummarizing(true)
+    try {
+      const res = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hadithId: hadith.id }),
+      })
+      const data = await res.json()
+      if (res.ok && data.key_teaching_en) {
+        setEnrichment((prev) => ({
+          summary_line: data.summary_line || prev?.summary_line || null,
+          key_teaching_en: data.key_teaching_en,
+          key_teaching_ar: data.key_teaching_ar || null,
+          category: prev?.category || null,
+          tags: prev?.tags || [],
+        }))
+      }
+    } catch (err) {
+      console.error("Summarize failed:", err)
+    }
+    setSummarizing(false)
+  }
 
   const handleSave = async () => {
     const {
@@ -313,8 +339,8 @@ export default function HadithDetailPage() {
             </div>
           )}
 
-          {/* Key Teaching Note */}
-          {enrichment?.key_teaching_en && (
+          {/* Key Teaching Note / Summarize Button */}
+          {enrichment?.key_teaching_en ? (
             <div className="mb-8 rounded-xl border border-[#C5A059]/20 bg-[#C5A059]/5 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <BookOpen className="w-4 h-4 text-[#C5A059]" />
@@ -331,6 +357,21 @@ export default function HadithDetailPage() {
                   {enrichment.key_teaching_ar}
                 </p>
               )}
+            </div>
+          ) : (
+            <div className="mb-8">
+              <button
+                onClick={handleSummarize}
+                disabled={summarizing}
+                className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium border-2 border-dashed border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/5 hover:border-[#C5A059]/50 transition-all disabled:opacity-50 w-full justify-center"
+              >
+                {summarizing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                {summarizing ? "Generating summary & key teaching..." : "Summarize this Hadith"}
+              </button>
             </div>
           )}
 

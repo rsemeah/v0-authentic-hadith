@@ -1,6 +1,7 @@
 "use client";
 
-import { Trash2, ExternalLink } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Trash2, ExternalLink, Sparkles, Loader2, BookOpen, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BookmarkedHadithCardProps {
@@ -35,6 +36,38 @@ export function BookmarkedHadithCard({
   onClick,
 }: BookmarkedHadithCardProps) {
   const hadith = bookmark.hadiths;
+  const [summarizing, setSummarizing] = useState(false);
+  const [teaching, setTeaching] = useState<string | null>(null);
+  const [teachingOpen, setTeachingOpen] = useState(false);
+  const teachingRef = useRef<HTMLDivElement>(null);
+  const [teachingHeight, setTeachingHeight] = useState(0);
+
+  useEffect(() => {
+    if (teachingRef.current) {
+      setTeachingHeight(teachingRef.current.scrollHeight);
+    }
+  }, [teachingOpen, teaching]);
+
+  const handleSummarize = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSummarizing(true);
+    try {
+      const res = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hadithId: hadith.id }),
+      });
+      const data = await res.json();
+      if (res.ok && data.key_teaching_en) {
+        setTeaching(data.key_teaching_en);
+        setTeachingOpen(true);
+      }
+    } catch (err) {
+      console.error("Summarize failed:", err);
+    }
+    setSummarizing(false);
+  };
+
   if (!hadith) return null;
 
   return (
@@ -75,6 +108,49 @@ export function BookmarkedHadithCard({
         <p className="text-sm text-foreground/80 leading-relaxed line-clamp-2">
           {hadith.english_translation}
         </p>
+
+        {/* Summarize / Key Teaching */}
+        <div className="mt-3" onClick={(e) => e.stopPropagation()}>
+          {teaching ? (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setTeachingOpen(!teachingOpen);
+                }}
+                className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-[11px] font-medium text-[#C5A059] bg-[#C5A059]/8 hover:bg-[#C5A059]/15 transition-colors"
+              >
+                <BookOpen className="w-3 h-3" />
+                Key Teaching
+                <ChevronDown
+                  className={cn("w-3 h-3 transition-transform duration-200", teachingOpen && "rotate-180")}
+                />
+              </button>
+              <div
+                ref={teachingRef}
+                className="overflow-hidden transition-all duration-300 ease-in-out"
+                style={{ maxHeight: teachingOpen ? `${teachingHeight}px` : "0px", opacity: teachingOpen ? 1 : 0 }}
+              >
+                <div className="mt-2 rounded-lg border border-[#C5A059]/15 bg-[#C5A059]/5 p-2.5">
+                  <p className="text-[11px] leading-relaxed text-foreground/75">{teaching}</p>
+                </div>
+              </div>
+            </>
+          ) : (
+            <button
+              onClick={handleSummarize}
+              disabled={summarizing}
+              className="flex items-center gap-1 px-2 py-1 rounded-lg text-[11px] font-medium text-[#1B5E43] bg-[#1B5E43]/8 hover:bg-[#1B5E43]/15 transition-colors disabled:opacity-50"
+            >
+              {summarizing ? (
+                <Loader2 className="w-3 h-3 animate-spin" />
+              ) : (
+                <Sparkles className="w-3 h-3" />
+              )}
+              {summarizing ? "Summarizing..." : "Summarize"}
+            </button>
+          )}
+        </div>
 
         {/* Saved date */}
         <p className="text-[10px] text-muted-foreground mt-2">

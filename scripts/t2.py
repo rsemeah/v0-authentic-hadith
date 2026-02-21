@@ -8,7 +8,10 @@ H = {"apikey":K,"Authorization":"Bearer "+K,"Content-Type":"application/json"}
 def rpc(fn, body):
     b = json.dumps(body).encode()
     r = urllib.request.Request(U+"/rest/v1/rpc/"+fn, data=b, headers=H, method="POST")
-    return json.loads(urllib.request.urlopen(r, context=x, timeout=30).read())
+    raw = urllib.request.urlopen(r, context=x, timeout=30).read().decode()
+    if not raw.strip():
+        return None
+    return json.loads(raw)
 
 def ai(prompt):
     m = {"model":"meta-llama/Llama-3.3-70B-Instruct","temperature":0.3,"max_tokens":800}

@@ -225,7 +225,7 @@ export default function HomePage() {
           // Fetch continue reading -- last read hadith per collection
           const { data: lastReadData } = await supabase
             .from("reading_progress")
-            .select("hadith_id, collection_id, created_at, collections!collection_id(name_en, slug, total_hadiths)")
+            .select("hadith_id, collection_id, created_at")
             .eq("user_id", user.id)
             .order("created_at", { ascending: false })
             .limit(50)
@@ -233,7 +233,7 @@ export default function HomePage() {
           if (lastReadData && lastReadData.length > 0) {
             // Group by collection, keep the latest per collection
             const byCollection = new Map<string, typeof lastReadData[0]>()
-            let readCountByCollection = new Map<string, number>()
+            const readCountByCollection = new Map<string, number>()
             for (const rp of lastReadData) {
               if (!rp.collection_id) continue
               readCountByCollection.set(rp.collection_id, (readCountByCollection.get(rp.collection_id) || 0) + 1)
@@ -242,10 +242,24 @@ export default function HomePage() {
               }
             }
 
+            // Fetch collection details separately
+            const collectionIds = Array.from(byCollection.keys())
+            const { data: collectionsData } = await supabase
+              .from("collections")
+              .select("id, name_en, slug, total_hadiths")
+              .in("id", collectionIds)
+
+            const collMap = new Map<string, { name_en: string; slug: string; total_hadiths: number }>()
+            if (collectionsData) {
+              for (const c of collectionsData) {
+                collMap.set(c.id, c)
+              }
+            }
+
             // For each latest entry, get the hadith number
             const continueItems: ContinueReading[] = []
             for (const [collId, rp] of byCollection) {
-              const coll = rp.collections as { name_en: string; slug: string; total_hadiths: number } | null
+              const coll = collMap.get(collId)
               if (!coll) continue
               const { data: hData } = await supabase
                 .from("hadiths")

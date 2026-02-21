@@ -25,6 +25,9 @@ interface Enrichment {
   id: string
   hadith_id: string
   summary_line: string | null
+  key_teaching_en: string | null
+  key_teaching_ar: string | null
+  summary_ar: string | null
   category_id: string | null
   status: "suggested" | "approved" | "published" | "rejected"
   confidence: number | null
@@ -108,6 +111,9 @@ export default function AdminEnrichmentPage() {
   const [generating, setGenerating] = useState(false)
   const [generateCount, setGenerateCount] = useState(5)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
+  const [batchRunning, setBatchRunning] = useState(false)
+  const [batchLog, setBatchLog] = useState<string[]>([])
+  const [batchSize, setBatchSize] = useState(10)
 
   // Editing state
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -320,6 +326,45 @@ export default function AdminEnrichmentPage() {
     setActionLoading(null)
   }
 
+  const handleBatchEnrich = async (mode: "new" | "backfill") => {
+    if (!confirm(`Run batch ${mode === "backfill" ? "backfill (add key teachings to existing)" : "enrich & auto-publish"} for ${batchSize} hadiths?`)) return
+    setBatchRunning(true)
+    setBatchLog([`Starting ${mode} batch (${batchSize} hadiths)...`])
+    try {
+      const token = await getToken()
+      const res = await fetch("/api/enrich/batch", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          collection_slug: filterCollection || undefined,
+          batch_size: batchSize,
+          auto_publish: true,
+          mode,
+        }),
+      })
+      const result = await res.json()
+      if (res.ok) {
+        setBatchLog((prev) => [
+          ...prev,
+          `Done: ${result.success} success, ${result.failed} failed (${result.processed} processed)`,
+          ...(result.results || [])
+            .filter((r: { success: boolean }) => !r.success)
+            .map((r: { hadithId?: string; enrichmentId?: string; error?: string }) => `  Failed ${r.hadithId || r.enrichmentId}: ${r.error}`),
+        ])
+        await fetchStats()
+        await fetchEnrichments()
+      } else {
+        setBatchLog((prev) => [...prev, `Error: ${result.error}`])
+      }
+    } catch (err) {
+      setBatchLog((prev) => [...prev, `Error: ${err instanceof Error ? err.message : "Unknown"}`])
+    }
+    setBatchRunning(false)
+  }
+
   const startEdit = (e: Enrichment) => {
     setEditingId(e.id)
     setEditSummary(e.summary_line || "")
@@ -475,6 +520,58 @@ export default function AdminEnrichmentPage() {
           </div>
         </div>
 
+        {/* Batch Enrich Controls */}
+        <div className="premium-card rounded-xl p-4 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <Play className="w-4 h-4 text-[#C5A059]" />
+            <h3 className="text-sm font-semibold text-[#1a1f36]">Batch Enrich & Auto-Publish</h3>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+              {stats ? `${stats.remaining.toLocaleString()} remaining` : "..."}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Process hadiths through GPT-4o-mini to generate summary, key teaching (EN+AR), category, and tags. Auto-publishes results.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <select
+              value={batchSize}
+              onChange={(e) => setBatchSize(Number(e.target.value))}
+              className="text-sm border border-[#e5e7eb] rounded-lg px-3 py-2 bg-transparent w-24"
+            >
+              {[5, 10, 20, 30, 50].map((n) => (
+                <option key={n} value={n}>
+                  {n}
+                </option>
+              ))}
+            </select>
+            <button
+              onClick={() => handleBatchEnrich("new")}
+              disabled={batchRunning}
+              className="emerald-button px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+            >
+              {batchRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+              Enrich New Hadiths
+            </button>
+            <button
+              onClick={() => handleBatchEnrich("backfill")}
+              disabled={batchRunning}
+              className="px-4 py-2 rounded-lg text-sm font-medium border border-[#C5A059] text-[#C5A059] hover:bg-[#C5A059]/10 transition-colors flex items-center gap-2"
+            >
+              {batchRunning ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+              Backfill Key Teachings
+            </button>
+          </div>
+          {batchLog.length > 0 && (
+            <div className="bg-[#1a1f36] rounded-lg p-3 max-h-40 overflow-y-auto">
+              {batchLog.map((line, i) => (
+                <p key={i} className="text-xs font-mono text-emerald-400">
+                  {line}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Review Queue */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -581,6 +678,26 @@ export default function AdminEnrichmentPage() {
                           </p>
                         )}
                         <p className="text-sm text-[#4a5568] leading-relaxed">{parsed.text}</p>
+                      </div>
+                    )}
+
+                    {/* Key Teaching */}
+                    {e.key_teaching_en && (
+                      <div className="bg-white rounded-lg p-3 border border-[#C5A059]/20">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-[#C5A059] mb-1">
+                          Key Teaching (EN)
+                        </p>
+                        <p className="text-xs text-[#4a5568] leading-relaxed">{e.key_teaching_en}</p>
+                        {e.key_teaching_ar && (
+                          <>
+                            <p className="text-[10px] font-bold uppercase tracking-wider text-[#C5A059] mb-1 mt-3">
+                              Key Teaching (AR)
+                            </p>
+                            <p className="text-xs text-[#4a5568] leading-relaxed text-right" dir="rtl" lang="ar">
+                              {e.key_teaching_ar}
+                            </p>
+                          </>
+                        )}
                       </div>
                     )}
 

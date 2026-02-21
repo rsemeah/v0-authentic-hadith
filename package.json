@@ -9,7 +9,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/groq": "^2.0.0",
+    "@ai-sdk/groq": "3.0.24",
     "@ai-sdk/react": "^3.0.0",
     "@expo/metro-runtime": "latest",
     "@hookform/resolvers": "^3.10.0",
@@ -75,8 +75,8 @@
     "react-markdown": "^9.0.1",
     "react-native": "0.84.0",
     "react-native-gesture-handler": "latest",
-    "react-native-purchases": "9.10.1",
-    "react-native-purchases-ui": "9.10.1",
+    "react-native-purchases": "9.10.3",
+    "react-native-purchases-ui": "9.10.3",
     "react-native-reanimated": "latest",
     "react-native-safe-area-context": "5.6.2",
     "react-native-screens": "latest",

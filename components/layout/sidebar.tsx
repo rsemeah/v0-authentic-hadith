@@ -262,6 +262,32 @@ export function Sidebar() {
               </li>
             )
           })}
+          {/* Theme toggle - always visible under About */}
+          {mounted && (
+            <li>
+              <button
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg",
+                  "transition-all duration-200 group",
+                  "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  collapsed && "justify-center px-0",
+                )}
+                title={collapsed ? (resolvedTheme === "dark" ? "Light mode" : "Dark mode") : undefined}
+              >
+                {resolvedTheme === "dark" ? (
+                  <Sun className="w-5 h-5 flex-shrink-0 text-[#C5A059]" />
+                ) : (
+                  <Moon className="w-5 h-5 flex-shrink-0" />
+                )}
+                {!collapsed && (
+                  <span className="text-sm whitespace-nowrap">
+                    {resolvedTheme === "dark" ? "Light Mode" : "Dark Mode"}
+                  </span>
+                )}
+              </button>
+            </li>
+          )}
         </ul>
 
         {/* User */}
@@ -307,35 +333,13 @@ export function Sidebar() {
           )}
         </div>
 
-        {/* Theme & Collapse */}
-        <div className="p-2 border-t border-border flex items-center gap-2">
-          {mounted && (
-            <button
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className={cn(
-                "flex items-center justify-center gap-2 py-2 rounded-lg",
-                "text-muted-foreground hover:text-foreground hover:bg-muted transition-all",
-                collapsed ? "w-full" : "px-3",
-              )}
-              aria-label="Toggle theme"
-              title={resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-            >
-              {resolvedTheme === "dark" ? (
-                <Sun className="w-5 h-5 text-[#C5A059]" />
-              ) : (
-                <Moon className="w-5 h-5" />
-              )}
-              {!collapsed && (
-                <span className="text-xs">{resolvedTheme === "dark" ? "Light" : "Dark"}</span>
-              )}
-            </button>
-          )}
+        {/* Collapse */}
+        <div className="p-2 border-t border-border">
           <button
             onClick={() => setCollapsed(!collapsed)}
             className={cn(
-              "flex items-center justify-center gap-2 py-2 rounded-lg",
+              "w-full flex items-center justify-center gap-2 py-2 rounded-lg",
               "text-muted-foreground hover:text-foreground hover:bg-muted transition-all",
-              collapsed ? "w-full" : "flex-1",
             )}
             aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >

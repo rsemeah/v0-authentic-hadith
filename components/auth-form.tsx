@@ -42,8 +42,27 @@ export function AuthForm() {
       return
     }
 
-    // Check if user has completed onboarding
+    // Ensure profile exists
     if (data?.user) {
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("user_id", data.user.id)
+        .single()
+
+      if (!existingProfile) {
+        const { error: profileErr } = await supabase.from("profiles").insert({
+          user_id: data.user.id,
+          name: data.user.user_metadata?.full_name || data.user.user_metadata?.name || null,
+          avatar_url: data.user.user_metadata?.avatar_url || null,
+          role: "user",
+          subscription_tier: "free",
+          subscription_status: "none",
+        })
+        // Profile create error is non-fatal
+      }
+
+      // Check if user has completed onboarding
       const { data: prefs } = await supabase
         .from("user_preferences")
         .select("onboarded")

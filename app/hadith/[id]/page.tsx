@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2, Hash, FolderOpen } from "lucide-react"
+import { ChevronLeft, Bookmark, Share2, BookOpen, ImageIcon, CheckCircle2, Hash, FolderOpen, Sparkles, Loader2 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 import { DiscussionSection } from "@/components/hadith/discussion-section"
@@ -30,8 +30,11 @@ export default function HadithDetailPage() {
   const [isSaved, setIsSaved] = useState(false)
   const [isRead, setIsRead] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [summarizing, setSummarizing] = useState(false)
   const [enrichment, setEnrichment] = useState<{
     summary_line: string | null
+    key_teaching_en: string | null
+    key_teaching_ar: string | null
     category: { slug: string; name_en: string } | null
     tags: Array<{ slug: string; name_en: string }>
   } | null>(null)
@@ -78,7 +81,7 @@ export default function HadithDetailPage() {
       // Fetch enrichment data
       const { data: enrichData } = await supabase
         .from("hadith_enrichment")
-        .select("summary_line, category:categories!category_id(slug, name_en)")
+        .select("summary_line, key_teaching_en, key_teaching_ar, category:categories!category_id(slug, name_en)")
         .eq("hadith_id", params.id)
         .eq("status", "published")
         .single()
@@ -93,6 +96,8 @@ export default function HadithDetailPage() {
 
         setEnrichment({
           summary_line: enrichData.summary_line,
+          key_teaching_en: enrichData.key_teaching_en,
+          key_teaching_ar: enrichData.key_teaching_ar,
           category: enrichData.category as { slug: string; name_en: string } | null,
           tags: (tagData || []).map((t: { tag: { slug: string; name_en: string } | null }) => t.tag).filter(Boolean) as Array<{ slug: string; name_en: string }>,
         })
@@ -103,6 +108,33 @@ export default function HadithDetailPage() {
 
     fetchHadith()
   }, [supabase, params.id])
+
+  const handleSummarize = async () => {
+    if (!hadith) return
+    setSummarizing(true)
+    try {
+      const res = await fetch("/api/summarize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hadithId: hadith.id }),
+      })
+      const data = await res.json()
+      if (res.ok && (data.key_teaching_en || data.summary_line)) {
+        setEnrichment({
+          summary_line: data.summary_line || null,
+          key_teaching_en: data.key_teaching_en || null,
+          key_teaching_ar: data.key_teaching_ar || null,
+          category: enrichment?.category || null,
+          tags: enrichment?.tags || [],
+        })
+      } else {
+        console.error("[v0] Summarize API error:", data.error)
+      }
+    } catch (err) {
+      console.error("[v0] Summarize failed:", err)
+    }
+    setSummarizing(false)
+  }
 
   const handleSave = async () => {
     const {
@@ -309,6 +341,27 @@ export default function HadithDetailPage() {
             </div>
           )}
 
+          {/* Key Teaching - only shown when enrichment exists */}
+          {enrichment?.key_teaching_en && (
+            <div className="mb-8 rounded-xl border border-[#C5A059]/20 bg-[#C5A059]/5 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <BookOpen className="w-4 h-4 text-[#C5A059]" />
+                <h3 className="text-sm font-semibold text-[#C5A059] uppercase tracking-wider">Key Teaching</h3>
+              </div>
+              <p className="text-sm leading-relaxed text-foreground/80">{enrichment.key_teaching_en}</p>
+              {enrichment.key_teaching_ar && (
+                <p
+                  className="mt-4 pt-4 border-t border-[#C5A059]/15 text-sm leading-[2] text-foreground/70 text-right"
+                  dir="rtl"
+                  lang="ar"
+                  style={{ fontFamily: "Amiri, serif" }}
+                >
+                  {enrichment.key_teaching_ar}
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Arabic Text */}
           <div className="mb-8" dir="rtl" lang="ar">
             <p
@@ -357,6 +410,24 @@ export default function HadithDetailPage() {
               <span className="text-foreground font-medium">{gradeLabels[hadith.grade]}</span>
             </div>
           </div>
+
+          {/* Summarize Button - below metadata, above mark as read */}
+          {!enrichment?.key_teaching_en && (
+            <div className="mt-6">
+              <button
+                onClick={handleSummarize}
+                disabled={summarizing}
+                className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 transition-all disabled:opacity-50 w-full justify-center shadow-sm"
+              >
+                {summarizing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                {summarizing ? "Summarizing..." : "Summarize this Hadith"}
+              </button>
+            </div>
+          )}
 
           {/* Mark as Read Button */}
           <div className="mt-6 pt-6 border-t border-border">

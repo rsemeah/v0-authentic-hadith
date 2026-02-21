@@ -37,6 +37,10 @@ interface Hadith {
   narrator: string
   hadith_number: number
   is_saved?: boolean
+  summary_line?: string
+  key_teaching_en?: string
+  category?: { slug: string; name_en: string } | null
+  tags?: Array<{ slug: string; name_en: string }>
 }
 
 export default function ChapterDetailPage() {
@@ -110,15 +114,52 @@ export default function ChapterDetailPage() {
               savedHadithIds = savedData?.map((s) => s.hadith_id) || []
             }
 
-            // Merge hadith data with hadith_number and saved status
+            // Batch-fetch enrichment data for all hadiths
+            const { data: enrichments } = await supabase
+              .from("hadith_enrichment")
+              .select("hadith_id, summary_line, key_teaching_en, category_id, category:categories!category_id(slug, name_en)")
+              .in("hadith_id", hadithIds)
+              .eq("status", "published")
+
+            const { data: allTags } = await supabase
+              .from("hadith_tags")
+              .select("hadith_id, tag:tags!tag_id(slug, name_en)")
+              .in("hadith_id", hadithIds)
+              .eq("status", "published")
+
+            // Build enrichment lookup maps
+            const enrichmentMap = new Map<string, { summary_line: string | null; key_teaching_en: string | null; category: { slug: string; name_en: string } | null }>()
+            for (const e of enrichments || []) {
+              enrichmentMap.set(e.hadith_id, {
+                summary_line: e.summary_line,
+                key_teaching_en: e.key_teaching_en,
+                category: e.category as { slug: string; name_en: string } | null,
+              })
+            }
+
+            const tagsMap = new Map<string, Array<{ slug: string; name_en: string }>>()
+            for (const t of allTags || []) {
+              const tag = t.tag as { slug: string; name_en: string } | null
+              if (!tag) continue
+              const existing = tagsMap.get(t.hadith_id) || []
+              existing.push(tag)
+              tagsMap.set(t.hadith_id, existing)
+            }
+
+            // Merge hadith data with hadith_number, saved status, and enrichment
             const mergedHadiths = collectionHadiths
               .map((ch) => {
                 const hadith = hadithsData.find((h) => h.id === ch.hadith_id)
                 if (!hadith) return null
+                const enrichment = enrichmentMap.get(hadith.id)
                 return {
                   ...hadith,
                   hadith_number: ch.hadith_number,
                   is_saved: savedHadithIds.includes(hadith.id),
+                  summary_line: enrichment?.summary_line || undefined,
+                  key_teaching_en: enrichment?.key_teaching_en || undefined,
+                  category: enrichment?.category || undefined,
+                  tags: tagsMap.get(hadith.id) || undefined,
                 }
               })
               .filter(Boolean) as Hadith[]

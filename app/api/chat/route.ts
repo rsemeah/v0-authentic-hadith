@@ -1,14 +1,9 @@
 import { streamText, tool, convertToModelMessages, UIMessage } from "ai"
-import { createGroq } from "@ai-sdk/groq"
 import { z } from "zod"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { checkAIQuota, incrementAIUsage } from "@/lib/quotas/check"
 
 export const maxDuration = 30
-
-const groq = createGroq({
-  apiKey: process.env.GROQ_API_KEY,
-})
 
 const BASE_SYSTEM_PROMPT = `You are HadithChat, a knowledgeable Islamic scholar assistant specializing in hadith studies.
 
@@ -91,20 +86,9 @@ function buildSystemPrompt(madhab?: string | null, level?: string | null): strin
 }
 
 export async function POST(req: Request) {
-  if (!process.env.GROQ_API_KEY) {
-    return new Response(
-      JSON.stringify({
-        error: "AI service is not configured. Please set the GROQ_API_KEY environment variable.",
-      }),
-      { status: 503, headers: { "Content-Type": "application/json" } },
-    )
-  }
-
   try {
-    console.log("[v0] Chat API: POST received")
     const body = await req.json()
     const messages: UIMessage[] = body.messages
-    console.log("[v0] Chat API: messages count:", messages?.length)
 
     // Auth check
     const supabase = await getSupabaseServerClient()
@@ -112,7 +96,6 @@ export async function POST(req: Request) {
       data: { user },
     } = await supabase.auth.getUser()
 
-    console.log("[v0] Chat API: user:", user?.id ?? "NONE")
     if (!user) {
       return new Response(
         JSON.stringify({ error: "You must be logged in to use the AI assistant." }),
@@ -121,9 +104,7 @@ export async function POST(req: Request) {
     }
 
     // Quota check
-    console.log("[v0] Chat API: checking quota for user", user.id)
     const quotaCheck = await checkAIQuota(user.id)
-    console.log("[v0] Chat API: quota result:", JSON.stringify(quotaCheck))
 
     if (!quotaCheck.allowed) {
       return new Response(
@@ -162,12 +143,10 @@ export async function POST(req: Request) {
       prefs?.learning_level,
     )
 
-    console.log("[v0] Chat API: converting messages")
     const convertedMessages = await convertToModelMessages(messages)
-    console.log("[v0] Chat API: converted, starting streamText with Groq")
 
     const result = streamText({
-      model: groq("llama-3.3-70b-versatile"),
+      model: "openai/gpt-4o-mini",
       system: systemPrompt,
       messages: convertedMessages,
       tools: {
@@ -180,7 +159,6 @@ export async function POST(req: Request) {
           }),
           execute: async ({ query, limit }) => {
             try {
-              console.log("[v0] Tool searchHadiths called with:", query)
               const supabase = await getSupabaseServerClient()
               const { data, error } = await supabase
                 .from("hadiths")
@@ -193,11 +171,8 @@ export async function POST(req: Request) {
                 .limit(limit ?? 5)
 
               if (error) {
-                console.log("[v0] Tool searchHadiths error:", error.message)
                 return { results: [], error: error.message }
               }
-
-              console.log("[v0] Tool searchHadiths found:", data?.length, "results")
 
               const cleaned = (data || []).map((h) => {
                 let text = h.english_translation || ""
@@ -230,7 +205,6 @@ export async function POST(req: Request) {
       console.error("[v0] Failed to increment usage:", err),
     )
 
-    console.log("[v0] Chat API: returning stream response")
     return result.toUIMessageStreamResponse()
   } catch (error) {
     console.error("[v0] Chat API error:", error)

@@ -100,18 +100,23 @@ export default function LearnPage() {
 
   useEffect(() => {
     async function loadData() {
-      const [pathsRes, modulesRes, lessonsRes, booksRes] = await Promise.all([
+      const [pathsRes, modulesRes, lessonsRes, booksRes, collectionsRes] = await Promise.all([
         supabase.from("learning_paths").select("*").order("sort_order"),
         supabase.from("learning_modules").select("*").order("sort_order"),
         supabase.from("learning_lessons").select("*").order("sort_order"),
-        supabase.from("books").select("id, number, collection:collections!collection_id(slug)"),
+        supabase.from("books").select("id, number, collection_id"),
+        supabase.from("collections").select("id, slug"),
       ])
 
       // Build book ID map for deep-linking
-      if (booksRes.data) {
+      if (booksRes.data && collectionsRes.data) {
+        const collSlugMap = new Map<string, string>()
+        for (const c of collectionsRes.data) {
+          collSlugMap.set(c.id, c.slug)
+        }
         const map: Record<string, string> = {}
         for (const b of booksRes.data) {
-          const collSlug = (b.collection as { slug: string } | null)?.slug
+          const collSlug = collSlugMap.get(b.collection_id)
           if (collSlug) map[`${collSlug}:${b.number}`] = b.id
         }
         setBookIdMap(map)

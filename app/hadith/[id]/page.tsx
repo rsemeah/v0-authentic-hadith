@@ -119,17 +119,19 @@ export default function HadithDetailPage() {
         body: JSON.stringify({ hadithId: hadith.id }),
       })
       const data = await res.json()
-      if (res.ok && data.key_teaching_en) {
-        setEnrichment((prev) => ({
-          summary_line: data.summary_line || prev?.summary_line || null,
-          key_teaching_en: data.key_teaching_en,
+      if (res.ok && (data.key_teaching_en || data.summary_line)) {
+        setEnrichment({
+          summary_line: data.summary_line || null,
+          key_teaching_en: data.key_teaching_en || null,
           key_teaching_ar: data.key_teaching_ar || null,
-          category: prev?.category || null,
-          tags: prev?.tags || [],
-        }))
+          category: enrichment?.category || null,
+          tags: enrichment?.tags || [],
+        })
+      } else {
+        console.error("[v0] Summarize API error:", data.error)
       }
     } catch (err) {
-      console.error("Summarize failed:", err)
+      console.error("[v0] Summarize failed:", err)
     }
     setSummarizing(false)
   }
@@ -339,8 +341,8 @@ export default function HadithDetailPage() {
             </div>
           )}
 
-          {/* Key Teaching Note / Summarize Button */}
-          {enrichment?.key_teaching_en ? (
+          {/* Key Teaching - only shown when enrichment exists */}
+          {enrichment?.key_teaching_en && (
             <div className="mb-8 rounded-xl border border-[#C5A059]/20 bg-[#C5A059]/5 p-5">
               <div className="flex items-center gap-2 mb-3">
                 <BookOpen className="w-4 h-4 text-[#C5A059]" />
@@ -357,21 +359,6 @@ export default function HadithDetailPage() {
                   {enrichment.key_teaching_ar}
                 </p>
               )}
-            </div>
-          ) : (
-            <div className="mb-8">
-              <button
-                onClick={handleSummarize}
-                disabled={summarizing}
-                className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium border-2 border-dashed border-[#C5A059]/30 text-[#C5A059] hover:bg-[#C5A059]/5 hover:border-[#C5A059]/50 transition-all disabled:opacity-50 w-full justify-center"
-              >
-                {summarizing ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Sparkles className="w-4 h-4" />
-                )}
-                {summarizing ? "Generating summary & key teaching..." : "Summarize this Hadith"}
-              </button>
             </div>
           )}
 
@@ -423,6 +410,24 @@ export default function HadithDetailPage() {
               <span className="text-foreground font-medium">{gradeLabels[hadith.grade]}</span>
             </div>
           </div>
+
+          {/* Summarize Button - below metadata, above mark as read */}
+          {!enrichment?.key_teaching_en && (
+            <div className="mt-6">
+              <button
+                onClick={handleSummarize}
+                disabled={summarizing}
+                className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-medium bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white hover:opacity-90 transition-all disabled:opacity-50 w-full justify-center shadow-sm"
+              >
+                {summarizing ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4" />
+                )}
+                {summarizing ? "Summarizing..." : "Summarize this Hadith"}
+              </button>
+            </div>
+          )}
 
           {/* Mark as Read Button */}
           <div className="mt-6 pt-6 border-t border-border">

@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const text = (hadith.english_translation || "").slice(0, 800)
 
     const { output } = await generateText({
-      model: "groq/llama-3.3-70b-versatile",
+      model: "openai/gpt-4o-mini",
       prompt: `You are a hadith scholar. Analyze this hadith and return JSON.
 
 Hadith: "${text}"

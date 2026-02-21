@@ -22,6 +22,8 @@ export default function BulkEnrichPage() {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [log])
 
+  const [autoStarted, setAutoStarted] = useState(false)
+
   // Fetch counts on mount
   useEffect(() => {
     async function fetchCounts() {
@@ -33,6 +35,17 @@ export default function BulkEnrichPage() {
     }
     fetchCounts()
   }, [stats])
+
+  // Auto-start on mount if ?auto=true
+  useEffect(() => {
+    if (autoStarted) return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("auto") === "true") {
+      setAutoStarted(true)
+      // Small delay to let counts load first
+      setTimeout(() => runBatch(), 1500)
+    }
+  }, [autoStarted])
 
   const getToken = async () => {
     const supabase = getSupabaseBrowserClient()

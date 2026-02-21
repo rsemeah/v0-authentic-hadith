@@ -133,7 +133,6 @@ Rules:
           rationale: object.rationale,
           suggested_by: "openai-gpt-4o-mini",
           methodology_version: "v1.1",
-          published_at: new Date().toISOString(),
         })
         .select("id")
         .single()

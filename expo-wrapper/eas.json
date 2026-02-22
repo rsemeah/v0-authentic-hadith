@@ -9,16 +9,25 @@
       "distribution": "internal",
       "ios": {
         "simulator": true
+      },
+      "env": {
+        "EXPO_PUBLIC_WEB_APP_URL": "https://v0-authentic-hadith.vercel.app"
       }
     },
     "preview": {
       "distribution": "internal",
       "ios": {
         "simulator": false
+      },
+      "env": {
+        "EXPO_PUBLIC_WEB_APP_URL": "https://v0-authentic-hadith.vercel.app"
       }
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "env": {
+        "EXPO_PUBLIC_WEB_APP_URL": "https://v0-authentic-hadith.vercel.app"
+      }
     }
   },
   "submit": {
@@ -30,7 +39,7 @@
       },
       "android": {
         "serviceAccountKeyPath": "",
-        "track": "production"
+        "track": "internal"
       }
     }
   }

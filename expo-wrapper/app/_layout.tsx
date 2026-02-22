@@ -19,7 +19,7 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <RevenueCatProvider>
-        <StatusBar style="light" backgroundColor="#1B5E43" />
+        <StatusBar style="auto" />
         <Stack
           screenOptions={{
             headerShown: false,

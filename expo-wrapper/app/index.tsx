@@ -7,6 +7,8 @@ import {
   ActivityIndicator,
   Text,
   Linking,
+  useColorScheme,
+  TouchableOpacity,
 } from "react-native";
 import { WebView, WebViewMessageEvent } from "react-native-webview";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -19,6 +21,25 @@ const WEB_APP_URL =
   Constants.expoConfig?.extra?.webAppUrl ||
   "https://v0-authentic-hadith.vercel.app";
 
+const COLORS = {
+  light: {
+    background: "#F8F6F2",
+    accent: "#C5A059",
+    title: "#2C2416",
+    subtitle: "#6B5D4D",
+    buttonBorder: "#1B5E43",
+    buttonText: "#1B5E43",
+  },
+  dark: {
+    background: "#1A1A1A",
+    accent: "#C5A059",
+    title: "#F8F6F2",
+    subtitle: "#A89B8C",
+    buttonBorder: "#4a9973",
+    buttonText: "#4a9973",
+  },
+};
+
 export default function AppScreen() {
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
@@ -26,6 +47,8 @@ export default function AppScreen() {
   const [hasError, setHasError] = useState(false);
   const insets = useSafeAreaInsets();
   const { isPro, restorePurchases, refreshCustomerInfo } = useRevenueCat();
+  const colorScheme = useColorScheme();
+  const colors = COLORS[colorScheme === "dark" ? "dark" : "light"];
 
   // Handle Android back button
   useEffect(() => {
@@ -61,7 +84,6 @@ export default function AppScreen() {
 
         switch (data.type) {
           case "SHOW_PAYWALL": {
-            // Present RevenueCat's native paywall
             const result = await RevenueCatUI.presentPaywallIfNeeded({
               requiredEntitlementIdentifier: "RedLantern Studios Pro",
             });
@@ -70,7 +92,6 @@ export default function AppScreen() {
               result === PAYWALL_RESULT.PURCHASED ||
               result === PAYWALL_RESULT.RESTORED;
 
-            // Notify webview of result
             webViewRef.current?.injectJavaScript(`
               window.dispatchEvent(new CustomEvent('nativePaywallResult', { detail: { success: ${success} } }));
               true;
@@ -98,7 +119,6 @@ export default function AppScreen() {
           }
 
           case "USER_LOGIN": {
-            // Sync Supabase user ID to RevenueCat for webhook linking
             if (data.userId) {
               try {
                 await Purchases.logIn(data.userId);
@@ -120,7 +140,6 @@ export default function AppScreen() {
           }
 
           case "PAGE_LOADED": {
-            // Send initial subscription status when page loads
             webViewRef.current?.injectJavaScript(`
               window.__NATIVE_SUBSCRIPTION_STATUS__ = ${JSON.stringify({ isPro })};
               window.__IS_NATIVE_APP__ = true;
@@ -146,7 +165,7 @@ export default function AppScreen() {
     []
   );
 
-  // Inject JS to handle viewport and theme color for native feel
+  // Inject JS to handle viewport and native app detection
   const injectedJS = `
     (function() {
       // Set viewport meta for proper scaling
@@ -154,8 +173,8 @@ export default function AppScreen() {
       if (meta) {
         meta.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover');
       }
-      
-      // Add CSS to handle safe area insets
+
+      // Add CSS to handle safe area insets and native feel
       const style = document.createElement('style');
       style.textContent = \`
         body {
@@ -163,15 +182,19 @@ export default function AppScreen() {
           -webkit-user-select: none;
           overscroll-behavior-y: none;
         }
+        /* Hide elements that don't make sense in native app */
+        .native-hidden {
+          display: none !important;
+        }
       \`;
       document.head.appendChild(style);
-      
+
       // Mark as native app for the web code to detect
       window.__IS_NATIVE_APP__ = true;
-      
+
       // Notify React Native when page is ready
       window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'PAGE_LOADED' }));
-      
+
       true;
     })();
   `;
@@ -194,20 +217,30 @@ export default function AppScreen() {
 
   if (hasError) {
     return (
-      <View style={[styles.errorContainer, { paddingTop: insets.top }]}>
-        <Text style={styles.errorTitle}>Unable to Connect</Text>
-        <Text style={styles.errorMessage}>
+      <View
+        style={[
+          styles.errorContainer,
+          { paddingTop: insets.top, backgroundColor: colors.background },
+        ]}
+      >
+        <Text style={[styles.errorTitle, { color: colors.title }]}>
+          Unable to Connect
+        </Text>
+        <Text style={[styles.errorMessage, { color: colors.subtitle }]}>
           Please check your internet connection and try again.
         </Text>
-        <Text
-          style={styles.retryButton}
+        <TouchableOpacity
+          style={[styles.retryButton, { borderColor: colors.buttonBorder }]}
           onPress={() => {
             setHasError(false);
             setIsLoading(true);
           }}
+          activeOpacity={0.7}
         >
-          Retry
-        </Text>
+          <Text style={[styles.retryButtonText, { color: colors.buttonText }]}>
+            Retry
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -218,13 +251,14 @@ export default function AppScreen() {
         styles.container,
         {
           paddingTop: Platform.OS === "ios" ? insets.top : 0,
+          backgroundColor: colors.background,
         },
       ]}
     >
       <WebView
         ref={webViewRef}
         source={{ uri: WEB_APP_URL }}
-        style={styles.webview}
+        style={[styles.webview, { backgroundColor: colors.background }]}
         onNavigationStateChange={handleNavigationStateChange}
         onShouldStartLoadWithRequest={handleShouldStartLoadWithRequest}
         onMessage={handleWebViewMessage}
@@ -259,12 +293,19 @@ export default function AppScreen() {
         textZoom={100}
         overScrollMode="never"
         // Match app background on load
-        backgroundColor="#F8F6F2"
+        backgroundColor={colors.background}
       />
       {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#C5A059" />
-          <Text style={styles.loadingText}>Loading Authentic Hadith...</Text>
+        <View
+          style={[
+            styles.loadingOverlay,
+            { backgroundColor: colors.background },
+          ]}
+        >
+          <ActivityIndicator size="large" color={colors.accent} />
+          <Text style={[styles.loadingText, { color: colors.accent }]}>
+            Loading Authentic Hadith...
+          </Text>
         </View>
       )}
     </View>
@@ -274,54 +315,46 @@ export default function AppScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F6F2",
   },
   webview: {
     flex: 1,
-    backgroundColor: "#F8F6F2",
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#F8F6F2",
     justifyContent: "center",
     alignItems: "center",
     gap: 16,
   },
   loadingText: {
-    color: "#C5A059",
     fontSize: 16,
     fontWeight: "500",
     marginTop: 8,
   },
   errorContainer: {
     flex: 1,
-    backgroundColor: "#F8F6F2",
     justifyContent: "center",
     alignItems: "center",
     padding: 32,
   },
   errorTitle: {
-    color: "#2C2416",
     fontSize: 22,
     fontWeight: "700",
     marginBottom: 12,
   },
   errorMessage: {
-    color: "#6B5D4D",
     fontSize: 16,
     textAlign: "center",
     lineHeight: 24,
     marginBottom: 24,
   },
   retryButton: {
-    color: "#1B5E43",
-    fontSize: 18,
-    fontWeight: "600",
+    borderWidth: 1,
+    borderRadius: 8,
     paddingHorizontal: 32,
     paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: "#1B5E43",
-    borderRadius: 8,
-    overflow: "hidden",
+  },
+  retryButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
   },
 });

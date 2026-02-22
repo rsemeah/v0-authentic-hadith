@@ -21,7 +21,10 @@
         "usesNonExemptEncryption": false
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false
+        }
       }
     },
     "android": {
@@ -30,7 +33,8 @@
         "backgroundColor": "#1B5E43"
       },
       "package": "com.authentichadith.app",
-      "versionCode": 1
+      "versionCode": 1,
+      "permissions": ["INTERNET", "ACCESS_NETWORK_STATE"]
     },
     "web": {
       "bundler": "metro",
@@ -38,7 +42,8 @@
       "favicon": "./assets/favicon.jpg"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "react-native-purchases"
     ],
     "experiments": {
       "typedRoutes": true
@@ -47,8 +52,11 @@
       "router": {
         "origin": false
       },
+      "eas": {
+        "projectId": ""
+      },
       "webAppUrl": "https://v0-authentic-hadith.vercel.app",
-      "revenueCatApiKeyApple": "test_gngYicqPNakjsEBKvUwfIlFHrUg",
+      "revenueCatApiKeyApple": "",
       "revenueCatApiKeyGoogle": "",
       "revenueCatEntitlementId": "RedLantern Studios Pro"
     }

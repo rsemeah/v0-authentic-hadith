@@ -52,6 +52,7 @@ const drawerGroups = [
     items: [
       { icon: Trophy, label: "Achievements", href: "/achievements" },
       { icon: Bookmark, label: "Saved", href: "/saved" },
+      { icon: Users, label: "People", href: "/people" },
     ],
   },
   {

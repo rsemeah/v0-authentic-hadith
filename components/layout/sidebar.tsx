@@ -75,6 +75,7 @@ const navGroups: NavGroup[] = [
       { id: "my-hadith", icon: Star, label: "My Hadith", href: "/my-hadith", iconColor: "text-[#c5a059]/70", iconHover: "group-hover:text-[#c5a059]" },
       { id: "achievements", icon: Trophy, label: "Achievements", href: "/achievements", iconColor: "text-[#e8c77d]/80", iconHover: "group-hover:text-[#c5a059]" },
       { id: "saved", icon: Bookmark, label: "Saved", href: "/saved" },
+      { id: "people", icon: Users, label: "People", href: "/people", iconColor: "text-[#2d7a5b]/60", iconHover: "group-hover:text-[#1b5e43]" },
     ],
   },
   {

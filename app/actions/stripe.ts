@@ -86,9 +86,18 @@ export async function startCheckoutSession(productId: string) {
     sessionParams.subscription_data = subscriptionData
   }
 
+  console.log("[v0] Creating Stripe checkout session with params:", JSON.stringify({
+    ui_mode: sessionParams.ui_mode,
+    redirect_on_completion: sessionParams.redirect_on_completion,
+    mode: sessionParams.mode,
+    has_return_url: "return_url" in sessionParams,
+  }))
+
   const session = await stripe.checkout.sessions.create(
     sessionParams as Parameters<typeof stripe.checkout.sessions.create>[0],
   )
+
+  console.log("[v0] Stripe session created successfully:", session.id, "client_secret exists:", !!session.client_secret)
 
   if (!session.client_secret) {
     throw new Error("Failed to create checkout session -- no client secret returned")

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { startCheckoutSession } from "@/app/actions/stripe"
-import { AlertCircle, RotateCcw } from "lucide-react"
+import { AlertCircle, LogIn, RotateCcw } from "lucide-react"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
 
@@ -36,18 +36,34 @@ export default function Checkout({ productId }: { productId: string }) {
   }
 
   if (error) {
+    const isAuthError = error.toLowerCase().includes("logged in")
     return (
       <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 text-center">
         <AlertCircle className="w-8 h-8 text-destructive mx-auto mb-3" />
-        <p className="text-sm font-medium text-foreground mb-1">Checkout Error</p>
+        <p className="text-sm font-medium text-foreground mb-1">
+          {isAuthError ? "Sign in Required" : "Checkout Error"}
+        </p>
         <p className="text-xs text-muted-foreground mb-4">{error}</p>
-        <button
-          onClick={handleRetry}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-background border border-border text-sm font-medium hover:border-[#C5A059] transition-colors"
-        >
-          <RotateCcw className="w-4 h-4" />
-          Try Again
-        </button>
+        {isAuthError ? (
+          <button
+            onClick={() => {
+              const returnUrl = encodeURIComponent(`/pricing?plan=${productId}`)
+              router.push(`/login?redirect=${returnUrl}`)
+            }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-[#C5A059] to-[#E8C77D] text-white text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            <LogIn className="w-4 h-4" />
+            Sign In to Continue
+          </button>
+        ) : (
+          <button
+            onClick={handleRetry}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-background border border-border text-sm font-medium hover:border-[#C5A059] transition-colors"
+          >
+            <RotateCcw className="w-4 h-4" />
+            Try Again
+          </button>
+        )}
       </div>
     )
   }

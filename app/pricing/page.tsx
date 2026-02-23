@@ -96,14 +96,32 @@ function PricingContent() {
   const searchParams = useSearchParams()
   const planFromUrl = searchParams.get("plan")
   const validPlan = PRODUCTS.find((p) => p.id === planFromUrl)
-  const [selectedProduct, setSelectedProduct] = useState<string | null>(validPlan ? validPlan.id : null)
+  const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
   const [checkoutError, setCheckoutError] = useState<string | null>(null)
   const [isNative, setIsNative] = useState(false)
   const [isRestoring, setIsRestoring] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
     setIsNative(isNativeApp())
-  }, [])
+
+    // If a plan is in the URL, verify the user is logged in before showing checkout
+    if (validPlan) {
+      const supabase = getSupabaseBrowserClient()
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+          setSelectedProduct(validPlan.id)
+        } else {
+          // Not logged in -- redirect to login with return URL
+          const returnUrl = encodeURIComponent(`/pricing?plan=${validPlan.id}`)
+          router.push(`/login?redirect=${returnUrl}`)
+        }
+        setAuthChecked(true)
+      })
+    } else {
+      setAuthChecked(true)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSelectPlan = async (planId: string) => {
     if (isNative) {

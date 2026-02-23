@@ -410,7 +410,7 @@ export default function AboutPage() {
                 — The Authentic Hadith Team
               </p>
               <p className="text-xs text-muted-foreground mt-1 font-sans">
-                Red Lantern Studios
+                byRed
               </p>
             </div>
           </div>

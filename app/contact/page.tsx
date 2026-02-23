@@ -116,7 +116,7 @@ export default function ContactPage() {
 
         {/* Company Info */}
         <div className="mt-8 pt-8 border-t border-border text-center">
-          <p className="text-sm font-semibold text-foreground font-sans">Red Lantern Studios</p>
+          <p className="text-sm font-semibold text-foreground font-sans">byRed</p>
           <p className="text-xs text-muted-foreground mt-1 font-sans">
             Makers of Authentic Hadith
           </p>

@@ -39,11 +39,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ received: true, duplicate: true })
   }
 
-  // Record event
+  // Record event (id is the text PK -- use the Stripe event id)
   await supabase.from("stripe_events").insert({
+    id: event.id,
     stripe_event_id: event.id,
     event_type: event.type,
+    type: event.type,
     payload: event.data.object,
+    processed_at: new Date().toISOString(),
   })
 
   try {

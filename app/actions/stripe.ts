@@ -46,10 +46,6 @@ export async function startCheckoutSession(productId: string) {
       .eq("user_id", user.id)
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000")
-
   const isSubscription = product.mode === "subscription"
 
   // Build price_data inline so we don't depend on pre-created Stripe prices
@@ -69,9 +65,9 @@ export async function startCheckoutSession(productId: string) {
   const sessionParams: Record<string, unknown> = {
     customer: customerId,
     ui_mode: "embedded",
+    redirect_on_completion: "never",
     line_items: [{ price_data: priceData, quantity: 1 }],
     mode: product.mode,
-    return_url: `${baseUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     metadata: {
       supabase_user_id: user.id,
       product_id: product.id,
@@ -93,6 +89,10 @@ export async function startCheckoutSession(productId: string) {
   const session = await stripe.checkout.sessions.create(
     sessionParams as Parameters<typeof stripe.checkout.sessions.create>[0],
   )
+
+  if (!session.client_secret) {
+    throw new Error("Failed to create checkout session -- no client secret returned")
+  }
 
   return session.client_secret
 }

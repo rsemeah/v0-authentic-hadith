@@ -122,7 +122,7 @@ async function gatherUserStats(userId: string): Promise<UserStats> {
     { data: sunnahStreak },
   ] = await Promise.all([
     supabase.from("user_stats").select("*").eq("user_id", userId).single(),
-    supabase.from("user_streaks").select("current_streak, longest_streak").eq("user_id", userId).single(),
+    supabase.from("user_streaks").select("current_streak, longest_streak").eq("user_id", userId).maybeSingle(),
     supabase.from("profiles").select("created_at").eq("user_id", userId).single(),
     // Completed lessons count
     supabase

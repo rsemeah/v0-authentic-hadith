@@ -81,7 +81,7 @@ export default function ProgressPage() {
       .from("user_streaks")
       .select("*")
       .eq("user_id", user.id)
-      .single()
+      .maybeSingle()
 
     // Build collection progress
     if (collections) {
@@ -166,7 +166,7 @@ export default function ProgressPage() {
         .from("user_streaks")
         .select("*")
         .eq("user_id", user.id)
-        .single()
+        .maybeSingle()
 
       if (!existing) {
         await supabase.from("user_streaks").insert({

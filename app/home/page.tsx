@@ -219,7 +219,7 @@ export default function HomePage() {
             .from("user_streaks")
             .select("last_active_date")
             .eq("user_id", user.id)
-            .single()
+            .maybeSingle()
           if (streakRow) setLastActiveDate(streakRow.last_active_date)
 
           // Fetch continue reading -- last read hadith per collection

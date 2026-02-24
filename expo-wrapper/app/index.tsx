@@ -63,7 +63,7 @@ export default function AppScreen() {
           case "SHOW_PAYWALL": {
             // Present RevenueCat's native paywall
             const result = await RevenueCatUI.presentPaywallIfNeeded({
-              requiredEntitlementIdentifier: "RedLantern Studios Pro",
+              requiredEntitlementIdentifier: "byRed Pro",
             });
 
             const success =

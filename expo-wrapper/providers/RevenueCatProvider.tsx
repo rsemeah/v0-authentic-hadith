@@ -13,7 +13,7 @@ const API_KEY_GOOGLE =
   Constants.expoConfig?.extra?.revenueCatApiKeyGoogle || "";
 const ENTITLEMENT_ID =
   Constants.expoConfig?.extra?.revenueCatEntitlementId ||
-  "RedLantern Studios Pro";
+  "byRed Pro";
 
 interface RevenueCatContextType {
   isReady: boolean;

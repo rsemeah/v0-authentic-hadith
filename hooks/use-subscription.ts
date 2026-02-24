@@ -57,7 +57,7 @@ export function useSubscription(): UserSubscription {
         .in("status", ["active", "trialing", "lifetime"])
         .order("created_at", { ascending: false })
         .limit(1)
-        .single()
+        .maybeSingle()
 
       if (data) {
         setSub({

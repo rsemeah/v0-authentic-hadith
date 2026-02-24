@@ -373,7 +373,7 @@ function PricingContent() {
         {/* Fine print */}
         <p className="text-[11px] text-muted-foreground/60 text-center leading-relaxed">
           You can cancel anytime from your profile settings or device subscription manager.
-          No charge until your free trial ends. Prices shown in USD.
+          Monthly and Annual plans include a 7-day free trial — no charge until trial ends. Prices shown in USD.
         </p>
       </main>
     </div>

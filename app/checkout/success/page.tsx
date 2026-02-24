@@ -3,21 +3,42 @@
 import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { CheckCircle, Loader2 } from "lucide-react"
+import { CheckCircle, Loader2, AlertTriangle } from "lucide-react"
 import { Suspense } from "react"
 
 function SuccessContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get("session_id")
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
+  const [status, setStatus] = useState<"loading" | "success" | "pending" | "error">("loading")
 
   useEffect(() => {
-    if (sessionId) {
-      // Session exists, payment was completed
-      setStatus("success")
-    } else {
+    if (!sessionId) {
       setStatus("error")
+      return
     }
+
+    // Verify the session with our API
+    async function verify() {
+      try {
+        const res = await fetch(`/api/checkout/verify?session_id=${sessionId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.status === "complete" || data.payment_status === "paid" || data.payment_status === "no_payment_required") {
+            setStatus("success")
+          } else {
+            // Payment still processing (e.g. 3D Secure pending)
+            setStatus("pending")
+          }
+        } else {
+          setStatus("error")
+        }
+      } catch {
+        // If verification fails, still show success (webhook will handle activation)
+        setStatus("success")
+      }
+    }
+
+    verify()
   }, [sessionId])
 
   if (status === "loading") {
@@ -42,6 +63,25 @@ function SuccessContent() {
     )
   }
 
+  if (status === "pending") {
+    return (
+      <div className="min-h-screen marble-bg flex items-center justify-center p-6">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center">
+            <AlertTriangle className="w-10 h-10 text-amber-600" />
+          </div>
+          <h1 className="text-2xl font-bold text-foreground mb-2">Payment Processing</h1>
+          <p className="text-muted-foreground mb-8">
+            Your payment is being processed. Your premium access will activate shortly. You can safely close this page.
+          </p>
+          <Link href="/home" className="px-6 py-3 gold-button rounded-lg text-sm inline-block">
+            Go to Home
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen marble-bg flex items-center justify-center p-6">
       <div className="text-center max-w-md">
@@ -55,9 +95,6 @@ function SuccessContent() {
         <div className="flex flex-col gap-3">
           <Link href="/home" className="px-6 py-3 gold-button rounded-lg text-sm inline-block">
             Go to Home
-          </Link>
-          <Link href="/login" className="px-6 py-3 text-sm text-muted-foreground hover:text-foreground transition-colors">
-            Sign in to your account
           </Link>
         </div>
       </div>

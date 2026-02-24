@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     .from("stripe_events")
     .select("id")
     .eq("stripe_event_id", event.id)
-    .single()
+    .maybeSingle()
 
   if (existing) {
     return NextResponse.json({ received: true, duplicate: true })
@@ -50,7 +50,27 @@ export async function POST(request: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session
+        // For one-time payments with 3D Secure, payment_status may be "unpaid" here.
+        // Only process if payment is confirmed; async_payment_succeeded handles the rest.
+        if (session.mode === "payment" && session.payment_status !== "paid") {
+          console.log("[v0] Checkout completed but payment pending (3D Secure). Waiting for async_payment_succeeded.")
+          break
+        }
         await handleCheckoutCompleted(session, supabase)
+        break
+      }
+
+      case "checkout.session.async_payment_succeeded": {
+        // Handles delayed/3D Secure payments for one-time (lifetime) purchases
+        const session = event.data.object as Stripe.Checkout.Session
+        await handleCheckoutCompleted(session, supabase)
+        break
+      }
+
+      case "checkout.session.async_payment_failed": {
+        // 3D Secure / async payment failed — log but no action needed
+        const session = event.data.object as Stripe.Checkout.Session
+        console.error("[v0] Async payment failed for session:", session.id)
         break
       }
 
@@ -107,7 +127,14 @@ async function handleCheckoutCompleted(
     const tier = getTierFromProductId(productId || "")
     const status = sub.status === "trialing" ? "trialing" : "active"
 
-    // Update subscriptions table
+    // Upsert subscription — use stripe_subscription_id as conflict target (it has UNIQUE)
+    // First, delete any stale rows for this user to avoid duplicates
+    await supabase
+      .from("subscriptions")
+      .delete()
+      .eq("user_id", userId)
+      .neq("stripe_subscription_id", subscriptionId)
+
     await supabase.from("subscriptions").upsert(
       {
         user_id: userId,
@@ -119,7 +146,7 @@ async function handleCheckoutCompleted(
         current_period_start: new Date(sub.current_period_start * 1000).toISOString(),
         current_period_end: new Date(sub.current_period_end * 1000).toISOString(),
       },
-      { onConflict: "user_id" },
+      { onConflict: "stripe_subscription_id" },
     )
 
     // Update profile with tier info
@@ -136,19 +163,22 @@ async function handleCheckoutCompleted(
       .eq("user_id", userId)
   } else if (session.mode === "payment") {
     // One-time payment (lifetime access)
-    await supabase.from("subscriptions").upsert(
-      {
-        user_id: userId,
-        stripe_customer_id: customerId,
-        stripe_subscription_id: null,
-        product_id: productId,
-        provider: "stripe",
-        status: "lifetime",
-        current_period_start: new Date().toISOString(),
-        current_period_end: null,
-      },
-      { onConflict: "user_id" },
-    )
+    // Clean up any prior subscription rows for this user
+    await supabase
+      .from("subscriptions")
+      .delete()
+      .eq("user_id", userId)
+
+    await supabase.from("subscriptions").insert({
+      user_id: userId,
+      stripe_customer_id: customerId,
+      stripe_subscription_id: null,
+      product_id: productId,
+      provider: "stripe",
+      status: "lifetime",
+      current_period_start: new Date().toISOString(),
+      current_period_end: null,
+    })
 
     // Update profile with lifetime tier
     await supabase

@@ -141,7 +141,7 @@ function SearchContent() {
               type="text"
               value={query}
               onChange={(e) => handleQueryChange(e.target.value)}
-              placeholder="Search by topic, Arabic term, narrator..."
+              placeholder="e.g. Bukhari 329, patience, Abu Hurairah..."
               className="flex-1 bg-transparent outline-none text-foreground"
               autoFocus
             />

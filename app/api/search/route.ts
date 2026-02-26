@@ -2,7 +2,9 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { getSearchTerms } from "@/lib/search/topics"
 
 // Supported query params:
-//   ?q=<text>           full-text search (with synonym expansion)
+//   ?q=<text>           full-text search with synonym expansion.
+//                       Also parses natural language like "Bukhari 329" or
+//                       "Sahih al-Bukhari 1" to extract collection + number.
 //   ?collection=<slug>  filter by collection (e.g. sahih-bukhari)
 //   ?narrator=<text>    filter by narrator (partial match)
 //   ?number=<int>       filter by hadith number (exact)
@@ -11,13 +13,95 @@ import { getSearchTerms } from "@/lib/search/topics"
 //   ?category=<slug>    filter by category slug
 //
 // All filters are combined with AND logic.
+// Explicit params always override values inferred from ?q.
+
+// Maps common collection name variants to their slugs
+const COLLECTION_ALIASES: Array<{ patterns: string[]; slug: string }> = [
+  {
+    patterns: ["bukhari", "al-bukhari", "sahih bukhari", "sahih al-bukhari", "sahih al bukhari"],
+    slug: "sahih-bukhari",
+  },
+  { patterns: ["muslim", "sahih muslim"], slug: "sahih-muslim" },
+  {
+    patterns: ["abu dawud", "abu dawood", "sunan abu dawud", "sunan abu dawood"],
+    slug: "sunan-abu-dawud",
+  },
+  { patterns: ["tirmidhi", "tirmizi", "jami tirmidhi", "jami at-tirmidhi"], slug: "jami-tirmidhi" },
+  { patterns: ["nasai", "nasaai", "nasa'i", "sunan nasai", "sunan an-nasai"], slug: "sunan-nasai" },
+  { patterns: ["ibn majah", "ibn maja", "sunan ibn majah"], slug: "sunan-ibn-majah" },
+  { patterns: ["malik", "muwatta", "muwatta malik"], slug: "muwatta-malik" },
+  { patterns: ["ahmad", "musnad ahmad"], slug: "musnad-ahmad" },
+]
+
+/**
+ * Parses a free-text query for embedded collection names and hadith numbers.
+ *
+ * Examples:
+ *   "Sahih al-Bukhari 329"  → { collection: "sahih-bukhari", number: "329", text: "" }
+ *   "Bukhari 1"             → { collection: "sahih-bukhari", number: "1",   text: "" }
+ *   "329"                   → { collection: "",               number: "329", text: "" }
+ *   "prayer in Bukhari"     → { collection: "sahih-bukhari", number: "",    text: "prayer" }
+ *   "patience"              → { collection: "",               number: "",    text: "patience" }
+ */
+function parseNaturalQuery(raw: string): { text: string; collection: string; number: string } {
+  const trimmed = raw.trim()
+
+  // Pure number: treat as hadith number lookup
+  if (/^\d+$/.test(trimmed)) {
+    return { text: "", collection: "", number: trimmed }
+  }
+
+  let text = trimmed
+  let collection = ""
+  let number = ""
+
+  // Extract trailing number (e.g. "Bukhari 329" → number "329")
+  const trailingNum = text.match(/\s+(\d+)$/)
+  if (trailingNum) {
+    number = trailingNum[1]
+    text = text.slice(0, -trailingNum[0].length).trim()
+  }
+
+  // Match collection name in remaining text (case-insensitive)
+  const lower = text.toLowerCase()
+  outer: for (const { patterns, slug } of COLLECTION_ALIASES) {
+    for (const pattern of patterns) {
+      if (lower === pattern) {
+        collection = slug
+        text = ""
+        break outer
+      }
+      if (lower.startsWith(pattern + " ")) {
+        collection = slug
+        text = text.slice(pattern.length).trim()
+        break outer
+      }
+      if (lower.endsWith(" " + pattern)) {
+        collection = slug
+        text = text.slice(0, -(pattern.length + 1)).trim()
+        break outer
+      }
+    }
+  }
+
+  // If collection + number fully account for the query, clear remaining text
+  if (collection && number && text.length < 3) text = ""
+
+  return { text, collection, number }
+}
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
-  const query = searchParams.get("q") || ""
-  const collection = searchParams.get("collection") || ""
+  const rawQuery = searchParams.get("q") || ""
+
+  // Parse natural language out of the text query
+  const { text: parsedText, collection: parsedCollection, number: parsedNumber } = parseNaturalQuery(rawQuery)
+
+  // Explicit params win over anything inferred from the text
+  const query = parsedText
+  const collection = searchParams.get("collection") || parsedCollection
   const narrator = searchParams.get("narrator") || ""
-  const number = searchParams.get("number") || ""
+  const number = searchParams.get("number") || parsedNumber
   const grade = searchParams.get("grade") || ""
   const tag = searchParams.get("tag") || ""
   const category = searchParams.get("category") || ""

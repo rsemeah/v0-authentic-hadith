@@ -88,7 +88,7 @@ export function SearchBar() {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder="Search hadiths..."
+            placeholder="e.g. Bukhari 329, patience, sabr..."
             className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
           />
           {query && (

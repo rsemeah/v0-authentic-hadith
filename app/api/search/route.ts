@@ -1,5 +1,5 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server"
-import { getSearchTerms } from "@/lib/search/topics"
+import { getSearchTerms, stripQueryFillers } from "@/lib/search/topics"
 
 // Supported query params:
 //   ?q=<text>           full-text search with synonym expansion.
@@ -33,50 +33,103 @@ const COLLECTION_ALIASES: Array<{ patterns: string[]; slug: string }> = [
   { patterns: ["ahmad", "musnad ahmad"], slug: "musnad-ahmad" },
 ]
 
+// Grade words that signal an authenticity filter when standalone in the query
+const GRADE_SIGNALS = [
+  { pattern: /\bsahih\b/i, value: "sahih" },
+  { pattern: /\bhasan\b/i, value: "hasan" },
+  { pattern: /\bdaif\b/i, value: "daif" },
+] as const
+
 /**
- * Parses a free-text query for embedded collection names and hadith numbers.
+ * Extracts a narrator name from preposition phrases like "narrated by X",
+ * "reported by X", or "on the authority of X", optionally followed by
+ * "about/on/regarding Y" where Y is the actual topic.
+ *
+ * Returns the narrator name and the cleaned-up remaining text.
+ */
+function extractNarratorPhrase(text: string): { narrator: string; text: string } {
+  const intro = /\b(?:(?:narrated|reported)\s+by|on\s+the\s+authority\s+of)\s+/i
+  const introMatch = text.match(intro)
+  if (!introMatch) return { narrator: "", text }
+
+  const afterIntro = text.slice(introMatch.index! + introMatch[0].length)
+
+  // Check if a topic follows: "narrated by X about Y" → narrator=X, topic=Y
+  const sepMatch = afterIntro.match(/^(.*?)\s+(?:about|on|regarding|concerning)\s+(.+)$/i)
+  const beforeIntro = text.slice(0, introMatch.index!).trim()
+
+  if (sepMatch) {
+    const narrator = sepMatch[1].trim()
+    const topic = sepMatch[2].trim()
+    return { narrator, text: [beforeIntro, topic].filter(Boolean).join(" ") }
+  }
+
+  // No topic — entire remainder is the narrator name
+  return { narrator: afterIntro.trim(), text: beforeIntro }
+}
+
+/**
+ * Parses a free-text query for collection names, hadith numbers, grade signals,
+ * narrator phrases, and Islamic filler words. Returns structured filters plus
+ * the cleaned-up text for full-text search.
  *
  * Examples:
- *   "Sahih al-Bukhari 329"  → { collection: "sahih-bukhari", number: "329", text: "" }
- *   "Bukhari 1"             → { collection: "sahih-bukhari", number: "1",   text: "" }
- *   "329"                   → { collection: "",               number: "329", text: "" }
- *   "prayer in Bukhari"     → { collection: "sahih-bukhari", number: "",    text: "prayer" }
- *   "patience"              → { collection: "",               number: "",    text: "patience" }
+ *   "Sahih al-Bukhari 329"                        → collection="sahih-bukhari", number="329"
+ *   "Bukhari 1"                                   → collection="sahih-bukhari", number="1"
+ *   "329"                                         → number="329"
+ *   "prayer in Bukhari"                           → collection="sahih-bukhari", text="prayer"
+ *   "sahih hadiths about patience"                → grade="sahih", text="patience"
+ *   "narrated by Abu Hurairah about patience"     → narrator="Abu Hurairah", text="patience"
+ *   "sahih hadiths narrated by Abu Hurairah about anger in Bukhari"
+ *                                                 → collection="sahih-bukhari", grade="sahih",
+ *                                                    narrator="Abu Hurairah", text="anger"
  */
-function parseNaturalQuery(raw: string): { text: string; collection: string; number: string } {
+function parseNaturalQuery(raw: string): {
+  text: string
+  collection: string
+  number: string
+  grade: string
+  narrator: string
+} {
   const trimmed = raw.trim()
 
   // Pure number: treat as hadith number lookup
   if (/^\d+$/.test(trimmed)) {
-    return { text: "", collection: "", number: trimmed }
+    return { text: "", collection: "", number: trimmed, grade: "", narrator: "" }
   }
 
-  let text = trimmed
-  let collection = ""
-  let number = ""
+  // 1. Strip Islamic query filler phrases ("hadiths about", "tell me about", etc.)
+  let text = stripQueryFillers(trimmed)
 
-  // Extract trailing number (e.g. "Bukhari 329" → number "329")
+  // 2. Extract narrator preposition phrases before other parsing so they don't
+  //    interfere with collection/grade detection
+  const { narrator, text: afterNarrator } = extractNarratorPhrase(text)
+  text = afterNarrator
+
+  // 3. Extract trailing hadith number (e.g. "Bukhari 329")
+  let number = ""
   const trailingNum = text.match(/\s+(\d+)$/)
   if (trailingNum) {
     number = trailingNum[1]
     text = text.slice(0, -trailingNum[0].length).trim()
   }
 
-  // Match collection name in remaining text (case-insensitive)
-  const lower = text.toLowerCase()
+  // 4. Match collection name in remaining text (case-insensitive)
+  let collection = ""
+  const textLower = text.toLowerCase()
   outer: for (const { patterns, slug } of COLLECTION_ALIASES) {
     for (const pattern of patterns) {
-      if (lower === pattern) {
+      if (textLower === pattern) {
         collection = slug
         text = ""
         break outer
       }
-      if (lower.startsWith(pattern + " ")) {
+      if (textLower.startsWith(pattern + " ")) {
         collection = slug
         text = text.slice(pattern.length).trim()
         break outer
       }
-      if (lower.endsWith(" " + pattern)) {
+      if (textLower.endsWith(" " + pattern)) {
         collection = slug
         text = text.slice(0, -(pattern.length + 1)).trim()
         break outer
@@ -84,10 +137,23 @@ function parseNaturalQuery(raw: string): { text: string; collection: string; num
     }
   }
 
+  // 5. Extract standalone grade signal (safe now: "Sahih" in collection name already consumed)
+  let grade = ""
+  for (const { pattern, value } of GRADE_SIGNALS) {
+    if (pattern.test(text)) {
+      grade = value
+      text = text.replace(pattern, "").replace(/\s+/g, " ").trim()
+      break
+    }
+  }
+
+  // 6. Strip trailing prepositions left by collection/narrator extraction
+  text = text.replace(/\s+(?:in|from|of|on|about|by|the|a|an)\s*$/i, "").trim()
+
   // If collection + number fully account for the query, clear remaining text
   if (collection && number && text.length < 3) text = ""
 
-  return { text, collection, number }
+  return { text, collection, number, grade, narrator }
 }
 
 export async function GET(req: Request) {
@@ -95,14 +161,20 @@ export async function GET(req: Request) {
   const rawQuery = searchParams.get("q") || ""
 
   // Parse natural language out of the text query
-  const { text: parsedText, collection: parsedCollection, number: parsedNumber } = parseNaturalQuery(rawQuery)
+  const {
+    text: parsedText,
+    collection: parsedCollection,
+    number: parsedNumber,
+    grade: parsedGrade,
+    narrator: parsedNarrator,
+  } = parseNaturalQuery(rawQuery)
 
-  // Explicit params win over anything inferred from the text
+  // Explicit URL params always win over anything inferred from the text
   const query = parsedText
   const collection = searchParams.get("collection") || parsedCollection
-  const narrator = searchParams.get("narrator") || ""
+  const narrator = searchParams.get("narrator") || parsedNarrator
   const number = searchParams.get("number") || parsedNumber
-  const grade = searchParams.get("grade") || ""
+  const grade = searchParams.get("grade") || parsedGrade
   const tag = searchParams.get("tag") || ""
   const category = searchParams.get("category") || ""
 

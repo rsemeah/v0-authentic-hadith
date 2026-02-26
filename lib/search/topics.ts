@@ -38,6 +38,54 @@ export const TOPIC_SYNONYMS: Record<string, string[]> = {
   trust: ["tawakkul", "reliance", "dependence on allah", "putting trust"],
   hope: ["raja", "optimism", "expectation", "hoping in allah"],
   fear: ["khawf", "awe", "reverence", "fearing allah", "taqwa", "god consciousness"],
+  // --- Additional high-value topics ---
+  supplication: ["dua", "duaa", "du'a", "invocation", "asking allah", "calling upon allah", "make dua", "supplicating"],
+  remembrance: ["dhikr", "zikr", "tasbih", "subhanallah", "alhamdulillah", "allahu akbar", "istighfar", "glorification", "glorify"],
+  alcohol: ["khamr", "wine", "intoxicants", "intoxicating", "drinking", "beer", "liquor", "maysir", "gambling", "forbidden drink"],
+  shirk: ["polytheism", "idol worship", "associating partners", "idolatry", "false gods", "partners with allah"],
+  food: ["halal food", "haram food", "eating", "zabiha", "slaughter", "pork", "forbidden food", "permissible food", "diet"],
+}
+
+// Filler phrases to strip from the start of a query before processing
+const QUERY_FILLER_PREFIXES: string[] = [
+  "what are some hadiths about ",
+  "what are hadiths about ",
+  "show me hadiths about ",
+  "find hadiths about ",
+  "is there a hadith about ",
+  "are there hadiths about ",
+  "what does islam say about ",
+  "what did the prophet say about ",
+  "tell me about ",
+]
+
+/**
+ * Strips common Islamic search filler phrases from a query so the meaningful
+ * term remains. Handles both prefix removal and inline "hadiths about" patterns.
+ *
+ * Examples:
+ *   "hadiths about patience"          → "patience"
+ *   "tell me about fasting"           → "fasting"
+ *   "sahih hadiths about anger"       → "sahih anger"   (grade extracted later)
+ */
+export function stripQueryFillers(query: string): string {
+  const lower = query.toLowerCase()
+
+  // Remove a known filler prefix first
+  for (const filler of QUERY_FILLER_PREFIXES) {
+    if (lower.startsWith(filler)) {
+      query = query.slice(filler.length).trim()
+      break
+    }
+  }
+
+  // Remove inline "hadith(s) about/on/regarding/concerning" patterns
+  query = query.replace(/\bhadiths?\s+(?:about|on|regarding|concerning|related\s+to)\s+/gi, "")
+
+  // Remove bare "hadith(s)" noise word that may be left over
+  query = query.replace(/\bhadiths?\b/gi, "").replace(/\s+/g, " ").trim()
+
+  return query
 }
 
 /**
@@ -54,18 +102,19 @@ export function detectTopic(query: string): string | null {
 }
 
 /**
- * Returns up to 4 search terms: the original query, the canonical topic (if found),
- * and two key synonyms. Keeps OR conditions manageable in SQL queries.
+ * Returns up to 6 search terms: the original query, the canonical topic (if found),
+ * and up to 4 of its synonyms. More terms than before (was capped at 4) means better
+ * recall for Arabic↔English cross-language searches.
  */
 export function getSearchTerms(query: string): string[] {
-  const terms: string[] = [query]
+  const terms = new Set([query])
   const topic = detectTopic(query)
   if (topic) {
-    if (topic.toLowerCase() !== query.toLowerCase()) terms.push(topic)
-    const synonyms = TOPIC_SYNONYMS[topic] || []
-    // Add first Arabic/primary synonym and one more
-    if (synonyms[0] && !terms.includes(synonyms[0])) terms.push(synonyms[0])
-    if (synonyms[1] && !terms.includes(synonyms[1])) terms.push(synonyms[1])
+    terms.add(topic)
+    for (const synonym of TOPIC_SYNONYMS[topic] || []) {
+      if (terms.size >= 6) break
+      terms.add(synonym)
+    }
   }
-  return [...new Set(terms)]
+  return [...terms]
 }

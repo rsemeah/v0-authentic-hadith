@@ -1,11 +1,11 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Search, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { getCleanTranslation, getCollectionDisplayName } from "@/lib/hadith-utils"
 
 interface SearchSuggestion {
   id: string
@@ -20,20 +20,37 @@ export function SearchBar() {
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
   const timeoutRef = useRef<NodeJS.Timeout>()
+  const abortRef = useRef<AbortController | null>(null)
 
-  // Mock suggestions - in real app, fetch from API
   useEffect(() => {
     if (query.length > 1) {
       clearTimeout(timeoutRef.current)
-      timeoutRef.current = setTimeout(() => {
-        setSuggestions([
-          { id: "1", title: `Hadith about ${query}...`, collection: "Sahih Bukhari" },
-          { id: "2", title: `${query} in Islamic teachings`, collection: "Sahih Muslim" },
-        ])
-      }, 200)
+      timeoutRef.current = setTimeout(async () => {
+        // Cancel any in-flight request
+        abortRef.current?.abort()
+        abortRef.current = new AbortController()
+
+        try {
+          const res = await fetch(
+            `/api/search?q=${encodeURIComponent(query)}`,
+            { signal: abortRef.current.signal }
+          )
+          const data = await res.json()
+          setSuggestions(
+            (data.results || []).slice(0, 5).map((h: any) => ({
+              id: h.id,
+              title: getCleanTranslation(h.english_translation).substring(0, 90),
+              collection: getCollectionDisplayName(h.collection),
+            }))
+          )
+        } catch {
+          // Ignore abort errors
+        }
+      }, 250)
     } else {
       setSuggestions([])
     }
+
     return () => clearTimeout(timeoutRef.current)
   }, [query])
 
@@ -46,6 +63,12 @@ export function SearchBar() {
 
   const handleSuggestionClick = (suggestion: SearchSuggestion) => {
     router.push(`/hadith/${suggestion.id}`)
+  }
+
+  const handleClear = () => {
+    setQuery("")
+    setSuggestions([])
+    inputRef.current?.focus()
   }
 
   return (
@@ -65,13 +88,13 @@ export function SearchBar() {
             onChange={(e) => setQuery(e.target.value)}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
-            placeholder="Search hadiths..."
+            placeholder="e.g. Bukhari 329, patience, sabr..."
             className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
           />
           {query && (
             <button
               type="button"
-              onClick={() => setQuery("")}
+              onClick={handleClear}
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
               <X className="w-5 h-5" />
@@ -89,13 +112,20 @@ export function SearchBar() {
               onClick={() => handleSuggestionClick(suggestion)}
               className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#fef3c7] transition-colors text-left"
             >
-              <Search className="w-4 h-4 text-muted-foreground" />
-              <div>
-                <p className="text-sm text-foreground">{suggestion.title}</p>
+              <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-foreground truncate">{suggestion.title}</p>
                 <p className="text-xs text-muted-foreground">{suggestion.collection}</p>
               </div>
             </button>
           ))}
+          <button
+            onClick={() => router.push(`/search?q=${encodeURIComponent(query)}`)}
+            className="w-full flex items-center gap-3 px-4 py-2.5 border-t border-border hover:bg-muted/50 transition-colors text-left"
+          >
+            <Search className="w-4 h-4 text-[#C5A059] shrink-0" />
+            <p className="text-sm text-[#C5A059] font-medium">See all results for &ldquo;{query}&rdquo;</p>
+          </button>
         </div>
       )}
     </div>
